@@ -88,16 +88,18 @@
 
     <!-- SCRIPT COLLEGAMENTO SUPABASE -->
     <script>
-        // 1. INSERISCI QUI I TUOI DATI DA SUPABASE (Settings > API)
+        // 1. INSERISCI QUI I TUOI DATI DA SUPABASE
         const SUPABASE_URL = 'https://kzuefjscxqpxqafymfdo.supabase.co';
+        
+        // INCOLLA QUI LA TUA CHIAVE (tra le virgolette singole)
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6dWVmanNjeHFweHFhZnltZmRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NDEwNTksImV4cCI6MjEwMzQxNzA1OX0.OWyjENw8EzzYNmHPfTZ5qghCvOaQ03zgOpo-Wyt0t8Q';
 
-        // Inizializza Supabase
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inizializza Supabase (ho cambiato il nome in supabaseClient per non far confusione!)
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Funzione per scaricare i dati
         async function caricaClienti() {
-            const { data: clienti, error } = await supabase
+            const { data: clienti, error } = await supabaseClient
                 .from('clienti')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -107,7 +109,7 @@
 
             if (error) {
                 console.error('Errore:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione. Apri la console per i dettagli.</td></tr>';
                 return;
             }
 
