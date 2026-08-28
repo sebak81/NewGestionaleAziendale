@@ -11,6 +11,9 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Stile per i campi disabilitati nel dettaglio (aspetto testo normale) */
+        .input-read-only:disabled { background-color: transparent; border-color: transparent; color: #111827; font-weight: 500; padding-left: 0; appearance: none; -webkit-appearance: none; }
+        .input-read-only:disabled + .select-icon { display: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
@@ -47,7 +50,7 @@
                     <h2 class="text-3xl font-bold tracking-tight">Clienti</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-clienti">Caricamento in corso...</p>
                 </div>
-                <button onclick="apriModale()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                <button onclick="apriModaleNuovo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
                     <span>+</span> Nuovo cliente
                 </button>
             </div>
@@ -78,128 +81,139 @@
         </div>
     </main>
 
-    <!-- FINESTRA MODALE NUOVO CLIENTE -->
-    <div id="modal-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <!-- 1. FINESTRA MODALE: NUOVO CLIENTE -->
+    <div id="modal-nuovo-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold">Nuovo cliente</h3>
                     <p class="text-xs text-gray-500">Aggiungi un cliente all'anagrafica</p>
                 </div>
-                <button type="button" onclick="chiudiModale()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-cliente" class="space-y-5">
-                    <!-- RIGA 1: Tipo e Stato -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                            <select id="form-tipo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                                <option value="Privato">Privato</option>
-                                <option value="Azienda">Azienda</option>
-                                <option value="Impresa">Impresa</option>
-                                <option value="Condominio">Condominio</option>
-                                <option value="Architetto">Architetto</option>
+                            <select id="nuovo-tipo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Privato">Privato</option><option value="Azienda">Azienda</option><option value="Impresa">Impresa</option><option value="Condominio">Condominio</option><option value="Architetto">Architetto</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
-                            <select id="form-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                                <option value="Attivo">Attivo</option>
-                                <option value="Lead">Lead</option>
-                                <option value="Storico">Storico</option>
+                            <select id="nuovo-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Attivo">Attivo</option><option value="Lead">Lead</option><option value="Storico">Storico</option>
                             </select>
                         </div>
                     </div>
-
-                    <!-- RIGA 2: Nome / Ragione Sociale -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nome / Ragione sociale *</label>
-                        <input type="text" id="form-nome" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none transition-all">
+                        <input type="text" id="nuovo-nome" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                     </div>
-
-                    <!-- RIGA 3: Indirizzo -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
-                        <input type="text" id="form-indirizzo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        <input type="text" id="nuovo-indirizzo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                     </div>
-
-                    <!-- RIGA 4: Città, Prov, CAP -->
                     <div class="grid grid-cols-12 gap-4">
-                        <div class="col-span-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Città</label>
-                            <input type="text" id="form-citta" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                        <div class="col-span-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Prov.</label>
-                            <input type="text" id="form-prov" placeholder="es. TV" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                        <div class="col-span-3">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">CAP</label>
-                            <input type="text" id="form-cap" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
+                        <div class="col-span-6"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="nuovo-citta" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div class="col-span-3"><label class="block text-sm font-medium text-gray-700 mb-1">Prov.</label><input type="text" id="nuovo-prov" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div class="col-span-3"><label class="block text-sm font-medium text-gray-700 mb-1">CAP</label><input type="text" id="nuovo-cap" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
                     </div>
-
-                    <!-- RIGA 5: Telefono e Email -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
-                            <input type="text" id="form-telefono" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="form-email" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="nuovo-telefono" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="nuovo-email" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
                     </div>
-
-                    <!-- RIGA 6: Fonte -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fonte</label>
-                        <input type="text" id="form-fonte" placeholder="es. Passaparola, Sito web..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                    </div>
-
-                    <!-- RIGA 7: Note -->
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
-                        <textarea id="form-note" rows="2" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
-                    </div>
-
-                    <!-- RIGA 8: Toggle Dati Fiscali -->
-                    <div class="pt-2">
-                        <button type="button" id="btn-toggle-fiscali" class="text-sm font-semibold text-[#2e2a5b] flex items-center gap-1 hover:underline">
-                            <span>+ Mostra Dati Fiscali</span>
-                        </button>
-                    </div>
-
-                    <!-- RIGA 9: Campi Dati Fiscali (Nascosti di default) -->
-                    <div id="sezione-dati-fiscali" class="hidden grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label>
-                            <input type="text" id="form-piva" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Codice fiscale</label>
-                            <input type="text" id="form-cf" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fonte</label><input type="text" id="nuovo-fonte" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Note</label><textarea id="nuovo-note" rows="2" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea></div>
+                    
+                    <div class="pt-2"><button type="button" id="btn-nuovo-fiscali" class="text-sm font-semibold text-[#2e2a5b] flex items-center gap-1 hover:underline"><span>+ Mostra Dati Fiscali</span></button></div>
+                    <div id="sezione-nuovo-fiscali" class="hidden grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label><input type="text" id="nuovo-piva" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Codice fiscale</label><input type="text" id="nuovo-cf" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
                     </div>
                 </form>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                <button type="button" onclick="chiudiModale()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="submit" form="form-nuovo-cliente" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea cliente</button>
             </div>
         </div>
     </div>
 
-    <!-- RICHIAMA IL FILE DI CONFIGURAZIONE ESTERNO -->
+    <!-- 2. FINESTRA MODALE: DETTAGLIO / MODIFICA CLIENTE -->
+    <div id="modal-dettaglio-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+                <div>
+                    <h3 class="text-lg font-bold" id="dettaglio-titolo">Nome Cliente</h3>
+                    <p class="text-xs text-gray-500">Dettaglio anagrafica</p>
+                </div>
+                <button type="button" onclick="chiudiModaleDettaglio()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-dettaglio-cliente" class="space-y-4">
+                    <input type="hidden" id="dettaglio-id"> <!-- ID Nascosto per l'aggiornamento -->
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="relative">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Tipo</label>
+                            <select id="dettaglio-tipo" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Privato">Privato</option><option value="Azienda">Azienda</option><option value="Impresa">Impresa</option><option value="Condominio">Condominio</option><option value="Architetto">Architetto</option>
+                            </select>
+                        </div>
+                        <div class="relative">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Stato</label>
+                            <select id="dettaglio-stato" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Attivo">Attivo</option><option value="Lead">Lead</option><option value="Storico">Storico</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Nome / Ragione sociale</label>
+                        <input type="text" id="dettaglio-nome" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label>
+                        <input type="text" id="dettaglio-indirizzo" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                    </div>
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="dettaglio-citta" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div class="col-span-3"><label class="block text-xs font-medium text-gray-500 mb-1">Prov.</label><input type="text" id="dettaglio-prov" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div class="col-span-3"><label class="block text-xs font-medium text-gray-500 mb-1">CAP</label><input type="text" id="dettaglio-cap" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="dettaglio-telefono" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="text" id="dettaglio-email" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                    </div>
+                    
+                    <div class="pt-3 border-t border-gray-100 mt-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Dati Fiscali & Altro</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs font-medium text-gray-500 mb-1">Partita IVA</label><input type="text" id="dettaglio-piva" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                            <div><label class="block text-xs font-medium text-gray-500 mb-1">Codice fiscale</label><input type="text" id="dettaglio-cf" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Fonte</label><input type="text" id="dettaglio-fonte" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Note</label><input type="text" id="dettaglio-note" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button type="button" id="btn-abilita-modifica" onclick="abilitaModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Modifica Dati</button>
+                <button type="submit" id="btn-salva-modifiche" form="form-dettaglio-cliente" class="hidden bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
 
-    <!-- SCRIPT PRINCIPALE -->
     <script>
-        // Inizializza Supabase utilizzando le variabili importate da config.js
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let clientiCorrenti = []; // Variabile globale per memorizzare i clienti e aprirli velocemente
 
         async function caricaClienti() {
             const { data: clienti, error } = await supabaseClient
@@ -216,6 +230,7 @@
                 return;
             }
 
+            clientiCorrenti = clienti; // Salviamo i dati in memoria
             conteggio.innerText = `${clienti.length} clienti in anagrafica`;
             tbody.innerHTML = ''; 
 
@@ -224,9 +239,11 @@
                 return;
             }
 
-            clienti.forEach(cliente => {
+            clienti.forEach((cliente, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+                // Aggiungiamo l'evento click alla riga passando la posizione nell'array
+                tr.addEventListener('click', () => apriDettaglio(index));
                 
                 const citta = cliente.citta || '--';
                 const telefono = cliente.telefono || '--';
@@ -242,68 +259,111 @@
             });
         }
 
-        // Gestione apertura e chiusura Modale
-        function apriModale() {
-            document.getElementById('modal-cliente').classList.remove('hidden');
-        }
-
-        function chiudiModale() {
-            document.getElementById('modal-cliente').classList.add('hidden');
+        // --- GESTIONE MODALE "NUOVO CLIENTE" ---
+        function apriModaleNuovo() { document.getElementById('modal-nuovo-cliente').classList.remove('hidden'); }
+        function chiudiModaleNuovo() { 
+            document.getElementById('modal-nuovo-cliente').classList.add('hidden');
             document.getElementById('form-nuovo-cliente').reset();
-            
-            // Riporta la sezione dati fiscali allo stato nascosto di default
-            const sezioneFiscali = document.getElementById('sezione-dati-fiscali');
-            const btnFiscali = document.getElementById('btn-toggle-fiscali');
-            sezioneFiscali.classList.add('hidden');
-            btnFiscali.innerHTML = '<span>+ Mostra Dati Fiscali</span>';
+            document.getElementById('sezione-nuovo-fiscali').classList.add('hidden');
+            document.getElementById('btn-nuovo-fiscali').innerHTML = '<span>+ Mostra Dati Fiscali</span>';
         }
 
-        // Toggle per la sezione Dati Fiscali
-        document.getElementById('btn-toggle-fiscali').addEventListener('click', () => {
-            const sezione = document.getElementById('sezione-dati-fiscali');
-            const btn = document.getElementById('btn-toggle-fiscali');
-            
-            sezione.classList.toggle('hidden');
-            
-            if (sezione.classList.contains('hidden')) {
-                btn.innerHTML = '<span>+ Mostra Dati Fiscali</span>';
-            } else {
-                btn.innerHTML = '<span>- Nascondi Dati Fiscali</span>';
-            }
+        document.getElementById('btn-nuovo-fiscali').addEventListener('click', () => {
+            const sez = document.getElementById('sezione-nuovo-fiscali');
+            const btn = document.getElementById('btn-nuovo-fiscali');
+            sez.classList.toggle('hidden');
+            btn.innerHTML = sez.classList.contains('hidden') ? '<span>+ Mostra Dati Fiscali</span>' : '<span>- Nascondi Dati Fiscali</span>';
         });
 
-        // Invio dei dati al database
         document.getElementById('form-nuovo-cliente').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const nuovoCliente = {
-                tipo: document.getElementById('form-tipo').value,
-                stato: document.getElementById('form-stato').value,
-                nome_ragione_sociale: document.getElementById('form-nome').value,
-                indirizzo: document.getElementById('form-indirizzo').value,
-                citta: document.getElementById('form-citta').value,
-                provincia: document.getElementById('form-prov').value,
-                cap: document.getElementById('form-cap').value,
-                telefono: document.getElementById('form-telefono').value,
-                email: document.getElementById('form-email').value,
-                fonte: document.getElementById('form-fonte').value,
-                note: document.getElementById('form-note').value,
-                // Aggiunti i dati fiscali nel caricamento (salvano stringa vuota se non compilati)
-                partita_iva: document.getElementById('form-piva').value,
-                codice_fiscale: document.getElementById('form-cf').value
+                tipo: document.getElementById('nuovo-tipo').value,
+                stato: document.getElementById('nuovo-stato').value,
+                nome_ragione_sociale: document.getElementById('nuovo-nome').value,
+                indirizzo: document.getElementById('nuovo-indirizzo').value,
+                citta: document.getElementById('nuovo-citta').value,
+                provincia: document.getElementById('nuovo-prov').value,
+                cap: document.getElementById('nuovo-cap').value,
+                telefono: document.getElementById('nuovo-telefono').value,
+                email: document.getElementById('nuovo-email').value,
+                fonte: document.getElementById('nuovo-fonte').value,
+                note: document.getElementById('nuovo-note').value,
+                partita_iva: document.getElementById('nuovo-piva').value,
+                codice_fiscale: document.getElementById('nuovo-cf').value
+            };
+            const { error } = await supabaseClient.from('clienti').insert([nuovoCliente]);
+            if (error) alert("Errore: " + error.message);
+            else { chiudiModaleNuovo(); caricaClienti(); }
+        });
+
+        // --- GESTIONE MODALE "DETTAGLIO/MODIFICA CLIENTE" ---
+        function apriDettaglio(index) {
+            const cliente = clientiCorrenti[index];
+            
+            // Popola i campi
+            document.getElementById('dettaglio-id').value = cliente.id;
+            document.getElementById('dettaglio-titolo').innerText = cliente.nome_ragione_sociale;
+            
+            const campi = ['tipo', 'stato', 'nome', 'indirizzo', 'citta', 'prov', 'cap', 'telefono', 'email', 'piva', 'cf', 'fonte', 'note'];
+            const chiaviDB = ['tipo', 'stato', 'nome_ragione_sociale', 'indirizzo', 'citta', 'provincia', 'cap', 'telefono', 'email', 'partita_iva', 'codice_fiscale', 'fonte', 'note'];
+            
+            campi.forEach((campo, i) => {
+                const el = document.getElementById(`dettaglio-${campo}`);
+                el.value = cliente[chiaviDB[i]] || '';
+                el.disabled = true; // Assicuriamoci che siano bloccati all'apertura
+            });
+
+            // Resetta i bottoni
+            document.getElementById('btn-abilita-modifica').classList.remove('hidden');
+            document.getElementById('btn-salva-modifiche').classList.add('hidden');
+            
+            document.getElementById('modal-dettaglio-cliente').classList.remove('hidden');
+        }
+
+        function chiudiModaleDettaglio() {
+            document.getElementById('modal-dettaglio-cliente').classList.add('hidden');
+        }
+
+        function abilitaModifica() {
+            const campi = ['tipo', 'stato', 'nome', 'indirizzo', 'citta', 'prov', 'cap', 'telefono', 'email', 'piva', 'cf', 'fonte', 'note'];
+            campi.forEach(campo => {
+                document.getElementById(`dettaglio-${campo}`).disabled = false;
+            });
+            document.getElementById('btn-abilita-modifica').classList.add('hidden');
+            document.getElementById('btn-salva-modifiche').classList.remove('hidden');
+        }
+
+        document.getElementById('form-dettaglio-cliente').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('dettaglio-id').value;
+            
+            const datiAggiornati = {
+                tipo: document.getElementById('dettaglio-tipo').value,
+                stato: document.getElementById('dettaglio-stato').value,
+                nome_ragione_sociale: document.getElementById('dettaglio-nome').value,
+                indirizzo: document.getElementById('dettaglio-indirizzo').value,
+                citta: document.getElementById('dettaglio-citta').value,
+                provincia: document.getElementById('dettaglio-prov').value,
+                cap: document.getElementById('dettaglio-cap').value,
+                telefono: document.getElementById('dettaglio-telefono').value,
+                email: document.getElementById('dettaglio-email').value,
+                partita_iva: document.getElementById('dettaglio-piva').value,
+                codice_fiscale: document.getElementById('dettaglio-cf').value,
+                fonte: document.getElementById('dettaglio-fonte').value,
+                note: document.getElementById('dettaglio-note').value
             };
 
-            const { error } = await supabaseClient.from('clienti').insert([nuovoCliente]);
+            const { error } = await supabaseClient.from('clienti').update(datiAggiornati).eq('id', id);
 
             if (error) {
-                alert("Errore durante il salvataggio: " + error.message);
+                alert("Errore durante l'aggiornamento: " + error.message);
             } else {
-                chiudiModale();
-                caricaClienti();
+                chiudiModaleDettaglio();
+                caricaClienti(); // Ricarica la tabella per mostrare le modifiche
             }
         });
 
-        // Caricamento iniziale
         document.addEventListener('DOMContentLoaded', caricaClienti);
     </script>
 </body>
