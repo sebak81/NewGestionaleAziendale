@@ -6,30 +6,24 @@
     <title>3 ESSE - Gestionale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Libreria Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-800">
+<body class="flex h-screen overflow-hidden text-gray-800 relative">
 
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
             <span class="font-bold text-lg">3 ESSE</span>
         </div>
-
         <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
             <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Clienti</a>
-            <!-- Altre voci menu nascoste per brevità, aggiungile se vuoi -->
         </nav>
-
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
@@ -53,7 +47,7 @@
                     <h2 class="text-3xl font-bold tracking-tight">Clienti</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-clienti">Caricamento in corso...</p>
                 </div>
-                <button class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                <button onclick="apriModale()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
                     <span>+</span> Nuovo cliente
                 </button>
             </div>
@@ -76,9 +70,7 @@
                                 <th class="px-6 py-4">Telefono</th>
                             </tr>
                         </thead>
-                        <!-- QUI VERRANNO INIETTATI I DATI -->
                         <tbody id="tabella-clienti" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Connessione al database in corso...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -86,18 +78,95 @@
         </div>
     </main>
 
-    <!-- SCRIPT COLLEGAMENTO SUPABASE -->
-    <script>
-        // 1. INSERISCI QUI I TUOI DATI DA SUPABASE
-        const SUPABASE_URL = 'https://kzuefjscxqpxqafymfdo.supabase.co';
-        
-        // INCOLLA QUI LA TUA CHIAVE (tra le virgolette singole)
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6dWVmanNjeHFweHFhZnltZmRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NDEwNTksImV4cCI6MjEwMzQxNzA1OX0.OWyjENw8EzzYNmHPfTZ5qghCvOaQ03zgOpo-Wyt0t8Q';
+    <!-- FINESTRA MODALE NUOVO CLIENTE -->
+    <div id="modal-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+                <div>
+                    <h3 class="text-lg font-bold">Nuovo cliente</h3>
+                    <p class="text-xs text-gray-500">Aggiungi un cliente all'anagrafica</p>
+                </div>
+                <button type="button" onclick="chiudiModale()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-nuovo-cliente" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome / Ragione sociale *</label>
+                        <input type="text" id="form-nome" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none transition-all">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="form-tipo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Privato">Privato</option>
+                                <option value="Azienda">Azienda</option>
+                                <option value="Impresa">Impresa</option>
+                                <option value="Condominio">Condominio</option>
+                                <option value="Architetto">Architetto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+                            <select id="form-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Attivo">Attivo</option>
+                                <option value="Lead">Lead</option>
+                                <option value="Storico">Storico</option>
+                            </select>
+                        </div>
+                    </div>
 
-        // Inizializza Supabase (ho cambiato il nome in supabaseClient per non far confusione!)
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="form-email" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
+                            <input type="text" id="form-telefono" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label>
+                            <input type="text" id="form-piva" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Codice fiscale</label>
+                            <input type="text" id="form-cf" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-8">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Città</label>
+                            <input type="text" id="form-citta" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div class="col-span-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Provincia</label>
+                            <input type="text" id="form-prov" placeholder="es. TV" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button type="button" onclick="chiudiModale()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="submit" form="form-nuovo-cliente" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RICHIAMA IL FILE DI CONFIGURAZIONE ESTERNO -->
+    <script src="config.js"></script>
+
+    <!-- SCRIPT PRINCIPALE -->
+    <script>
+        // Inizializza Supabase utilizzando le variabili importate da config.js
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Funzione per scaricare i dati
         async function caricaClienti() {
             const { data: clienti, error } = await supabaseClient
                 .from('clienti')
@@ -109,19 +178,18 @@
 
             if (error) {
                 console.error('Errore:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione. Apri la console per i dettagli.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione.</td></tr>';
                 return;
             }
 
             conteggio.innerText = `${clienti.length} clienti in anagrafica`;
-            tbody.innerHTML = ''; // Svuota la tabella
+            tbody.innerHTML = ''; 
 
             if (clienti.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato. Inseriscine uno su Supabase.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato.</td></tr>';
                 return;
             }
 
-            // Crea le righe HTML per ogni cliente
             clienti.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
@@ -140,7 +208,40 @@
             });
         }
 
-        // Lancia la funzione appena si apre la pagina
+        function apriModale() {
+            document.getElementById('modal-cliente').classList.remove('hidden');
+        }
+
+        function chiudiModale() {
+            document.getElementById('modal-cliente').classList.add('hidden');
+            document.getElementById('form-nuovo-cliente').reset();
+        }
+
+        document.getElementById('form-nuovo-cliente').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nuovoCliente = {
+                nome_ragione_sociale: document.getElementById('form-nome').value,
+                tipo: document.getElementById('form-tipo').value,
+                stato: document.getElementById('form-stato').value,
+                email: document.getElementById('form-email').value,
+                telefono: document.getElementById('form-telefono').value,
+                partita_iva: document.getElementById('form-piva').value,
+                codice_fiscale: document.getElementById('form-cf').value,
+                citta: document.getElementById('form-citta').value,
+                provincia: document.getElementById('form-prov').value
+            };
+
+            const { error } = await supabaseClient.from('clienti').insert([nuovoCliente]);
+
+            if (error) {
+                alert("Errore durante il salvataggio: " + error.message);
+            } else {
+                chiudiModale();
+                caricaClienti();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', caricaClienti);
     </script>
 </body>
