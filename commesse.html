@@ -185,15 +185,22 @@
         let listaClientiCache = [];
         let totaleCommesse = 0; 
 
-        // 1. Carica la lista clienti: ora estraiamo anche indirizzo e città per poterli copiare
+        // 1. Carica la lista clienti con controllo in console
         async function popolaTendinaClienti() {
             const { data: clienti, error } = await supabaseClient
                 .from('clienti')
                 .select('id, nome_ragione_sociale, indirizzo, citta')
                 .order('nome_ragione_sociale', { ascending: true });
 
-            if (!error && clienti) {
+            if (error) {
+                console.error("Errore caricamento clienti:", error.message);
+                return;
+            }
+
+            if (clienti) {
                 listaClientiCache = clienti;
+                console.log("Clienti caricati correttamente in cache:", listaClientiCache); // <- Controlla in console se vedi i dati qui
+                
                 const select = document.getElementById('form-com-cliente');
                 select.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
                 clienti.forEach(c => {
@@ -202,21 +209,25 @@
             }
         }
 
-        // 2. Logica di auto-compilazione dati fatturazione -> cantiere
+        // 2. Logica di auto-compilazione con diagnostica
         function applicaDatiCantiere() {
             const isChecked = document.getElementById('check-copia-dati').checked;
             const clienteId = document.getElementById('form-com-cliente').value;
             
+            console.log("Checkbox spuntata:", isChecked, "| Cliente selezionato ID:", clienteId);
+
             if (isChecked && clienteId) {
-                // FIX: Trasformiamo entrambi in stringhe di testo (String) per fare il confronto corretto
                 const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId));
+                console.log("Cliente trovato in cache:", cliente); // <- Vedi cosa stampa qui quando spunti
+
                 if (cliente) {
                     document.getElementById('form-com-indirizzo').value = cliente.indirizzo || '';
                     document.getElementById('form-com-citta').value = cliente.citta || '';
                     document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || '';
+                } else {
+                    console.warn("Attenzione: nessun cliente corrispondente trovato nella cache con ID:", clienteId);
                 }
             } else if (!isChecked) {
-                // Svuota i campi se togli la spunta
                 document.getElementById('form-com-indirizzo').value = '';
                 document.getElementById('form-com-citta').value = '';
                 document.getElementById('form-com-referente').value = '';
