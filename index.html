@@ -91,80 +91,99 @@
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-cliente" class="space-y-5">
-    <!-- RIGA 1: Tipo e Stato -->
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-            <select id="form-tipo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                <option value="Privato">Privato</option>
-                <option value="Azienda">Azienda</option>
-                <option value="Impresa">Impresa</option>
-                <option value="Condominio">Condominio</option>
-                <option value="Architetto">Architetto</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
-            <select id="form-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                <option value="Attivo">Attivo</option>
-                <option value="Lead">Lead</option>
-                <option value="Storico">Storico</option>
-            </select>
-        </div>
-    </div>
+                    <!-- RIGA 1: Tipo e Stato -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select id="form-tipo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Privato">Privato</option>
+                                <option value="Azienda">Azienda</option>
+                                <option value="Impresa">Impresa</option>
+                                <option value="Condominio">Condominio</option>
+                                <option value="Architetto">Architetto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+                            <select id="form-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Attivo">Attivo</option>
+                                <option value="Lead">Lead</option>
+                                <option value="Storico">Storico</option>
+                            </select>
+                        </div>
+                    </div>
 
-    <!-- RIGA 2: Nome / Ragione Sociale -->
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nome / Ragione sociale *</label>
-        <input type="text" id="form-nome" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none transition-all">
-    </div>
+                    <!-- RIGA 2: Nome / Ragione Sociale -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome / Ragione sociale *</label>
+                        <input type="text" id="form-nome" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none transition-all">
+                    </div>
 
-    <!-- RIGA 3: Indirizzo -->
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
-        <input type="text" id="form-indirizzo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-    </div>
+                    <!-- RIGA 3: Indirizzo -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label>
+                        <input type="text" id="form-indirizzo" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                    </div>
 
-    <!-- RIGA 4: Città, Prov, CAP -->
-    <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-6">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Città</label>
-            <input type="text" id="form-citta" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-        </div>
-        <div class="col-span-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Prov.</label>
-            <input type="text" id="form-prov" placeholder="es. TV" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-        </div>
-        <div class="col-span-3">
-            <label class="block text-sm font-medium text-gray-700 mb-1">CAP</label>
-            <input type="text" id="form-cap" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-        </div>
-    </div>
+                    <!-- RIGA 4: Città, Prov, CAP -->
+                    <div class="grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Città</label>
+                            <input type="text" id="form-citta" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div class="col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Prov.</label>
+                            <input type="text" id="form-prov" placeholder="es. TV" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div class="col-span-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">CAP</label>
+                            <input type="text" id="form-cap" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
 
-    <!-- RIGA 5: Telefono e Email -->
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
-            <input type="text" id="form-telefono" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" id="form-email" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-        </div>
-    </div>
+                    <!-- RIGA 5: Telefono e Email -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label>
+                            <input type="text" id="form-telefono" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="form-email" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
 
-    <!-- RIGA 6: Fonte -->
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Fonte</label>
-        <input type="text" id="form-fonte" placeholder="es. Passaparola, Sito web..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-    </div>
+                    <!-- RIGA 6: Fonte -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Fonte</label>
+                        <input type="text" id="form-fonte" placeholder="es. Passaparola, Sito web..." class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                    </div>
 
-    <!-- RIGA 7: Note -->
-    <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
-        <textarea id="form-note" rows="2" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
-    </div>
-</form>
+                    <!-- RIGA 7: Note -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Note</label>
+                        <textarea id="form-note" rows="2" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
+                    </div>
+
+                    <!-- RIGA 8: Toggle Dati Fiscali -->
+                    <div class="pt-2">
+                        <button type="button" id="btn-toggle-fiscali" class="text-sm font-semibold text-[#2e2a5b] flex items-center gap-1 hover:underline">
+                            <span>+ Mostra Dati Fiscali</span>
+                        </button>
+                    </div>
+
+                    <!-- RIGA 9: Campi Dati Fiscali (Nascosti di default) -->
+                    <div id="sezione-dati-fiscali" class="hidden grid grid-cols-2 gap-4 pt-3 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Partita IVA</label>
+                            <input type="text" id="form-piva" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Codice fiscale</label>
+                            <input type="text" id="form-cf" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+                </form>
             </div>
             
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
@@ -223,6 +242,7 @@
             });
         }
 
+        // Gestione apertura e chiusura Modale
         function apriModale() {
             document.getElementById('modal-cliente').classList.remove('hidden');
         }
@@ -230,8 +250,29 @@
         function chiudiModale() {
             document.getElementById('modal-cliente').classList.add('hidden');
             document.getElementById('form-nuovo-cliente').reset();
+            
+            // Riporta la sezione dati fiscali allo stato nascosto di default
+            const sezioneFiscali = document.getElementById('sezione-dati-fiscali');
+            const btnFiscali = document.getElementById('btn-toggle-fiscali');
+            sezioneFiscali.classList.add('hidden');
+            btnFiscali.innerHTML = '<span>+ Mostra Dati Fiscali</span>';
         }
 
+        // Toggle per la sezione Dati Fiscali
+        document.getElementById('btn-toggle-fiscali').addEventListener('click', () => {
+            const sezione = document.getElementById('sezione-dati-fiscali');
+            const btn = document.getElementById('btn-toggle-fiscali');
+            
+            sezione.classList.toggle('hidden');
+            
+            if (sezione.classList.contains('hidden')) {
+                btn.innerHTML = '<span>+ Mostra Dati Fiscali</span>';
+            } else {
+                btn.innerHTML = '<span>- Nascondi Dati Fiscali</span>';
+            }
+        });
+
+        // Invio dei dati al database
         document.getElementById('form-nuovo-cliente').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -246,8 +287,12 @@
                 telefono: document.getElementById('form-telefono').value,
                 email: document.getElementById('form-email').value,
                 fonte: document.getElementById('form-fonte').value,
-                note: document.getElementById('form-note').value
+                note: document.getElementById('form-note').value,
+                // Aggiunti i dati fiscali nel caricamento (salvano stringa vuota se non compilati)
+                partita_iva: document.getElementById('form-piva').value,
+                codice_fiscale: document.getElementById('form-cf').value
             };
+
             const { error } = await supabaseClient.from('clienti').insert([nuovoCliente]);
 
             if (error) {
@@ -258,6 +303,7 @@
             }
         });
 
+        // Caricamento iniziale
         document.addEventListener('DOMContentLoaded', caricaClienti);
     </script>
 </body>
