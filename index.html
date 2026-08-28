@@ -56,21 +56,31 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1 relative">
-                        <input type="text" placeholder="Cerca nome..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                
+                <!-- BARRA RICERCA E FILTRI STATO -->
+                <div class="p-5 border-b border-gray-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                    <div class="relative w-full xl:w-96">
+                        <input type="text" placeholder="Cerca nome o città..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                    </div>
+                    
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                        <button onclick="impostaFiltroStato('Tutti')" id="btn-filtro-Tutti" class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-[#2e2a5b] text-white shadow-sm transition-colors">Tutti [<span id="count-tutti">0</span>]</button>
+                        <button onclick="impostaFiltroStato('Potenziale')" id="btn-filtro-Potenziale" class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Potenziali [<span id="count-potenziali">0</span>]</button>
+                        <button onclick="impostaFiltroStato('Attivo')" id="btn-filtro-Attivo" class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Attivi [<span id="count-attivi">0</span>]</button>
+                        <button onclick="impostaFiltroStato('Perso')" id="btn-filtro-Perso" class="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">Persi [<span id="count-persi">0</span>]</button>
                     </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <!-- NUOVO ORDINE COLONNE -->
                             <tr>
                                 <th class="px-6 py-4">Nome</th>
-                                <th class="px-6 py-4">Tipo</th>
-                                <th class="px-6 py-4">Stato</th>
+                                <th class="px-6 py-4">Città</th>
                                 <th class="px-6 py-4">Telefono</th>
+                                <th class="px-6 py-4">Tipo</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-clienti" class="divide-y divide-gray-100">
@@ -217,7 +227,7 @@
         </div>
     </div>
 
-    <!-- 3. NUOVA FINESTRA MODALE (z-index maggiore per stare sopra): DETTAGLIO / MODIFICA COMMESSA -->
+    <!-- 3. NUOVA FINESTRA MODALE: DETTAGLIO / MODIFICA COMMESSA -->
     <div id="modal-dettaglio-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -280,7 +290,6 @@
                     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                         <div class="relative">
                             <label class="block text-xs font-medium text-gray-500 mb-1">Stato Lavori</label>
-                            <!-- La Select Stato sbloccata -->
                             <select id="dettaglio-com-stato" onchange="mostraTastoSalvaCommessa()" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-[#2e2a5b] shadow-sm transition-colors">
                                 <option value="Preventivazione">Preventivazione</option>
                                 <option value="Rilievo Esecutive">Rilievo Esecutive</option>
@@ -314,56 +323,88 @@
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let clientiCorrenti = []; 
-        let commesseClienteCorrente = []; // Salviamo le commesse del cliente in memoria
+        let commesseClienteCorrente = []; 
+        let filtroStatoCorrente = 'Tutti'; // Variabile per tenere traccia del filtro attivo
 
+        // IMPOSTAZIONE FILTRI
+        function impostaFiltroStato(stato) {
+            filtroStatoCorrente = stato;
+            
+            // Stile dei bottoni
+            ['Tutti', 'Potenziale', 'Attivo', 'Perso'].forEach(s => {
+                const btn = document.getElementById(`btn-filtro-${s}`);
+                if(s === stato) {
+                    btn.className = "whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-[#2e2a5b] text-white shadow-sm transition-colors";
+                } else {
+                    btn.className = "whitespace-nowrap px-4 py-2 rounded-lg text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors";
+                }
+            });
+            
+            renderTabellaClienti();
+        }
+
+        // AGGIORNAMENTO CONTATORI
+        function aggiornaContatoriClienti() {
+            document.getElementById('count-tutti').innerText = clientiCorrenti.length;
+            document.getElementById('count-potenziali').innerText = clientiCorrenti.filter(c => c.stato === 'Potenziale').length;
+            document.getElementById('count-attivi').innerText = clientiCorrenti.filter(c => c.stato === 'Attivo').length;
+            document.getElementById('count-persi').innerText = clientiCorrenti.filter(c => c.stato === 'Perso').length;
+            document.getElementById('conteggio-clienti').innerText = `${clientiCorrenti.length} clienti totali`;
+        }
+
+        // RENDER DELLA TABELLA (Diviso dal caricamento database per applicare filtri senza ricaricare)
+        function renderTabellaClienti() {
+            const tbody = document.getElementById('tabella-clienti');
+            tbody.innerHTML = '';
+
+            const clientiFiltrati = filtroStatoCorrente === 'Tutti' 
+                ? clientiCorrenti 
+                : clientiCorrenti.filter(c => c.stato === filtroStatoCorrente);
+
+            if (clientiFiltrati.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato in questa categoria.</td></tr>';
+                return;
+            }
+
+            clientiFiltrati.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+                // Passiamo l'ID del cliente invece dell'indice, per non confonderci quando è filtrato
+                tr.addEventListener('click', () => apriDettaglio(cliente.id));
+                
+                const citta = cliente.citta || '--';
+                const telefono = cliente.telefono || '--';
+                const tipo = cliente.tipo || 'Privato';
+
+                // Ora le colonne sono: Nome | Città | Telefono | Tipo
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-semibold text-gray-900">${cliente.nome_ragione_sociale}</td>
+                    <td class="px-6 py-4 text-gray-600">${citta}</td>
+                    <td class="px-6 py-4 text-gray-600">${telefono}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">${tipo}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // CARICAMENTO DA SUPABASE
         async function caricaClienti() {
             const { data: clienti, error } = await supabaseClient
                 .from('clienti')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            const tbody = document.getElementById('tabella-clienti');
-            const conteggio = document.getElementById('conteggio-clienti');
-
             if (error) {
-                console.error('Errore:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione.</td></tr>';
+                document.getElementById('tabella-clienti').innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore di connessione.</td></tr>';
                 return;
             }
 
-            clientiCorrenti = clienti; 
-            conteggio.innerText = `${clienti.length} clienti in anagrafica`;
-            tbody.innerHTML = ''; 
-
-            if (clienti.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato.</td></tr>';
-                return;
-            }
-
-            clienti.forEach((cliente, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.addEventListener('click', () => apriDettaglio(index));
-                
-                const telefono = cliente.telefono || '--';
-                const stato = cliente.stato || 'Potenziale';
-                const tipo = cliente.tipo || 'Privato';
-                
-                let statoColor = 'bg-gray-100 text-gray-600';
-                if (stato === 'Attivo') statoColor = 'bg-green-100 text-green-700';
-                if (stato === 'Perso') statoColor = 'bg-red-100 text-red-700';
-
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-semibold text-gray-900">${cliente.nome_ragione_sociale}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">${tipo}</span></td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${statoColor} rounded-full text-xs font-medium">${stato}</span></td>
-                    <td class="px-6 py-4 text-gray-600">${telefono}</td>
-                `;
-                tbody.appendChild(tr);
-            });
+            clientiCorrenti = clienti || []; 
+            aggiornaContatoriClienti();
+            renderTabellaClienti();
         }
 
-        // FUNZIONI CLIENTE
+        // FUNZIONI MODALI NUOVO CLIENTE
         function apriModaleNuovo() { document.getElementById('modal-nuovo-cliente').classList.remove('hidden'); }
         function chiudiModaleNuovo() { 
             document.getElementById('modal-nuovo-cliente').classList.add('hidden');
@@ -401,7 +442,7 @@
             else { chiudiModaleNuovo(); caricaClienti(); }
         });
 
-        // CARICA COMMESSE DEL CLIENTE (Aggiornata per estrarre tutti i campi)
+        // CARICA COMMESSE DEL CLIENTE (nella scheda Cliente)
         async function caricaCommesseCliente(clienteId) {
             const container = document.getElementById('lista-commesse-cliente');
             container.innerHTML = '<p class="text-xs text-gray-500 italic">Caricamento commesse in corso...</p>';
@@ -437,7 +478,6 @@
                 if(statoLavoro === 'Saldo' || statoLavoro === 'Conclusa') colorStato = 'bg-green-100 text-green-700';
                 if(statoLavoro === 'Annullata') colorStato = 'bg-red-100 text-red-700';
 
-                // Ora le righe richiamano apriDettaglioCommessaDaCliente(index)
                 html += `
                     <div onclick="apriDettaglioCommessaDaCliente(${index})" class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer shadow-sm">
                         <div>
@@ -455,8 +495,9 @@
             container.innerHTML = html;
         }
 
-        function apriDettaglio(index) {
-            const cliente = clientiCorrenti[index];
+        function apriDettaglio(id) {
+            // Cerchiamo il cliente tramite ID anziché index
+            const cliente = clientiCorrenti.find(c => c.id === id);
             
             document.getElementById('dettaglio-id').value = cliente.id;
             document.getElementById('dettaglio-titolo').innerText = cliente.nome_ragione_sociale;
@@ -521,10 +562,9 @@
         });
 
         // --- FUNZIONI MODALE COMMESSA (INTERNA A INDEX) ---
-        
         function apriDettaglioCommessaDaCliente(index) {
             const com = commesseClienteCorrente[index];
-            const nomeCliente = document.getElementById('dettaglio-nome').value; // Lo peschiamo dalla scheda cliente già aperta
+            const nomeCliente = document.getElementById('dettaglio-nome').value; 
             
             document.getElementById('dettaglio-com-id').value = com.id;
             document.getElementById('dettaglio-com-titolo').innerText = `Commessa ${com.numero}`;
@@ -539,12 +579,10 @@
             document.getElementById('dettaglio-com-email-referente').value = com.email_referente || '';
             document.getElementById('dettaglio-com-valore').value = com.valore || '';
             
-            // GARANZIA DI SBLOCCO PER LA SELECT STATO
             const selectStato = document.getElementById('dettaglio-com-stato');
             selectStato.value = com.stato || 'Preventivazione';
-            selectStato.disabled = false; // <-- Forza lo sblocco per evitare problemi di cache
+            selectStato.disabled = false; 
 
-            // Blocca gli altri campi
             const campi = ['numero', 'cliente', 'nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
             campi.forEach(c => document.getElementById(`dettaglio-com-${c}`).disabled = true);
 
@@ -590,7 +628,6 @@
                 alert("Errore durante l'aggiornamento: " + error.message);
             } else {
                 chiudiModaleDettaglioCommessa();
-                // Ricarichiamo le commesse per QUESTO cliente nella sua scheda
                 const clienteId = document.getElementById('dettaglio-id').value;
                 caricaCommesseCliente(clienteId);
             }
