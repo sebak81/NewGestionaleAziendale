@@ -1,2 +1,2 @@
 const SUPABASE_URL = 'https://kzuefjscxqpxqafymfdo.supabase.co';
-const SUPABASE_KEY = 'INCOLLA_QUI_LA_TUA_CHIAVE_LUNGHISSIMA';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt6dWVmanNjeHFweHFhZnltZmRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc4NDEwNTksImV4cCI6MjEwMzQxNzA1OX0.OWyjENw8EzzYNmHPfTZ5qghCvOaQ03zgOpo-Wyt0t8Q';
