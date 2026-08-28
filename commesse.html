@@ -100,10 +100,16 @@
                             <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                                 <option value="">Caricamento clienti...</option>
                             </select>
+                            
+                            <!-- NUOVO FLAG AUTORICOMPILAZIONE -->
+                            <div class="mt-2 flex items-center gap-2">
+                                <input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] focus:ring-[#2e2a5b] w-4 h-4 cursor-pointer">
+                                <label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati di fatturazione per il cantiere</label>
+                            </div>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Numero Commessa *</label>
-                            <input type="text" id="form-com-numero" placeholder="es. COM-2026/001" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-600">
                         </div>
                     </div>
 
@@ -124,7 +130,6 @@
                                     <input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                                 </div>
                             </div>
-                            <!-- NUOVI CAMPI REFERENTE -->
                             <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50">
                                 <div class="col-span-4">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Referente Cantiere</label>
@@ -147,15 +152,16 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Stato Lavori</label>
                             <select id="form-com-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                                 <option value="Preventivazione">Preventivazione</option>
+                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
                                 <option value="Contratto">Contratto</option>
-                                <option value="Rilievo definitivo">Rilievo definitivo</option>
-                                <option value="Ordinato">Ordinato</option>
-                                <option value="In consegna">In consegna</option>
-                                <option value="In posa">In posa</option>
+                                <option value="Acconto">Acconto</option>
+                                <option value="Ordini">Ordini</option>
+                                <option value="In Consegna">In Consegna</option>
+                                <option value="In Posa">In Posa</option>
                                 <option value="Collaudo">Collaudo</option>
-                                <option value="Saldato">Saldato</option>
-                                <option value="Chiuso">Chiuso</option>
-                                <option value="Annullato">Annullato</option>
+                                <option value="Saldo">Saldo</option>
+                                <option value="Conclusa">Conclusa</option>
+                                <option value="Annullata">Annullata</option>
                             </select>
                         </div>
                         <div>
@@ -179,11 +185,11 @@
         let listaClientiCache = [];
         let totaleCommesse = 0; 
 
-        // 1. Carica la lista clienti per popolare il menu a tendina
+        // 1. Carica la lista clienti: ora estraiamo anche indirizzo e città per poterli copiare
         async function popolaTendinaClienti() {
             const { data: clienti, error } = await supabaseClient
                 .from('clienti')
-                .select('id, nome_ragione_sociale')
+                .select('id, nome_ragione_sociale, indirizzo, citta')
                 .order('nome_ragione_sociale', { ascending: true });
 
             if (!error && clienti) {
@@ -196,7 +202,32 @@
             }
         }
 
-        // 2. Carica le commesse e i dati del cliente principale associato
+        // 2. Logica di auto-compilazione dati fatturazione -> cantiere
+        function applicaDatiCantiere() {
+            const isChecked = document.getElementById('check-copia-dati').checked;
+            const clienteId = document.getElementById('form-com-cliente').value;
+            
+            if (isChecked && clienteId) {
+                const cliente = listaClientiCache.find(c => c.id === clienteId);
+                if (cliente) {
+                    document.getElementById('form-com-indirizzo').value = cliente.indirizzo || '';
+                    document.getElementById('form-com-citta').value = cliente.citta || '';
+                    document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || '';
+                }
+            } else if (!isChecked) {
+                // Svuota i campi se togli la spunta
+                document.getElementById('form-com-indirizzo').value = '';
+                document.getElementById('form-com-citta').value = '';
+                document.getElementById('form-com-referente').value = '';
+            }
+        }
+
+        document.getElementById('check-copia-dati').addEventListener('change', applicaDatiCantiere);
+        document.getElementById('form-com-cliente').addEventListener('change', () => {
+            if (document.getElementById('check-copia-dati').checked) applicaDatiCantiere();
+        });
+
+        // 3. Carica le commesse in tabella
         async function caricaCommesse() {
             const { data: commesse, error } = await supabaseClient
                 .from('commesse')
@@ -207,7 +238,7 @@
             const conteggio = document.getElementById('conteggio-commesse');
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Errore: assicurati che la tabella esista e i nomi colonne siano corretti.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Errore nel caricamento delle commesse.</td></tr>';
                 return;
             }
 
@@ -227,19 +258,22 @@
                 const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
                 const cantiere = com.nome_cantiere || '--';
                 const valore = com.valore ? `€ ${parseFloat(com.valore).toFixed(2)}` : '--';
+                const statoLavoro = com.stato || 'Preventivazione';
                 
+                // Colori dinamicizzati per la nuova lista stati
                 let colorStato = 'bg-gray-100 text-gray-700';
-                if(com.stato === 'Preventivazione') colorStato = 'bg-yellow-100 text-yellow-800';
-                if(com.stato === 'Ordinato') colorStato = 'bg-blue-100 text-blue-700';
-                if(com.stato === 'In posa' || com.stato === 'Collaudo') colorStato = 'bg-purple-100 text-purple-700';
-                if(com.stato === 'Saldato' || com.stato === 'Chiuso') colorStato = 'bg-green-100 text-green-700';
-                if(com.stato === 'Annullato') colorStato = 'bg-red-100 text-red-700';
+                if(statoLavoro === 'Preventivazione') colorStato = 'bg-yellow-100 text-yellow-800';
+                if(statoLavoro === 'Contratto' || statoLavoro === 'Acconto') colorStato = 'bg-emerald-100 text-emerald-800';
+                if(statoLavoro === 'Rilievo Esecutive' || statoLavoro === 'Ordini') colorStato = 'bg-blue-100 text-blue-700';
+                if(statoLavoro === 'In Consegna' || statoLavoro === 'In Posa' || statoLavoro === 'Collaudo') colorStato = 'bg-purple-100 text-purple-700';
+                if(statoLavoro === 'Saldo' || statoLavoro === 'Conclusa') colorStato = 'bg-green-100 text-green-700';
+                if(statoLavoro === 'Annullata') colorStato = 'bg-red-100 text-red-700';
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-xs font-medium">${com.stato || 'Preventivazione'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-xs font-medium">${statoLavoro}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-semibold">${valore}</td>
                 `;
                 tbody.appendChild(tr);
@@ -251,6 +285,7 @@
             const anno = new Date().getFullYear(); 
             const prossimoNumero = (totaleCommesse + 1).toString().padStart(3, '0'); 
             document.getElementById('form-com-numero').value = `COM-${anno}/${prossimoNumero}`;
+            document.getElementById('check-copia-dati').checked = false; // reset flag
         }
         
         function chiudiModaleNuovaCommessa() { 
