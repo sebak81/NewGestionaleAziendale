@@ -25,6 +25,7 @@
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
+            <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
             <div class="flex items-center gap-3">
@@ -117,18 +118,16 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento</h3>
                 
-                <!-- Contenitore Barra -->
                 <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container">
                     <!-- Generato via Javascript -->
                 </div>
 
-                <!-- Pulsanti Azione Rapida -->
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni">
                     <!-- Generato via Javascript -->
                 </div>
             </div>
 
-            <!-- MOCKUP TABS (Grafica provvisoria per i futuri sviluppi) -->
+            <!-- MOCKUP TABS -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b]">Riepilogo e Pagamenti</button>
                 <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Preventivo e Ordini</button>
@@ -228,7 +227,7 @@
         </div>
     </div>
 
-    <!-- FINESTRA MODALE MODIFICA DATI COMMESSA (ex Dettaglio) -->
+    <!-- FINESTRA MODALE MODIFICA DATI COMMESSA -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -300,7 +299,6 @@
         let commesseCorrenti = []; 
         let totaleCommesse = 0; 
         
-        // Ordine lineare degli stati per lo Stepper
         const sequenzaStati = [
             'Preventivazione', 'Rilievo Esecutive', 'Contratto', 'Acconto', 
             'Ordini', 'In Consegna', 'In Posa', 'Collaudo', 'Saldo', 'Conclusa'
@@ -529,8 +527,8 @@
                 referente: document.getElementById('form-com-referente').value,
                 telefono_referente: document.getElementById('form-com-tel-referente').value,
                 email_referente: document.getElementById('form-com-email-referente').value,
-                stato: 'Preventivazione', // Forzato in automatico come richiesto
-                valore: null // Impostato a vuoto come richiesto
+                stato: 'Preventivazione', 
+                valore: null 
             };
             const { error } = await supabaseClient.from('commesse').insert([nuovaCommessa]);
             if (!error) { chiudiModaleNuovaCommessa(); caricaCommesse(); }
