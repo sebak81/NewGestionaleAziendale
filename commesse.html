@@ -208,7 +208,8 @@
             const clienteId = document.getElementById('form-com-cliente').value;
             
             if (isChecked && clienteId) {
-                const cliente = listaClientiCache.find(c => c.id === clienteId);
+                // FIX: Trasformiamo entrambi in stringhe di testo (String) per fare il confronto corretto
+                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId));
                 if (cliente) {
                     document.getElementById('form-com-indirizzo').value = cliente.indirizzo || '';
                     document.getElementById('form-com-citta').value = cliente.citta || '';
