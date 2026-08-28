@@ -242,7 +242,8 @@
                     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                         <div class="relative">
                             <label class="block text-xs font-medium text-gray-500 mb-1">Stato Lavori</label>
-                            <select id="dettaglio-com-stato" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <!-- ATTENZIONE: Questo campo ora NON è disabled e chiama la funzione al cambio -->
+                            <select id="dettaglio-com-stato" onchange="mostraTastoSalvaCommessa()" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-[#2e2a5b] shadow-sm transition-colors">
                                 <option value="Preventivazione">Preventivazione</option>
                                 <option value="Rilievo Esecutive">Rilievo Esecutive</option>
                                 <option value="Contratto">Contratto</option>
@@ -264,7 +265,7 @@
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                <button type="button" id="btn-abilita-modifica-com" onclick="abilitaModificaCommessa()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Modifica Dati</button>
+                <button type="button" id="btn-abilita-modifica-com" onclick="abilitaModificaCommessa()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Modifica Altri Dati</button>
                 <button type="submit" id="btn-salva-modifiche-com" form="form-dettaglio-commessa" class="hidden bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
             </div>
         </div>
@@ -334,7 +335,7 @@
                 return;
             }
 
-            commesseCorrenti = commesse; // Salviamo la lista in memoria
+            commesseCorrenti = commesse; 
             totaleCommesse = commesse.length; 
             conteggio.innerText = `${commesse.length} commesse in corso`;
             tbody.innerHTML = ''; 
@@ -347,7 +348,7 @@
             commesse.forEach((com, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.addEventListener('click', () => apriDettaglioCommessa(index)); // Aggiunto evento Click
+                tr.addEventListener('click', () => apriDettaglioCommessa(index)); 
                 
                 const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
                 const cantiere = com.nome_cantiere || '--';
@@ -423,8 +424,8 @@
             document.getElementById('dettaglio-com-stato').value = com.stato || 'Preventivazione';
             document.getElementById('dettaglio-com-valore').value = com.valore || '';
 
-            // Blocca tutti i campi
-            const campi = ['numero', 'cliente', 'nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'stato', 'valore'];
+            // Blocca tutti i campi TRANNE lo stato (che resta sempre modificabile)
+            const campi = ['numero', 'cliente', 'nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
             campi.forEach(c => document.getElementById(`dettaglio-com-${c}`).disabled = true);
 
             document.getElementById('btn-abilita-modifica-com').classList.remove('hidden');
@@ -432,18 +433,22 @@
             document.getElementById('modal-dettaglio-commessa').classList.remove('hidden');
         }
 
+        // Funzione innescata quando modifichi il menu a tendina dello Stato
+        function mostraTastoSalvaCommessa() {
+            document.getElementById('btn-abilita-modifica-com').classList.add('hidden');
+            document.getElementById('btn-salva-modifiche-com').classList.remove('hidden');
+        }
+
         function chiudiModaleDettaglioCommessa() {
             document.getElementById('modal-dettaglio-commessa').classList.add('hidden');
         }
 
         function abilitaModificaCommessa() {
-            // Abilita la modifica per tutto tranne Cliente e Numero (che non devono essere cambiati)
-            const campiDaSbloccare = ['nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'stato', 'valore'];
+            const campiDaSbloccare = ['nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
             campiDaSbloccare.forEach(c => {
                 document.getElementById(`dettaglio-com-${c}`).disabled = false;
             });
-            document.getElementById('btn-abilita-modifica-com').classList.add('hidden');
-            document.getElementById('btn-salva-modifiche-com').classList.remove('hidden');
+            mostraTastoSalvaCommessa(); // Mostra il tasto salva
         }
 
         document.getElementById('form-dettaglio-commessa').addEventListener('submit', async (e) => {
