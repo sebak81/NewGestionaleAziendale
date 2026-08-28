@@ -236,17 +236,18 @@
             e.preventDefault();
             
             const nuovoCliente = {
-                nome_ragione_sociale: document.getElementById('form-nome').value,
                 tipo: document.getElementById('form-tipo').value,
                 stato: document.getElementById('form-stato').value,
-                email: document.getElementById('form-email').value,
-                telefono: document.getElementById('form-telefono').value,
-                partita_iva: document.getElementById('form-piva').value,
-                codice_fiscale: document.getElementById('form-cf').value,
+                nome_ragione_sociale: document.getElementById('form-nome').value,
+                indirizzo: document.getElementById('form-indirizzo').value,
                 citta: document.getElementById('form-citta').value,
-                provincia: document.getElementById('form-prov').value
+                provincia: document.getElementById('form-prov').value,
+                cap: document.getElementById('form-cap').value,
+                telefono: document.getElementById('form-telefono').value,
+                email: document.getElementById('form-email').value,
+                fonte: document.getElementById('form-fonte').value,
+                note: document.getElementById('form-note').value
             };
-
             const { error } = await supabaseClient.from('clienti').insert([nuovoCliente]);
 
             if (error) {
