@@ -201,7 +201,7 @@
                         <div><label class="block text-xs font-medium text-gray-500 mb-1">Note</label><input type="text" id="dettaglio-note" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></div>
                     </div>
 
-                    <!-- NUOVA SEZIONE: COMMESSE COLLEGATE -->
+                    <!-- SEZIONE: COMMESSE COLLEGATE -->
                     <div class="pt-3 border-t border-gray-100 mt-6">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Commesse Collegate</h4>
                         <div id="lista-commesse-cliente">
@@ -217,11 +217,104 @@
         </div>
     </div>
 
+    <!-- 3. NUOVA FINESTRA MODALE (z-index maggiore per stare sopra): DETTAGLIO / MODIFICA COMMESSA -->
+    <div id="modal-dettaglio-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+                <div>
+                    <h3 class="text-lg font-bold" id="dettaglio-com-titolo">Dettaglio Commessa</h3>
+                    <p class="text-xs text-gray-500">Visualizza o modifica lo stato dei lavori</p>
+                </div>
+                <button type="button" onclick="chiudiModaleDettaglioCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-dettaglio-commessa" class="space-y-4">
+                    <input type="hidden" id="dettaglio-com-id"> 
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Cliente Principale (Fatturazione)</label>
+                            <input type="text" id="dettaglio-com-cliente" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Numero Commessa</label>
+                            <input type="text" id="dettaglio-com-numero" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-100 mt-2">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Dati Cantiere</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-500 mb-1">Nome Cantiere</label>
+                                <input type="text" id="dettaglio-com-nome-cantiere" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-8">
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo Cantiere</label>
+                                    <input type="text" id="dettaglio-com-indirizzo" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Città</label>
+                                    <input type="text" id="dettaglio-com-citta" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-12 gap-4 pt-2">
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Referente Cantiere</label>
+                                    <input type="text" id="dettaglio-com-referente" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Telefono Ref.</label>
+                                    <input type="text" id="dettaglio-com-tel-referente" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-xs font-medium text-gray-500 mb-1">Email Ref.</label>
+                                    <input type="email" id="dettaglio-com-email-referente" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                        <div class="relative">
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Stato Lavori</label>
+                            <!-- La Select Stato sbloccata -->
+                            <select id="dettaglio-com-stato" onchange="mostraTastoSalvaCommessa()" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-[#2e2a5b] shadow-sm transition-colors">
+                                <option value="Preventivazione">Preventivazione</option>
+                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
+                                <option value="Contratto">Contratto</option>
+                                <option value="Acconto">Acconto</option>
+                                <option value="Ordini">Ordini</option>
+                                <option value="In Consegna">In Consegna</option>
+                                <option value="In Posa">In Posa</option>
+                                <option value="Collaudo">Collaudo</option>
+                                <option value="Saldo">Saldo</option>
+                                <option value="Conclusa">Conclusa</option>
+                                <option value="Annullata">Annullata</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Valore Lavori (€)</label>
+                            <input type="number" step="0.01" id="dettaglio-com-valore" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button type="button" id="btn-abilita-modifica-com" onclick="abilitaModificaCommessa()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Modifica Altri Dati</button>
+                <button type="submit" id="btn-salva-modifiche-com" form="form-dettaglio-commessa" class="hidden bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
 
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let clientiCorrenti = []; 
+        let commesseClienteCorrente = []; // Salviamo le commesse del cliente in memoria
 
         async function caricaClienti() {
             const { data: clienti, error } = await supabaseClient
@@ -270,6 +363,7 @@
             });
         }
 
+        // FUNZIONI CLIENTE
         function apriModaleNuovo() { document.getElementById('modal-nuovo-cliente').classList.remove('hidden'); }
         function chiudiModaleNuovo() { 
             document.getElementById('modal-nuovo-cliente').classList.add('hidden');
@@ -307,14 +401,14 @@
             else { chiudiModaleNuovo(); caricaClienti(); }
         });
 
-        // NUOVA FUNZIONE: Carica le commesse specifiche per il cliente
+        // CARICA COMMESSE DEL CLIENTE (Aggiornata per estrarre tutti i campi)
         async function caricaCommesseCliente(clienteId) {
             const container = document.getElementById('lista-commesse-cliente');
             container.innerHTML = '<p class="text-xs text-gray-500 italic">Caricamento commesse in corso...</p>';
             
             const { data, error } = await supabaseClient
                 .from('commesse')
-                .select('numero, nome_cantiere, stato, valore')
+                .select('*')
                 .eq('cliente_id', clienteId)
                 .order('created_at', { ascending: false });
                 
@@ -323,30 +417,35 @@
                 return;
             }
             
+            commesseClienteCorrente = data;
+
             if (data.length === 0) {
                 container.innerHTML = '<p class="text-xs text-gray-500 italic">Nessuna commessa associata a questo cliente.</p>';
                 return;
             }
             
             let html = '<div class="space-y-2">';
-            data.forEach(c => {
+            data.forEach((c, index) => {
                 const valoreStr = c.valore ? `€ ${parseFloat(c.valore).toFixed(2)}` : '--';
+                const statoLavoro = c.stato || 'Preventivazione';
                 
                 let colorStato = 'bg-gray-100 text-gray-700';
-                if(c.stato === 'Preventivazione') colorStato = 'bg-yellow-100 text-yellow-800';
-                if(c.stato === 'Ordinato') colorStato = 'bg-blue-100 text-blue-700';
-                if(c.stato === 'In posa' || c.stato === 'Collaudo') colorStato = 'bg-purple-100 text-purple-700';
-                if(c.stato === 'Saldato' || c.stato === 'Chiuso') colorStato = 'bg-green-100 text-green-700';
-                if(c.stato === 'Annullato') colorStato = 'bg-red-100 text-red-700';
+                if(statoLavoro === 'Preventivazione') colorStato = 'bg-yellow-100 text-yellow-800';
+                if(statoLavoro === 'Contratto' || statoLavoro === 'Acconto') colorStato = 'bg-emerald-100 text-emerald-800';
+                if(statoLavoro === 'Rilievo Esecutive' || statoLavoro === 'Ordini') colorStato = 'bg-blue-100 text-blue-700';
+                if(statoLavoro === 'In Consegna' || statoLavoro === 'In Posa' || statoLavoro === 'Collaudo') colorStato = 'bg-purple-100 text-purple-700';
+                if(statoLavoro === 'Saldo' || statoLavoro === 'Conclusa') colorStato = 'bg-green-100 text-green-700';
+                if(statoLavoro === 'Annullata') colorStato = 'bg-red-100 text-red-700';
 
+                // Ora le righe richiamano apriDettaglioCommessaDaCliente(index)
                 html += `
-                    <div class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-lg hover:bg-gray-100 transition-colors cursor-default">
+                    <div onclick="apriDettaglioCommessaDaCliente(${index})" class="flex justify-between items-center p-3 bg-gray-50 border border-gray-100 rounded-lg hover:bg-gray-200 transition-colors cursor-pointer shadow-sm">
                         <div>
                             <p class="text-sm font-bold text-[#2e2a5b]">${c.numero}</p>
                             <p class="text-xs text-gray-500">${c.nome_cantiere || 'Cantiere non specificato'}</p>
                         </div>
                         <div class="text-right">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${colorStato}">${c.stato}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${colorStato}">${statoLavoro}</span>
                             <p class="text-xs font-bold text-gray-900 mt-1">${valoreStr}</p>
                         </div>
                     </div>
@@ -375,7 +474,6 @@
             document.getElementById('btn-salva-modifiche').classList.add('hidden');
             document.getElementById('modal-dettaglio-cliente').classList.remove('hidden');
 
-            // Richiama la funzione per popolare le commesse
             caricaCommesseCliente(cliente.id);
         }
 
@@ -419,6 +517,82 @@
             } else {
                 chiudiModaleDettaglio();
                 caricaClienti(); 
+            }
+        });
+
+        // --- FUNZIONI MODALE COMMESSA (INTERNA A INDEX) ---
+        
+        function apriDettaglioCommessaDaCliente(index) {
+            const com = commesseClienteCorrente[index];
+            const nomeCliente = document.getElementById('dettaglio-nome').value; // Lo peschiamo dalla scheda cliente già aperta
+            
+            document.getElementById('dettaglio-com-id').value = com.id;
+            document.getElementById('dettaglio-com-titolo').innerText = `Commessa ${com.numero}`;
+            
+            document.getElementById('dettaglio-com-numero').value = com.numero || '';
+            document.getElementById('dettaglio-com-cliente').value = nomeCliente;
+            document.getElementById('dettaglio-com-nome-cantiere').value = com.nome_cantiere || '';
+            document.getElementById('dettaglio-com-indirizzo').value = com.indirizzo_cantiere || '';
+            document.getElementById('dettaglio-com-citta').value = com.citta_cantiere || '';
+            document.getElementById('dettaglio-com-referente').value = com.referente || '';
+            document.getElementById('dettaglio-com-tel-referente').value = com.telefono_referente || '';
+            document.getElementById('dettaglio-com-email-referente').value = com.email_referente || '';
+            document.getElementById('dettaglio-com-valore').value = com.valore || '';
+            
+            // GARANZIA DI SBLOCCO PER LA SELECT STATO
+            const selectStato = document.getElementById('dettaglio-com-stato');
+            selectStato.value = com.stato || 'Preventivazione';
+            selectStato.disabled = false; // <-- Forza lo sblocco per evitare problemi di cache
+
+            // Blocca gli altri campi
+            const campi = ['numero', 'cliente', 'nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
+            campi.forEach(c => document.getElementById(`dettaglio-com-${c}`).disabled = true);
+
+            document.getElementById('btn-abilita-modifica-com').classList.remove('hidden');
+            document.getElementById('btn-salva-modifiche-com').classList.add('hidden');
+            
+            document.getElementById('modal-dettaglio-commessa').classList.remove('hidden');
+        }
+
+        function mostraTastoSalvaCommessa() {
+            document.getElementById('btn-abilita-modifica-com').classList.add('hidden');
+            document.getElementById('btn-salva-modifiche-com').classList.remove('hidden');
+        }
+
+        function chiudiModaleDettaglioCommessa() {
+            document.getElementById('modal-dettaglio-commessa').classList.add('hidden');
+        }
+
+        function abilitaModificaCommessa() {
+            const campiDaSbloccare = ['nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
+            campiDaSbloccare.forEach(c => document.getElementById(`dettaglio-com-${c}`).disabled = false);
+            mostraTastoSalvaCommessa(); 
+        }
+
+        document.getElementById('form-dettaglio-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('dettaglio-com-id').value;
+            
+            const datiAggiornati = {
+                nome_cantiere: document.getElementById('dettaglio-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('dettaglio-com-indirizzo').value,
+                citta_cantiere: document.getElementById('dettaglio-com-citta').value,
+                referente: document.getElementById('dettaglio-com-referente').value,
+                telefono_referente: document.getElementById('dettaglio-com-tel-referente').value,
+                email_referente: document.getElementById('dettaglio-com-email-referente').value,
+                stato: document.getElementById('dettaglio-com-stato').value,
+                valore: document.getElementById('dettaglio-com-valore').value || null
+            };
+
+            const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
+
+            if (error) {
+                alert("Errore durante l'aggiornamento: " + error.message);
+            } else {
+                chiudiModaleDettaglioCommessa();
+                // Ricarichiamo le commesse per QUESTO cliente nella sua scheda
+                const clienteId = document.getElementById('dettaglio-id').value;
+                caricaCommesseCliente(clienteId);
             }
         });
 
