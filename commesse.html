@@ -421,10 +421,14 @@
             document.getElementById('dettaglio-com-referente').value = com.referente || '';
             document.getElementById('dettaglio-com-tel-referente').value = com.telefono_referente || '';
             document.getElementById('dettaglio-com-email-referente').value = com.email_referente || '';
-            document.getElementById('dettaglio-com-stato').value = com.stato || 'Preventivazione';
             document.getElementById('dettaglio-com-valore').value = com.valore || '';
 
-            // Blocca tutti i campi TRANNE lo stato (che resta sempre modificabile)
+            // GARANZIA DI SBLOCCO PER LA SELECT STATO (Novità)
+            const selectStato = document.getElementById('dettaglio-com-stato');
+            selectStato.value = com.stato || 'Preventivazione';
+            selectStato.disabled = false; 
+
+            // Blocca tutti gli altri campi
             const campi = ['numero', 'cliente', 'nome-cantiere', 'indirizzo', 'citta', 'referente', 'tel-referente', 'email-referente', 'valore'];
             campi.forEach(c => document.getElementById(`dettaglio-com-${c}`).disabled = true);
 
