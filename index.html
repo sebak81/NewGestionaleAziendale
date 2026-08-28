@@ -26,6 +26,7 @@
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
+            <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
             <div class="flex items-center gap-3">
@@ -57,7 +58,6 @@
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 
-                <!-- BARRA RICERCA E FILTRI STATO -->
                 <div class="p-5 border-b border-gray-100 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
                     <div class="relative w-full xl:w-96">
                         <input type="text" placeholder="Cerca nome o città..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
@@ -75,7 +75,6 @@
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                            <!-- NUOVO ORDINE COLONNE -->
                             <tr>
                                 <th class="px-6 py-4">Nome</th>
                                 <th class="px-6 py-4">Città</th>
@@ -91,7 +90,7 @@
         </div>
     </main>
 
-    <!-- 1. FINESTRA MODALE: NUOVO CLIENTE -->
+    <!-- FINESTRA MODALE: NUOVO CLIENTE -->
     <div id="modal-nuovo-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -152,7 +151,7 @@
         </div>
     </div>
 
-    <!-- 2. FINESTRA MODALE: DETTAGLIO / MODIFICA CLIENTE -->
+    <!-- FINESTRA MODALE: DETTAGLIO / MODIFICA CLIENTE -->
     <div id="modal-dettaglio-cliente" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -227,7 +226,7 @@
         </div>
     </div>
 
-    <!-- 3. NUOVA FINESTRA MODALE: DETTAGLIO / MODIFICA COMMESSA -->
+    <!-- FINESTRA MODALE: DETTAGLIO / MODIFICA COMMESSA (Sopra quella del cliente) -->
     <div id="modal-dettaglio-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -244,7 +243,7 @@
                     
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Cliente Principale (Fatturazione)</label>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Cliente Principale</label>
                             <input type="text" id="dettaglio-com-cliente" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                         </div>
                         <div>
@@ -324,13 +323,12 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let clientiCorrenti = []; 
         let commesseClienteCorrente = []; 
-        let filtroStatoCorrente = 'Tutti'; // Variabile per tenere traccia del filtro attivo
+        let filtroStatoCorrente = 'Tutti'; 
 
         // IMPOSTAZIONE FILTRI
         function impostaFiltroStato(stato) {
             filtroStatoCorrente = stato;
             
-            // Stile dei bottoni
             ['Tutti', 'Potenziale', 'Attivo', 'Perso'].forEach(s => {
                 const btn = document.getElementById(`btn-filtro-${s}`);
                 if(s === stato) {
@@ -352,7 +350,7 @@
             document.getElementById('conteggio-clienti').innerText = `${clientiCorrenti.length} clienti totali`;
         }
 
-        // RENDER DELLA TABELLA (Diviso dal caricamento database per applicare filtri senza ricaricare)
+        // RENDER DELLA TABELLA 
         function renderTabellaClienti() {
             const tbody = document.getElementById('tabella-clienti');
             tbody.innerHTML = '';
@@ -369,14 +367,12 @@
             clientiFiltrati.forEach(cliente => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                // Passiamo l'ID del cliente invece dell'indice, per non confonderci quando è filtrato
                 tr.addEventListener('click', () => apriDettaglio(cliente.id));
                 
                 const citta = cliente.citta || '--';
                 const telefono = cliente.telefono || '--';
                 const tipo = cliente.tipo || 'Privato';
 
-                // Ora le colonne sono: Nome | Città | Telefono | Tipo
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900">${cliente.nome_ragione_sociale}</td>
                     <td class="px-6 py-4 text-gray-600">${citta}</td>
@@ -496,7 +492,6 @@
         }
 
         function apriDettaglio(id) {
-            // Cerchiamo il cliente tramite ID anziché index
             const cliente = clientiCorrenti.find(c => c.id === id);
             
             document.getElementById('dettaglio-id').value = cliente.id;
