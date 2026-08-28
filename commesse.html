@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 ESSE - Commesse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800 relative">
+
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
+            <span class="font-bold text-lg">3 ESSE</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
+            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
+                <div>
+                    <p class="font-bold text-sm">Sebastiano</p>
+                    <p class="text-xs text-gray-500 uppercase">Owner</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="p-8 pb-4">
+            <h1 class="text-xl font-bold">Commesse Operative 🏗️</h1>
+            <p class="text-sm text-gray-500 mt-1">Gestione cantieri e stato avanzamento lavori</p>
+        </header>
+
+        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight">Commesse</h2>
+                    <p class="text-sm text-gray-500 mt-1" id="conteggio-commesse">Caricamento in corso...</p>
+                </div>
+                <button onclick="apriModaleNuovaCommessa()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                    <span>+</span> Nuova commessa
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <input type="text" placeholder="Cerca numero commessa, cliente o cantiere..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">Numero</th>
+                                <th class="px-6 py-4">Cliente Principale</th>
+                                <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
+                                <th class="px-6 py-4">Stato</th>
+                                <th class="px-6 py-4">Valore</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabella-commesse" class="divide-y divide-gray-100">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FINESTRA MODALE NUOVA COMMESSA -->
+    <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+                <div>
+                    <h3 class="text-lg font-bold">Nuova Commessa</h3>
+                    <p class="text-xs text-gray-500">Collega un nuovo lavoro a un cliente</p>
+                </div>
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-nuova-commessa" class="space-y-5">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale (Fatturazione) *</label>
+                            <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="">Caricamento clienti...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero Commessa *</label>
+                            <input type="text" id="form-com-numero" placeholder="es. COM-2026/001" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-3">Dati Cantiere / Destinazione Lavori</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Cantiere (es. Sig. Rossi o Condominio Roma)</label>
+                                <input type="text" id="form-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-8">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo Cantiere</label>
+                                    <input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Città Cantiere</label>
+                                    <input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                            </div>
+                            <!-- NUOVI CAMPI REFERENTE -->
+                            <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50">
+                                <div class="col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Referente Cantiere</label>
+                                    <input type="text" id="form-com-referente" placeholder="Nome cognome" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Telefono Ref.</label>
+                                    <input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                                <div class="col-span-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Email Ref.</label>
+                                    <input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Stato Lavori</label>
+                            <select id="form-com-stato" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Preventivazione">Preventivazione</option>
+                                <option value="Contratto">Contratto</option>
+                                <option value="Rilievo definitivo">Rilievo definitivo</option>
+                                <option value="Ordinato">Ordinato</option>
+                                <option value="In consegna">In consegna</option>
+                                <option value="In posa">In posa</option>
+                                <option value="Collaudo">Collaudo</option>
+                                <option value="Saldato">Saldato</option>
+                                <option value="Chiuso">Chiuso</option>
+                                <option value="Annullato">Annullato</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valore Lavori Stimato/Reale (€)</label>
+                            <input type="number" step="0.01" id="form-com-valore" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Commessa</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+
+    <script>
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let listaClientiCache = [];
+        let totaleCommesse = 0; 
+
+        // 1. Carica la lista clienti per popolare il menu a tendina
+        async function popolaTendinaClienti() {
+            const { data: clienti, error } = await supabaseClient
+                .from('clienti')
+                .select('id, nome_ragione_sociale')
+                .order('nome_ragione_sociale', { ascending: true });
+
+            if (!error && clienti) {
+                listaClientiCache = clienti;
+                const select = document.getElementById('form-com-cliente');
+                select.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
+                clienti.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`;
+                });
+            }
+        }
+
+        // 2. Carica le commesse e i dati del cliente principale associato
+        async function caricaCommesse() {
+            const { data: commesse, error } = await supabaseClient
+                .from('commesse')
+                .select('*, clienti(nome_ragione_sociale)')
+                .order('created_at', { ascending: false });
+
+            const tbody = document.getElementById('tabella-commesse');
+            const conteggio = document.getElementById('conteggio-commesse');
+
+            if (error) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Errore: assicurati che la tabella esista e i nomi colonne siano corretti.</td></tr>';
+                return;
+            }
+
+            totaleCommesse = commesse.length; 
+            conteggio.innerText = `${commesse.length} commesse in corso`;
+            tbody.innerHTML = ''; 
+
+            if (commesse.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessuna commessa trovata.</td></tr>';
+                return;
+            }
+
+            commesse.forEach(com => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+                
+                const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+                const cantiere = com.nome_cantiere || '--';
+                const valore = com.valore ? `€ ${parseFloat(com.valore).toFixed(2)}` : '--';
+                
+                let colorStato = 'bg-gray-100 text-gray-700';
+                if(com.stato === 'Preventivazione') colorStato = 'bg-yellow-100 text-yellow-800';
+                if(com.stato === 'Ordinato') colorStato = 'bg-blue-100 text-blue-700';
+                if(com.stato === 'In posa' || com.stato === 'Collaudo') colorStato = 'bg-purple-100 text-purple-700';
+                if(com.stato === 'Saldato' || com.stato === 'Chiuso') colorStato = 'bg-green-100 text-green-700';
+                if(com.stato === 'Annullato') colorStato = 'bg-red-100 text-red-700';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-semibold text-gray-900">${com.numero}</td>
+                    <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
+                    <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-xs font-medium">${com.stato || 'Preventivazione'}</span></td>
+                    <td class="px-6 py-4 text-gray-900 font-semibold">${valore}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function apriModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
+            const anno = new Date().getFullYear(); 
+            const prossimoNumero = (totaleCommesse + 1).toString().padStart(3, '0'); 
+            document.getElementById('form-com-numero').value = `COM-${anno}/${prossimoNumero}`;
+        }
+        
+        function chiudiModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.add('hidden');
+            document.getElementById('form-nuova-commessa').reset();
+        }
+
+        document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const nuovaCommessa = {
+                cliente_id: document.getElementById('form-com-cliente').value,
+                numero: document.getElementById('form-com-numero').value,
+                nome_cantiere: document.getElementById('form-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('form-com-indirizzo').value,
+                citta_cantiere: document.getElementById('form-com-citta').value,
+                referente: document.getElementById('form-com-referente').value,
+                telefono_referente: document.getElementById('form-com-tel-referente').value,
+                email_referente: document.getElementById('form-com-email-referente').value,
+                stato: document.getElementById('form-com-stato').value,
+                valore: document.getElementById('form-com-valore').value || null
+            };
+
+            const { error } = await supabaseClient.from('commesse').insert([nuovaCommessa]);
+
+            if (error) {
+                alert("Errore durante il salvataggio: " + error.message);
+            } else {
+                chiudiModaleNuovaCommessa();
+                caricaCommesse();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            popolaTendinaClienti();
+            caricaCommesse();
+        });
+    </script>
+</body>
+</html>
