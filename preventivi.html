@@ -86,7 +86,7 @@
 
     <!-- FINESTRA MODALE: NUOVO PREVENTIVO -->
     <div id="modal-nuovo-preventivo" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold">Crea Preventivo</h3>
@@ -96,15 +96,25 @@
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-nuovo-preventivo" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa di Riferimento *</label>
-                        <select id="form-prev-commessa" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            <option value="">Caricamento commesse...</option>
-                        </select>
+                <form id="form-nuovo-preventivo" class="space-y-5">
+                    
+                    <!-- NOVITÀ: TENDINE A CASCATA CLIENTE -> COMMESSA -->
+                    <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">1. Scegli il Cliente *</label>
+                            <select id="form-prev-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none shadow-sm">
+                                <option value="">Caricamento clienti...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">2. Scegli la Commessa *</label>
+                            <select id="form-prev-commessa" required disabled class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400 transition-colors">
+                                <option value="">-- Seleziona prima un cliente --</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-2 gap-4 pt-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Numero Preventivo *</label>
                             <input type="text" id="form-prev-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-600">
@@ -201,27 +211,70 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let preventiviCorrenti = [];
         let totalePreventivi = 0;
+        
+        // Cache per le tendine a cascata
+        let listaClientiPrev = [];
+        let listaCommessePrev = [];
 
-        // 1. CARICAMENTO COMMESSE PER MENU A TENDINA
-        async function popolaTendinaCommesse() {
-            const { data: commesse, error } = await supabaseClient
+        // 1. CARICAMENTO DATI PER TENDINE A CASCATA
+        async function popolaTendineNuovoPreventivo() {
+            // Carica tutti i clienti
+            const { data: clienti } = await supabaseClient
+                .from('clienti')
+                .select('id, nome_ragione_sociale')
+                .order('nome_ragione_sociale', { ascending: true });
+                
+            if (clienti) {
+                listaClientiPrev = clienti;
+                const selectCliente = document.getElementById('form-prev-cliente');
+                selectCliente.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
+                clienti.forEach(c => {
+                    selectCliente.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`;
+                });
+            }
+
+            // Carica tutte le commesse (ci serviranno in memoria per filtrarle velocemente)
+            const { data: commesse } = await supabaseClient
                 .from('commesse')
-                .select('id, numero, nome_cantiere')
+                .select('id, numero, nome_cantiere, cliente_id')
                 .order('numero', { ascending: false });
 
-            if (!error && commesse) {
-                const select = document.getElementById('form-prev-commessa');
-                select.innerHTML = '<option value="">-- Seleziona una commessa --</option>';
-                commesse.forEach(com => {
+            if (commesse) {
+                listaCommessePrev = commesse;
+            }
+        }
+
+        // LOGICA DI FILTRAGGIO COMMESSE QUANDO CAMBI CLIENTE
+        function filtraCommessePerCliente() {
+            const clienteId = document.getElementById('form-prev-cliente').value;
+            const selectCommessa = document.getElementById('form-prev-commessa');
+            
+            selectCommessa.innerHTML = '<option value="">-- Seleziona una commessa --</option>';
+            
+            if (!clienteId) {
+                selectCommessa.disabled = true;
+                selectCommessa.innerHTML = '<option value="">-- Seleziona prima un cliente --</option>';
+                return;
+            }
+
+            // Sblocca la tendina
+            selectCommessa.disabled = false;
+            
+            // Trova solo le commesse associate a quel cliente
+            const commesseFiltrate = listaCommessePrev.filter(c => String(c.cliente_id) === String(clienteId));
+            
+            if (commesseFiltrate.length === 0) {
+                selectCommessa.innerHTML = '<option value="">Nessuna commessa trovata per questo cliente</option>';
+            } else {
+                commesseFiltrate.forEach(com => {
                     const cantiere = com.nome_cantiere ? ` (${com.nome_cantiere})` : '';
-                    select.innerHTML += `<option value="${com.id}">${com.numero}${cantiere}</option>`;
+                    selectCommessa.innerHTML += `<option value="${com.id}">${com.numero}${cantiere}</option>`;
                 });
             }
         }
 
         // 2. CARICA ELENCO PREVENTIVI IN TABELLA
         async function caricaPreventivi() {
-            // Uniamo la tabella preventivi con quella commesse per prelevare il numero e cantiere
             const { data: preventivi, error } = await supabaseClient
                 .from('preventivi')
                 .select('*, commesse(numero, nome_cantiere)')
@@ -253,11 +306,10 @@
                 const commessaInfo = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere || 'Senza Cantiere'}` : 'Commessa eliminata';
                 const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '--';
                 
-                // Formattazione Data Italiana (DD/MM/YYYY)
                 const dataSplit = prev.data_emissione ? prev.data_emissione.split('-') : ['','',''];
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
 
-                let colorStato = 'bg-gray-100 text-gray-700'; // Bozza
+                let colorStato = 'bg-gray-100 text-gray-700';
                 if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
@@ -277,12 +329,10 @@
         function apriModaleNuovoPreventivo() {
             document.getElementById('modal-nuovo-preventivo').classList.remove('hidden');
             
-            // Genera numero progressivo (es. PREV-2026/001)
             const anno = new Date().getFullYear();
             const prossimoNumero = (totalePreventivi + 1).toString().padStart(3, '0');
             document.getElementById('form-prev-numero').value = `PREV-${anno}/${prossimoNumero}`;
             
-            // Imposta data odierna come default (formato YYYY-MM-DD per input type date)
             const oggi = new Date().toISOString().split('T')[0];
             document.getElementById('form-prev-data').value = oggi;
         }
@@ -290,6 +340,11 @@
         function chiudiModaleNuovoPreventivo() {
             document.getElementById('modal-nuovo-preventivo').classList.add('hidden');
             document.getElementById('form-nuovo-preventivo').reset();
+            
+            // Ripristina la tendina commesse al suo stato bloccato
+            const selectCommessa = document.getElementById('form-prev-commessa');
+            selectCommessa.disabled = true;
+            selectCommessa.innerHTML = '<option value="">-- Seleziona prima un cliente --</option>';
         }
 
         // Salvataggio nuovo preventivo
@@ -313,7 +368,6 @@
             if (error) {
                 alert("Errore durante il salvataggio: " + error.message);
             } else {
-                // Logica Magica: Se crei un preventivo già ACCETTATO, aggiorniamo il valore della commessa e lo stato!
                 if (stato === 'Accettato') {
                     await supabaseClient.from('commesse').update({ 
                         valore: importo, 
@@ -343,9 +397,8 @@
             
             const selectStato = document.getElementById('dettaglio-prev-stato');
             selectStato.value = prev.stato || 'Bozza';
-            selectStato.disabled = false; // Lasciamo lo stato sbloccato
+            selectStato.disabled = false; 
 
-            // Blocca data e importo di base
             document.getElementById('dettaglio-prev-data').disabled = true;
             document.getElementById('dettaglio-prev-importo').disabled = true;
 
@@ -370,7 +423,6 @@
             mostraTastoSalvaPreventivo();
         }
 
-        // Aggiornamento preventivo
         document.getElementById('form-dettaglio-preventivo').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('dettaglio-prev-id').value;
@@ -389,7 +441,6 @@
             if (error) {
                 alert("Errore durante l'aggiornamento: " + error.message);
             } else {
-                // Stessa Magia: Se cambi stato in ACCETTATO, aggiorniamo la commessa
                 if (nuovoStato === 'Accettato') {
                     await supabaseClient.from('commesse').update({ 
                         valore: nuovoImporto,
@@ -404,7 +455,7 @@
 
         // INIT
         document.addEventListener('DOMContentLoaded', () => {
-            popolaTendinaCommesse();
+            popolaTendineNuovoPreventivo();
             caricaPreventivi();
         });
     </script>
