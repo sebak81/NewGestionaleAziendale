@@ -67,14 +67,16 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
+                        <!-- NUOVO ORDINE COLONNE -->
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
                                 <th class="px-6 py-4">Numero</th>
-                                <th class="px-6 py-4">Commessa / Cantiere</th>
-                                <th class="px-6 py-4">Data Emissione</th>
+                                <th class="px-6 py-4">Cliente</th>
+                                <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
+                                <th class="px-6 py-4">Data</th>
                                 <th class="px-6 py-4">Stato</th>
-                                <th class="px-6 py-4">Importo</th>
-                                <th class="px-6 py-4">Doc</th>
+                                <th class="px-6 py-4">Valore</th>
+                                <th class="px-6 py-4 text-center">Allegato</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-preventivi" class="divide-y divide-gray-100">
@@ -87,7 +89,7 @@
 
     <!-- FINESTRA MODALE: NUOVO PREVENTIVO -->
     <div id="modal-nuovo-preventivo" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold">Crea Preventivo</h3>
@@ -99,6 +101,7 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-preventivo" class="space-y-5">
                     
+                    <!-- TENDINE A CASCATA CLIENTE -> COMMESSA -->
                     <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">1. Scegli il Cliente *</label>
@@ -140,7 +143,7 @@
                             <input type="number" step="0.01" id="form-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none placeholder-gray-300" placeholder="0.00">
                         </div>
                         
-                        <!-- NOVITÀ: ANNOTAZIONI E ALLEGATO -->
+                        <!-- ANNOTAZIONI E ALLEGATO -->
                         <div class="col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni</label>
                             <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="Note interne, dettagli, versioni..."></textarea>
@@ -161,7 +164,7 @@
 
     <!-- FINESTRA MODALE: DETTAGLIO / MODIFICA PREVENTIVO -->
     <div id="modal-dettaglio-preventivo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold" id="dettaglio-prev-titolo">Dettaglio Preventivo</h3>
@@ -206,7 +209,7 @@
                             <input type="number" step="0.01" id="dettaglio-prev-importo" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                         </div>
                         
-                        <!-- NOVITÀ DETTAGLIO: ANNOTAZIONI E ALLEGATO -->
+                        <!-- ANNOTAZIONI E ALLEGATO -->
                         <div class="col-span-2">
                             <label class="block text-xs font-medium text-gray-500 mb-1">Annotazioni</label>
                             <textarea id="dettaglio-prev-annotazioni" rows="2" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
@@ -252,11 +255,9 @@
         async function caricaFileSuStorage(file, prefisso) {
             if (!file) return null;
             
-            // Pulisce il nome file da spazi e caratteri strani per evitare errori
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
             const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
             
-            // Carica nel bucket 'preventivi_docs'
             const { data, error } = await supabaseClient.storage
                 .from('preventivi_docs')
                 .upload(fileName, file, { cacheControl: '3600', upsert: false });
@@ -267,7 +268,6 @@
                 return null;
             }
             
-            // Recupera l'URL pubblico del file appena caricato
             const { data: publicUrlData } = supabaseClient.storage
                 .from('preventivi_docs')
                 .getPublicUrl(fileName);
@@ -313,18 +313,19 @@
             }
         }
 
-        // 2. CARICA ELENCO PREVENTIVI IN TABELLA
+        // 2. CARICA ELENCO PREVENTIVI IN TABELLA CON DOPPIO JOIN (Commessa -> Cliente)
         async function caricaPreventivi() {
+            // Chiediamo a Supabase di fare un "doppio salto" per prendere il nome del cliente
             const { data: preventivi, error } = await supabaseClient
                 .from('preventivi')
-                .select('*, commesse(numero, nome_cantiere)')
+                .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-preventivi');
             const conteggio = document.getElementById('conteggio-preventivi');
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Errore nel caricamento. Assicurati che la colonna "annotazioni" e "file_url" esistano.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Errore nel caricamento dei dati.</td></tr>';
                 return;
             }
 
@@ -334,7 +335,7 @@
             tbody.innerHTML = '';
 
             if (preventivi.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nessun preventivo trovato.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nessun preventivo trovato.</td></tr>';
                 return;
             }
 
@@ -343,12 +344,14 @@
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
                 tr.addEventListener('click', () => apriDettaglioPreventivo(index));
 
-                const commessaInfo = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere || 'Senza Cantiere'}` : 'Commessa eliminata';
+                // Risoluzione dei nuovi campi (Cliente e Cantiere separati)
+                const nomeCliente = (prev.commesse && prev.commesse.clienti) ? prev.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
+                const nomeCantiere = prev.commesse ? (prev.commesse.nome_cantiere || prev.commesse.numero) : 'Commessa eliminata';
+                
                 const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '--';
                 const dataSplit = prev.data_emissione ? prev.data_emissione.split('-') : ['','',''];
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
                 
-                // Icona File
                 const iconaFile = prev.file_url ? '📎' : '';
 
                 let colorStato = 'bg-gray-100 text-gray-700';
@@ -356,13 +359,15 @@
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
 
+                // Nuovo ordine di visualizzazione
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-bold text-[#2e2a5b]">${prev.numero}</td>
-                    <td class="px-6 py-4 text-gray-600 font-medium">${commessaInfo}</td>
+                    <td class="px-6 py-4 text-gray-600 font-medium">${nomeCliente}</td>
+                    <td class="px-6 py-4 text-gray-600">${nomeCantiere}</td>
                     <td class="px-6 py-4 text-gray-600">${dataIta}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider">${prev.stato || 'Bozza'}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
-                    <td class="px-6 py-4 text-xl">${iconaFile}</td>
+                    <td class="px-6 py-4 text-center text-lg">${iconaFile}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -389,7 +394,6 @@
             
             const btnSubmit = document.getElementById('btn-submit-nuovo');
             
-            // 1. Carica prima il file PDF se presente
             const fileInput = document.getElementById('form-prev-file');
             let fileUrl = null;
             if (fileInput.files.length > 0) {
@@ -399,7 +403,6 @@
 
             btnSubmit.innerText = "Salvataggio dati...";
 
-            // 2. Salva nel database
             const commessaId = document.getElementById('form-prev-commessa').value;
             const stato = document.getElementById('form-prev-stato').value;
             const importo = document.getElementById('form-prev-importo').value;
@@ -445,13 +448,11 @@
             document.getElementById('dettaglio-prev-stato').value = prev.stato || 'Bozza';
             document.getElementById('dettaglio-prev-stato').disabled = false; 
 
-            // Blocca i campi
             document.getElementById('dettaglio-prev-data').disabled = true;
             document.getElementById('dettaglio-prev-importo').disabled = true;
             document.getElementById('dettaglio-prev-annotazioni').disabled = true;
             document.getElementById('box-carica-nuovo').classList.add('hidden');
 
-            // Mostra il link se c'è un file
             const boxLink = document.getElementById('box-allegato-esistente');
             if (prev.file_url) {
                 boxLink.classList.remove('hidden');
@@ -468,7 +469,7 @@
 
         function chiudiModaleDettaglioPreventivo() {
             document.getElementById('modal-dettaglio-preventivo').classList.add('hidden');
-            document.getElementById('dettaglio-prev-file').value = ""; // Resetta l'input file
+            document.getElementById('dettaglio-prev-file').value = ""; 
             document.getElementById('btn-salva-modifiche-prev').innerText = "Salva Modifiche";
         }
 
@@ -488,7 +489,6 @@
             mostraTastoSalvaPreventivo();
         }
 
-        // Salvataggio Modifiche
         document.getElementById('form-dettaglio-preventivo').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -498,7 +498,6 @@
             const nuovoStato = document.getElementById('dettaglio-prev-stato').value;
             const nuovoImporto = document.getElementById('dettaglio-prev-importo').value;
             
-            // Controlla se c'è un NUOVO file da caricare
             let nuovoFileUrl = null;
             const fileInputMod = document.getElementById('dettaglio-prev-file');
             if (fileInputMod.files.length > 0) {
@@ -515,7 +514,6 @@
                 annotazioni: document.getElementById('dettaglio-prev-annotazioni').value
             };
 
-            // Aggiorna l'url del file solo se ne è stato caricato uno nuovo
             if (nuovoFileUrl) {
                 datiAggiornati.file_url = nuovoFileUrl;
             }
