@@ -109,9 +109,10 @@
         <div class="p-8 max-w-5xl mx-auto w-full space-y-6">
             
             <!-- CARD AVANZAMENTO STATO (STEPPER) -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Preventivo</h3>
-                <div class="relative flex justify-between items-center w-full mb-8 px-8" id="stepper-container"></div>
+                <!-- Container Stepper allargato per gestire 5 punti -->
+                <div class="relative flex justify-between items-center w-full mb-8 px-4 sm:px-12" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
@@ -180,12 +181,11 @@
             <div class="p-6 space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi i dettagli per il registro (opzionale)</label>
-                    <textarea id="form-log-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Inviato preventivo aggiornato... oppure: Preventivo firmato in allegato."></textarea>
+                    <textarea id="form-log-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Inviato PDF tramite email, attendo risposta..."></textarea>
                 </div>
                 
-                <!-- NUOVO: CAMPO ALLEGATO PER IL DIARIO -->
                 <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Allega un documento (Es. PDF firmato)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Allega un documento (Es. File fornitori, Scansione firma)</label>
                     <p class="text-xs text-gray-500 mb-3">Se carichi un file qui, questo diventerà anche il documento principale del preventivo.</p>
                     <input type="file" id="form-log-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                 </div>
@@ -243,7 +243,7 @@
                             <input type="number" step="0.01" id="form-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none placeholder-gray-300">
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni di base</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni base</label>
                             <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
                         </div>
                         <div class="col-span-2 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
@@ -310,7 +310,8 @@
         let listaClientiPrev = [];
         let listaCommessePrev = [];
         
-        const sequenzaStatiPrev = ['Bozza', 'Inviato', 'Accettato'];
+        // --- NUOVI STATI AGGIUNTI ---
+        const sequenzaStatiPrev = ['Bozza', 'Calcoli / Richieste', 'Stesura', 'Inviato', 'Accettato'];
         let statoPendentePrev = ''; 
 
         // --- GESTIONE UPLOAD FILE ---
@@ -383,7 +384,10 @@
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
                 const iconaFile = prev.file_url ? '📎' : '';
 
-                let colorStato = 'bg-gray-100 text-gray-700';
+                // --- NUOVA LOGICA COLORI STATI ---
+                let colorStato = 'bg-gray-100 text-gray-700'; // Bozza
+                if (prev.stato === 'Calcoli / Richieste') colorStato = 'bg-purple-100 text-purple-700';
+                if (prev.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
                 if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
@@ -393,7 +397,7 @@
                     <td class="px-6 py-4 text-gray-600 font-medium">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCantiere}</td>
                     <td class="px-6 py-4 text-gray-600">${dataIta}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider">${prev.stato || 'Bozza'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${prev.stato || 'Bozza'}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
                     <td class="px-6 py-4 text-center text-lg">${iconaFile}</td>
                 `;
@@ -422,11 +426,14 @@
             document.getElementById('scheda-titolo').innerText = prev.numero;
             document.getElementById('scheda-badge-stato').innerText = prev.stato || 'Bozza';
             
+            // Colori Badge Header
             let colorStato = 'bg-gray-100 text-gray-700';
+            if (prev.stato === 'Calcoli / Richieste') colorStato = 'bg-purple-100 text-purple-700';
+            if (prev.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
             if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
             if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
             if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
-            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider`;
 
             const nomeCliente = (prev.commesse && prev.commesse.clienti) ? prev.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
             const nomeCantiere = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere || ''}` : 'Senza Cantiere';
@@ -476,21 +483,40 @@
                 else if (index === currentIdx) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm shadow-lg ring-4 ring-blue-100">${index + 1}</div>`;
 
                 let textColor = index <= currentIdx ? 'text-gray-900 font-bold' : 'text-gray-400';
-                punto.innerHTML = `${iconaHTML}<span class="text-xs uppercase tracking-wider text-center w-20 leading-tight ${textColor}">${stato}</span>`;
+                // w-24 per far stare i testi più lunghi
+                punto.innerHTML = `${iconaHTML}<span class="text-[10px] mt-1 uppercase tracking-wider text-center w-24 leading-tight ${textColor}">${stato}</span>`;
                 container.appendChild(punto);
             });
 
+            // --- NUOVA LOGICA PULSANTI PER GLI STATI INTERMEDI ---
             if (statoAttuale === 'Bozza') {
-                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Segna come Inviato <span>&rarr;</span></button>`;
-            } else if (statoAttuale === 'Inviato') {
+                azioniBox.innerHTML = `
+                    <div class="flex-1"></div>
+                    <button onclick="preparaCambioStatoPrev('Calcoli / Richieste')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Inizia Calcoli <span>&rarr;</span></button>
+                `;
+            } else if (statoAttuale === 'Calcoli / Richieste') {
                 azioniBox.innerHTML = `
                     <button onclick="preparaCambioStatoPrev('Bozza')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Bozza</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaCambioStatoPrev('Stesura')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Passa a Stesura <span>&rarr;</span></button>
+                `;
+            } else if (statoAttuale === 'Stesura') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaCambioStatoPrev('Calcoli / Richieste')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Calcoli</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Segna come Inviato <span>&rarr;</span></button>
+                `;
+            } else if (statoAttuale === 'Inviato') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaCambioStatoPrev('Stesura')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Stesura</button>
                     <div class="flex-1"></div>
                     <button onclick="preparaCambioStatoPrev('Rifiutato')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-5 py-2.5 rounded-lg shadow-sm transition-colors">❌ Rifiutato</button>
                     <button onclick="preparaCambioStatoPrev('Accettato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors">✅ Segna Accettato</button>
                 `;
             } else if (statoAttuale === 'Accettato') {
-                azioniBox.innerHTML = `<button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Riporta a Inviato</button>`;
+                azioniBox.innerHTML = `
+                    <button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Riporta a Inviato</button>
+                `;
             }
         }
 
@@ -499,7 +525,7 @@
             statoPendentePrev = nuovoStato;
             document.getElementById('span-nuovo-stato').innerText = nuovoStato.toUpperCase();
             document.getElementById('form-log-nota').value = ''; 
-            document.getElementById('form-log-file').value = ''; // Reset input file
+            document.getElementById('form-log-file').value = ''; 
             document.getElementById('modal-cambio-stato-prev').classList.remove('hidden');
         }
 
@@ -519,14 +545,12 @@
             btnSubmit.innerText = "Salvataggio...";
             btnSubmit.disabled = true;
 
-            // Carica l'eventuale nuovo file dal modale del log
             let nuovoFileUrl = null;
             if (fileInputLog.files.length > 0) {
                 btnSubmit.innerText = "Caricamento file...";
                 nuovoFileUrl = await caricaFileSuStorage(fileInputLog.files[0], 'log_prev');
             }
 
-            // 1. Aggiorna lo stato nella tabella principale (e se c'è un file nuovo, aggiorna anche il file principale!)
             let datiAggiornamentoPrev = { stato: nuovoStato };
             if (nuovoFileUrl) {
                 datiAggiornamentoPrev.file_url = nuovoFileUrl;
@@ -539,7 +563,6 @@
                     await supabaseClient.from('commesse').update({ valore: prev.importo, stato: 'Contratto' }).eq('id', prev.commessa_id);
                 }
 
-                // 2. Scrivi nel DIARIO DI ATTIVITÀ con nota e file storico
                 await supabaseClient.from('preventivi_log').insert([{
                     preventivo_id: prev.id,
                     azione: `Stato aggiornato in: ${nuovoStato.toUpperCase()}`,
@@ -603,7 +626,7 @@
             divLog.innerHTML = html;
         }
 
-        // 4. CREA NUOVO PREVENTIVO E MODIFICA BASE
+        // 4. CREA NUOVO PREVENTIVO
         function apriModaleNuovoPreventivo() {
             document.getElementById('modal-nuovo-preventivo').classList.remove('hidden');
             const anno = new Date().getFullYear();
@@ -656,6 +679,7 @@
             }
         });
 
+        // 5. MODIFICA DATI PREVENTIVO
         function apriModaleModifica() {
             const prev = preventiviCorrenti[preventivoAttivoIndex];
             document.getElementById('mod-prev-id').value = prev.id;
