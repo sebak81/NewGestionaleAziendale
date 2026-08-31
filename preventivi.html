@@ -11,8 +11,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .input-read-only:disabled { background-color: transparent; border-color: transparent; color: #111827; font-weight: 500; padding-left: 0; appearance: none; -webkit-appearance: none; }
-        .input-read-only:disabled + .select-icon { display: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
@@ -41,7 +39,7 @@
     </aside>
 
     <!-- SCHERMATA PRINCIPALE (ELENCO PREVENTIVI) -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+    <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
             <h1 class="text-xl font-bold">Gestione Preventivi 📝</h1>
             <p class="text-sm text-gray-500 mt-1">Offerte commerciali e monitoraggio accettazioni</p>
@@ -67,7 +65,6 @@
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
-                        <!-- NUOVO ORDINE COLONNE -->
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
                                 <th class="px-6 py-4">Numero</th>
@@ -87,13 +84,96 @@
         </div>
     </main>
 
+    <!-- SCHEDA DETTAGLIO PREVENTIVO (VISTA A TUTTO SCHERMO) -->
+    <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
+        
+        <!-- Intestazione -->
+        <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
+            <div class="flex items-center gap-4">
+                <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
+                    <span>&larr;</span> Torna ai Preventivi
+                </button>
+                <div class="h-6 w-px bg-gray-300"></div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">PREV-0000/000</h2>
+                    <span id="scheda-badge-stato" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider">Bozza</span>
+                </div>
+            </div>
+            <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
+                ✏️ Modifica Importo/File
+            </button>
+        </div>
+
+        <div class="p-8 max-w-5xl mx-auto w-full space-y-6">
+            
+            <!-- CARD AVANZAMENTO STATO (STEPPER) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Preventivo</h3>
+                <div class="relative flex justify-between items-center w-full mb-8 px-8" id="stepper-container"></div>
+                <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
+            </div>
+
+            <!-- RIEPILOGO DATI E ALLEGATO -->
+            <div class="grid grid-cols-3 gap-6">
+                
+                <!-- Dati Principali -->
+                <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">Riepilogo Documento</h3>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Cliente</p>
+                            <p class="font-bold text-[#2e2a5b]" id="scheda-cliente">Caricamento...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Importo Totale</p>
+                            <p class="font-bold text-emerald-600 text-lg" id="scheda-importo">0,00 €</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xs text-gray-500 font-medium mb-1">Commessa di Riferimento</p>
+                            <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
+                        </div>
+                        <div class="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni / Note interne</p>
+                            <p class="text-sm text-gray-700 italic" id="scheda-annotazioni">Nessuna annotazione.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Allegato -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 w-full text-left">File Preventivo</h3>
+                    <div id="scheda-box-file" class="w-full flex flex-col items-center gap-3">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-2xl mb-2">📄</div>
+                        <a href="#" id="scheda-link-file" target="_blank" class="w-full block py-2.5 bg-[#2e2a5b] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#3f3a7a] transition-colors">Apri PDF Allegato</a>
+                    </div>
+                    <div id="scheda-nessun-file" class="w-full flex flex-col items-center gap-2 hidden">
+                        <div class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-2xl mb-2">🚫</div>
+                        <p class="text-sm text-gray-500">Nessun file allegato</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DIARIO / CRONOLOGIA ATTIVITÀ -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-base font-bold text-gray-800 mb-4">Diario di Attività</h3>
+                <div id="lista-cronologia" class="space-y-3">
+                    <p class="text-sm text-gray-500 italic">Caricamento cronologia...</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
+
     <!-- FINESTRA MODALE: NUOVO PREVENTIVO -->
     <div id="modal-nuovo-preventivo" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold">Crea Preventivo</h3>
-                    <p class="text-xs text-gray-500">Collega un preventivo e allega il PDF</p>
+                    <p class="text-xs text-gray-500">Nasce in automatico nello stato "Bozza"</p>
                 </div>
                 <button type="button" onclick="chiudiModaleNuovoPreventivo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
@@ -101,17 +181,16 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-preventivo" class="space-y-5">
                     
-                    <!-- TENDINE A CASCATA CLIENTE -> COMMESSA -->
                     <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">1. Scegli il Cliente *</label>
                             <select id="form-prev-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none shadow-sm">
-                                <option value="">Caricamento clienti...</option>
+                                <option value="">Caricamento...</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">2. Scegli la Commessa *</label>
-                            <select id="form-prev-commessa" required disabled class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400 transition-colors">
+                            <select id="form-prev-commessa" required disabled class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none shadow-sm disabled:bg-gray-100 disabled:text-gray-400">
                                 <option value="">-- Seleziona prima un cliente --</option>
                             </select>
                         </div>
@@ -129,24 +208,13 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
-                            <select id="form-prev-stato" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                                <option value="Bozza">Bozza</option>
-                                <option value="Inviato">Inviato</option>
-                                <option value="Accettato">Accettato</option>
-                                <option value="Rifiutato">Rifiutato/Scaduto</option>
-                            </select>
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Importo Totale Stimato (€) *</label>
+                            <input type="number" step="0.01" id="form-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none placeholder-gray-300">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Importo Totale (€) *</label>
-                            <input type="number" step="0.01" id="form-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none placeholder-gray-300" placeholder="0.00">
-                        </div>
-                        
-                        <!-- ANNOTAZIONI E ALLEGATO -->
                         <div class="col-span-2">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni</label>
-                            <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="Note interne, dettagli, versioni..."></textarea>
+                            <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="Note interne..."></textarea>
                         </div>
                         <div class="col-span-2 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Allega il Preventivo (PDF, Doc, Immagini)</label>
@@ -157,86 +225,51 @@
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleNuovoPreventivo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="submit" id="btn-submit-nuovo" form="form-nuovo-preventivo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Preventivo</button>
+                <button type="submit" id="btn-submit-nuovo" form="form-nuovo-preventivo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva in Bozza</button>
             </div>
         </div>
     </div>
 
-    <!-- FINESTRA MODALE: DETTAGLIO / MODIFICA PREVENTIVO -->
-    <div id="modal-dettaglio-preventivo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+    <!-- FINESTRA MODALE: MODIFICA DATI PREVENTIVO -->
+    <div id="modal-modifica-preventivo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
-                    <h3 class="text-lg font-bold" id="dettaglio-prev-titolo">Dettaglio Preventivo</h3>
-                    <p class="text-xs text-gray-500">Gestisci stato, importo e allegati</p>
+                    <h3 class="text-lg font-bold">Modifica Preventivo</h3>
+                    <p class="text-xs text-gray-500">Aggiorna importo, file o note</p>
                 </div>
-                <button type="button" onclick="chiudiModaleDettaglioPreventivo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-dettaglio-preventivo" class="space-y-4">
-                    <input type="hidden" id="dettaglio-prev-id"> 
-                    <input type="hidden" id="dettaglio-prev-commessa-id"> 
+                <form id="form-modifica-preventivo" class="space-y-4">
+                    <input type="hidden" id="mod-prev-id"> 
                     
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-1">Commessa di Riferimento</label>
-                        <input type="text" id="dettaglio-prev-commessa-nome" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                    </div>
-
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Numero Preventivo</label>
-                            <input type="text" id="dettaglio-prev-numero" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg">
-                        </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Data Emissione</label>
-                            <input type="date" id="dettaglio-prev-data" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="relative">
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Stato</label>
-                            <select id="dettaglio-prev-stato" onchange="mostraTastoSalvaPreventivo()" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-[#2e2a5b] shadow-sm transition-colors">
-                                <option value="Bozza">Bozza</option>
-                                <option value="Inviato">Inviato</option>
-                                <option value="Accettato">Accettato</option>
-                                <option value="Rifiutato">Rifiutato/Scaduto</option>
-                            </select>
+                            <input type="date" id="mod-prev-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Importo Totale (€)</label>
-                            <input type="number" step="0.01" id="dettaglio-prev-importo" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <input type="number" step="0.01" id="mod-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                         </div>
                         
-                        <!-- ANNOTAZIONI E ALLEGATO -->
                         <div class="col-span-2">
                             <label class="block text-xs font-medium text-gray-500 mb-1">Annotazioni</label>
-                            <textarea id="dettaglio-prev-annotazioni" rows="2" disabled class="input-read-only w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
+                            <textarea id="mod-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
                         </div>
                         
-                        <div class="col-span-2 pt-2">
-                            <label class="block text-xs font-medium text-gray-500 mb-2">File Allegato</label>
-                            
-                            <!-- Box file esistente -->
-                            <div id="box-allegato-esistente" class="hidden mb-3">
-                                <a href="#" target="_blank" id="link-allegato" class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-bold hover:bg-blue-100 transition-colors shadow-sm">
-                                    📄 Apri il Documento
-                                </a>
-                            </div>
-                            
-                            <!-- Box carica nuovo -->
-                            <div id="box-carica-nuovo" class="hidden p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                                <p class="text-xs text-gray-500 mb-2 font-medium">Vuoi caricare o sostituire il file?</p>
-                                <input type="file" id="dettaglio-prev-file" onchange="mostraTastoSalvaPreventivo()" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer">
-                            </div>
+                        <div class="col-span-2 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-2">
+                            <p class="text-xs text-gray-500 mb-2 font-medium">Carica un nuovo file per sovrascrivere l'attuale:</p>
+                            <input type="file" id="mod-prev-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer">
                         </div>
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                <button type="button" id="btn-abilita-modifica-prev" onclick="abilitaModificaPreventivo()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Modifica Dati / Allega File</button>
-                <button type="submit" id="btn-salva-modifiche-prev" form="form-dettaglio-preventivo" class="hidden bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Annulla</button>
+                <button type="submit" id="btn-submit-modifica" form="form-modifica-preventivo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
             </div>
         </div>
     </div>
@@ -247,32 +280,22 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         let preventiviCorrenti = [];
         let totalePreventivi = 0;
+        let preventivoAttivoIndex = null;
         
         let listaClientiPrev = [];
         let listaCommessePrev = [];
+        
+        const sequenzaStatiPrev = ['Bozza', 'Inviato', 'Accettato'];
 
-        // --- GESTIONE UPLOAD FILE SU SUPABASE ---
+        // --- GESTIONE UPLOAD FILE ---
         async function caricaFileSuStorage(file, prefisso) {
             if (!file) return null;
-            
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
             const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
-            
-            const { data, error } = await supabaseClient.storage
-                .from('preventivi_docs')
-                .upload(fileName, file, { cacheControl: '3600', upsert: false });
-
-            if (error) {
-                console.error("Errore upload Storage:", error);
-                alert("Errore durante il caricamento del file. Hai creato il bucket public 'preventivi_docs' in Supabase e impostato le policy?");
-                return null;
-            }
-            
-            const { data: publicUrlData } = supabaseClient.storage
-                .from('preventivi_docs')
-                .getPublicUrl(fileName);
-                
-            return publicUrlData.publicUrl;
+            const { error } = await supabaseClient.storage.from('preventivi_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) { alert("Errore caricamento file."); return null; }
+            const { data } = supabaseClient.storage.from('preventivi_docs').getPublicUrl(fileName);
+            return data.publicUrl;
         }
 
         // 1. CARICAMENTO DATI PER TENDINE A CASCATA
@@ -284,7 +307,6 @@
                 selectCliente.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
                 clienti.forEach(c => selectCliente.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`);
             }
-
             const { data: commesse } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id').order('numero', { ascending: false });
             if (commesse) listaCommessePrev = commesse;
         }
@@ -292,20 +314,13 @@
         function filtraCommessePerCliente() {
             const clienteId = document.getElementById('form-prev-cliente').value;
             const selectCommessa = document.getElementById('form-prev-commessa');
-            
             selectCommessa.innerHTML = '<option value="">-- Seleziona una commessa --</option>';
-            
-            if (!clienteId) {
-                selectCommessa.disabled = true;
-                return;
-            }
+            if (!clienteId) { selectCommessa.disabled = true; return; }
 
             selectCommessa.disabled = false;
             const commesseFiltrate = listaCommessePrev.filter(c => String(c.cliente_id) === String(clienteId));
-            
-            if (commesseFiltrate.length === 0) {
-                selectCommessa.innerHTML = '<option value="">Nessuna commessa trovata</option>';
-            } else {
+            if (commesseFiltrate.length === 0) { selectCommessa.innerHTML = '<option value="">Nessuna commessa trovata</option>'; } 
+            else {
                 commesseFiltrate.forEach(com => {
                     const cantiere = com.nome_cantiere ? ` (${com.nome_cantiere})` : '';
                     selectCommessa.innerHTML += `<option value="${com.id}">${com.numero}${cantiere}</option>`;
@@ -313,45 +328,33 @@
             }
         }
 
-        // 2. CARICA ELENCO PREVENTIVI IN TABELLA CON DOPPIO JOIN (Commessa -> Cliente)
+        // 2. ELENCO PREVENTIVI
         async function caricaPreventivi() {
-            // Chiediamo a Supabase di fare un "doppio salto" per prendere il nome del cliente
             const { data: preventivi, error } = await supabaseClient
                 .from('preventivi')
                 .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-preventivi');
-            const conteggio = document.getElementById('conteggio-preventivi');
-
-            if (error) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-red-500">Errore nel caricamento dei dati.</td></tr>';
-                return;
-            }
+            if (error) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-red-500">Errore di connessione.</td></tr>'; return; }
 
             preventiviCorrenti = preventivi;
             totalePreventivi = preventivi.length;
-            conteggio.innerText = `${preventivi.length} preventivi emessi`;
+            document.getElementById('conteggio-preventivi').innerText = `${preventivi.length} preventivi emessi`;
             tbody.innerHTML = '';
 
-            if (preventivi.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nessun preventivo trovato.</td></tr>';
-                return;
-            }
+            if (preventivi.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nessun preventivo trovato.</td></tr>'; return; }
 
             preventivi.forEach((prev, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.addEventListener('click', () => apriDettaglioPreventivo(index));
+                tr.addEventListener('click', () => apriSchedaPreventivo(index));
 
-                // Risoluzione dei nuovi campi (Cliente e Cantiere separati)
                 const nomeCliente = (prev.commesse && prev.commesse.clienti) ? prev.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
-                const nomeCantiere = prev.commesse ? (prev.commesse.nome_cantiere || prev.commesse.numero) : 'Commessa eliminata';
-                
+                const nomeCantiere = prev.commesse ? (prev.commesse.nome_cantiere || prev.commesse.numero) : 'Eliminata';
                 const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '--';
                 const dataSplit = prev.data_emissione ? prev.data_emissione.split('-') : ['','',''];
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
-                
                 const iconaFile = prev.file_url ? '📎' : '';
 
                 let colorStato = 'bg-gray-100 text-gray-700';
@@ -359,7 +362,6 @@
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
 
-                // Nuovo ordine di visualizzazione
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-bold text-[#2e2a5b]">${prev.numero}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${nomeCliente}</td>
@@ -373,7 +375,164 @@
             });
         }
 
-        // 3. LOGICA MODALE "NUOVO PREVENTIVO"
+        // 3. SCHEDA DETTAGLIO A TUTTO SCHERMO
+        function apriSchedaPreventivo(index) {
+            preventivoAttivoIndex = index;
+            aggiornaDatiSchedaUI();
+            caricaCronologia(preventiviCorrenti[index].id); // Carica il diario
+
+            document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
+            document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
+        }
+
+        function chiudiScheda() {
+            preventivoAttivoIndex = null;
+            document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
+            document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
+        }
+
+        function aggiornaDatiSchedaUI() {
+            const prev = preventiviCorrenti[preventivoAttivoIndex];
+            
+            // Intestazione
+            document.getElementById('scheda-titolo').innerText = prev.numero;
+            document.getElementById('scheda-badge-stato').innerText = prev.stato || 'Bozza';
+            
+            let colorStato = 'bg-gray-100 text-gray-700';
+            if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
+            if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
+            if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
+            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+
+            // Dati Griglia
+            const nomeCliente = (prev.commesse && prev.commesse.clienti) ? prev.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
+            const nomeCantiere = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere || ''}` : 'Senza Cantiere';
+            const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '0,00 €';
+
+            document.getElementById('scheda-cliente').innerText = nomeCliente;
+            document.getElementById('scheda-commessa').innerText = nomeCantiere;
+            document.getElementById('scheda-importo').innerText = importo;
+            document.getElementById('scheda-annotazioni').innerText = prev.annotazioni || 'Nessuna annotazione inserita.';
+
+            // Gestione File
+            const boxFile = document.getElementById('scheda-box-file');
+            const noFile = document.getElementById('scheda-nessun-file');
+            if (prev.file_url) {
+                boxFile.classList.remove('hidden');
+                noFile.classList.add('hidden');
+                document.getElementById('scheda-link-file').href = prev.file_url;
+            } else {
+                boxFile.classList.add('hidden');
+                noFile.classList.remove('hidden');
+            }
+
+            disegnaStepperPreventivo(prev.stato || 'Bozza');
+        }
+
+        // STEPPER PREVENTIVO
+        function disegnaStepperPreventivo(statoAttuale) {
+            const container = document.getElementById('stepper-container');
+            const azioniBox = document.getElementById('stepper-azioni');
+            container.innerHTML = ''; azioniBox.innerHTML = '';
+
+            if (statoAttuale === 'Rifiutato') {
+                container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ PREVENTIVO RIFIUTATO O SCADUTO</div>`;
+                azioniBox.innerHTML = `<button onclick="cambiaStatoPrevDB('Bozza')" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm">Ripristina in Bozza</button>`;
+                return;
+            }
+
+            const currentIdx = sequenzaStatiPrev.indexOf(statoAttuale);
+            const bgLine = document.createElement('div');
+            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-8';
+            container.appendChild(bgLine);
+
+            sequenzaStatiPrev.forEach((stato, index) => {
+                const punto = document.createElement('div');
+                punto.className = 'flex flex-col items-center gap-2 bg-white px-2 z-10';
+                
+                let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
+                if (index < currentIdx) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
+                else if (index === currentIdx) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm shadow-lg ring-4 ring-blue-100">${index + 1}</div>`;
+
+                let textColor = index <= currentIdx ? 'text-gray-900 font-bold' : 'text-gray-400';
+                punto.innerHTML = `${iconaHTML}<span class="text-xs uppercase tracking-wider text-center w-20 leading-tight ${textColor}">${stato}</span>`;
+                container.appendChild(punto);
+            });
+
+            // Bottoni in base allo stato
+            if (statoAttuale === 'Bozza') {
+                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="cambiaStatoPrevDB('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Segna come Inviato <span>&rarr;</span></button>`;
+            } else if (statoAttuale === 'Inviato') {
+                azioniBox.innerHTML = `
+                    <button onclick="cambiaStatoPrevDB('Bozza')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Bozza</button>
+                    <div class="flex-1"></div>
+                    <button onclick="cambiaStatoPrevDB('Rifiutato')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-5 py-2.5 rounded-lg shadow-sm transition-colors">❌ Rifiutato</button>
+                    <button onclick="cambiaStatoPrevDB('Accettato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors">✅ Segna Accettato</button>
+                `;
+            } else if (statoAttuale === 'Accettato') {
+                azioniBox.innerHTML = `<button onclick="cambiaStatoPrevDB('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Riporta a Inviato</button>`;
+            }
+        }
+
+        // CAMBIO STATO E LOG CRONOLOGIA
+        async function cambiaStatoPrevDB(nuovoStato) {
+            const prev = preventiviCorrenti[preventivoAttivoIndex];
+            const { error } = await supabaseClient.from('preventivi').update({ stato: nuovoStato }).eq('id', prev.id);
+            
+            if (!error) {
+                // Se Accettato, aggiorna la commessa
+                if (nuovoStato === 'Accettato') {
+                    await supabaseClient.from('commesse').update({ valore: prev.importo, stato: 'Contratto' }).eq('id', prev.commessa_id);
+                }
+
+                // Scrivi nel DIARIO DI ATTIVITÀ
+                await supabaseClient.from('preventivi_log').insert([{
+                    preventivo_id: prev.id,
+                    azione: `Stato aggiornato in: ${nuovoStato.toUpperCase()}`
+                }]);
+
+                prev.stato = nuovoStato; 
+                aggiornaDatiSchedaUI();
+                caricaCronologia(prev.id); // Aggiorna il diario visivo
+                caricaPreventivi(); // Aggiorna la tabella in background
+            }
+        }
+
+        // CARICA IL DIARIO (CRONOLOGIA)
+        async function caricaCronologia(preventivoId) {
+            const divLog = document.getElementById('lista-cronologia');
+            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+
+            const { data: logs, error } = await supabaseClient
+                .from('preventivi_log')
+                .select('*')
+                .eq('preventivo_id', preventivoId)
+                .order('created_at', { ascending: false });
+
+            if (error || !logs || logs.length === 0) {
+                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata.</p>';
+                return;
+            }
+
+            let html = '';
+            logs.forEach(log => {
+                const dateObj = new Date(log.created_at);
+                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                
+                html += `
+                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+                        <div class="w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">${log.azione}</p>
+                            <p class="text-xs text-gray-500">${dataFormat}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            divLog.innerHTML = html;
+        }
+
+        // 4. CREA NUOVO PREVENTIVO
         function apriModaleNuovoPreventivo() {
             document.getElementById('modal-nuovo-preventivo').classList.remove('hidden');
             const anno = new Date().getFullYear();
@@ -386,120 +545,71 @@
             document.getElementById('modal-nuovo-preventivo').classList.add('hidden');
             document.getElementById('form-nuovo-preventivo').reset();
             document.getElementById('form-prev-commessa').disabled = true;
-            document.getElementById('btn-submit-nuovo').innerText = "Salva Preventivo";
+            document.getElementById('btn-submit-nuovo').innerText = "Salva in Bozza";
         }
 
         document.getElementById('form-nuovo-preventivo').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const btnSubmit = document.getElementById('btn-submit-nuovo');
             
             const fileInput = document.getElementById('form-prev-file');
             let fileUrl = null;
             if (fileInput.files.length > 0) {
-                btnSubmit.innerText = "Caricamento PDF...";
+                btnSubmit.innerText = "Caricamento file...";
                 fileUrl = await caricaFileSuStorage(fileInput.files[0], 'prev');
             }
 
             btnSubmit.innerText = "Salvataggio dati...";
 
-            const commessaId = document.getElementById('form-prev-commessa').value;
-            const stato = document.getElementById('form-prev-stato').value;
-            const importo = document.getElementById('form-prev-importo').value;
-
             const nuovoPreventivo = {
-                commessa_id: commessaId,
+                commessa_id: document.getElementById('form-prev-commessa').value,
                 numero: document.getElementById('form-prev-numero').value,
                 data_emissione: document.getElementById('form-prev-data').value,
-                stato: stato,
-                importo: importo,
+                stato: 'Bozza', // Forza Bozza
+                importo: document.getElementById('form-prev-importo').value,
                 annotazioni: document.getElementById('form-prev-annotazioni').value,
                 file_url: fileUrl
             };
 
-            const { error } = await supabaseClient.from('preventivi').insert([nuovoPreventivo]);
+            // ATTENZIONE: Aggiungo .select() per farmi restituire l'ID appena creato da Supabase
+            const { data: result, error } = await supabaseClient.from('preventivi').insert([nuovoPreventivo]).select();
 
             if (error) {
-                alert("Errore durante il salvataggio: " + error.message);
-                btnSubmit.innerText = "Salva Preventivo";
+                alert("Errore salvataggio: " + error.message);
+                btnSubmit.innerText = "Salva in Bozza";
             } else {
-                if (stato === 'Accettato') {
-                    await supabaseClient.from('commesse').update({ valore: importo, stato: 'Contratto' }).eq('id', commessaId);
+                // Salva nel DIARIO che è stato creato
+                if(result && result.length > 0) {
+                    await supabaseClient.from('preventivi_log').insert([{ preventivo_id: result[0].id, azione: `Creato nuovo preventivo in BOZZA` }]);
                 }
                 chiudiModaleNuovoPreventivo();
                 caricaPreventivi();
             }
         });
 
-        // 4. LOGICA MODALE "DETTAGLIO PREVENTIVO"
-        function apriDettaglioPreventivo(index) {
-            const prev = preventiviCorrenti[index];
-            
-            document.getElementById('dettaglio-prev-id').value = prev.id;
-            document.getElementById('dettaglio-prev-commessa-id').value = prev.commessa_id;
-            document.getElementById('dettaglio-prev-titolo').innerText = prev.numero;
-            
-            document.getElementById('dettaglio-prev-commessa-nome').value = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere}` : '';
-            document.getElementById('dettaglio-prev-numero').value = prev.numero || '';
-            document.getElementById('dettaglio-prev-data').value = prev.data_emissione || '';
-            document.getElementById('dettaglio-prev-importo').value = prev.importo || '';
-            document.getElementById('dettaglio-prev-annotazioni').value = prev.annotazioni || '';
-            
-            document.getElementById('dettaglio-prev-stato').value = prev.stato || 'Bozza';
-            document.getElementById('dettaglio-prev-stato').disabled = false; 
-
-            document.getElementById('dettaglio-prev-data').disabled = true;
-            document.getElementById('dettaglio-prev-importo').disabled = true;
-            document.getElementById('dettaglio-prev-annotazioni').disabled = true;
-            document.getElementById('box-carica-nuovo').classList.add('hidden');
-
-            const boxLink = document.getElementById('box-allegato-esistente');
-            if (prev.file_url) {
-                boxLink.classList.remove('hidden');
-                document.getElementById('link-allegato').href = prev.file_url;
-            } else {
-                boxLink.classList.add('hidden');
-            }
-
-            document.getElementById('btn-abilita-modifica-prev').classList.remove('hidden');
-            document.getElementById('btn-salva-modifiche-prev').classList.add('hidden');
-            
-            document.getElementById('modal-dettaglio-preventivo').classList.remove('hidden');
+        // 5. MODIFICA DATI PREVENTIVO (Dal pulsante in alto nella scheda)
+        function apriModaleModifica() {
+            const prev = preventiviCorrenti[preventivoAttivoIndex];
+            document.getElementById('mod-prev-id').value = prev.id;
+            document.getElementById('mod-prev-data').value = prev.data_emissione || '';
+            document.getElementById('mod-prev-importo').value = prev.importo || '';
+            document.getElementById('mod-prev-annotazioni').value = prev.annotazioni || '';
+            document.getElementById('modal-modifica-preventivo').classList.remove('hidden');
         }
 
-        function chiudiModaleDettaglioPreventivo() {
-            document.getElementById('modal-dettaglio-preventivo').classList.add('hidden');
-            document.getElementById('dettaglio-prev-file').value = ""; 
-            document.getElementById('btn-salva-modifiche-prev').innerText = "Salva Modifiche";
+        function chiudiModaleModifica() { 
+            document.getElementById('modal-modifica-preventivo').classList.add('hidden'); 
+            document.getElementById('mod-prev-file').value = "";
+            document.getElementById('btn-submit-modifica').innerText = "Salva Modifiche";
         }
 
-        function mostraTastoSalvaPreventivo() {
-            document.getElementById('btn-abilita-modifica-prev').classList.add('hidden');
-            document.getElementById('btn-salva-modifiche-prev').classList.remove('hidden');
-        }
-
-        function abilitaModificaPreventivo() {
-            document.getElementById('dettaglio-prev-data').disabled = false;
-            document.getElementById('dettaglio-prev-importo').disabled = false;
-            document.getElementById('dettaglio-prev-annotazioni').disabled = false;
-            
-            document.getElementById('box-carica-nuovo').classList.remove('hidden');
-            document.getElementById('dettaglio-prev-file').disabled = false;
-            
-            mostraTastoSalvaPreventivo();
-        }
-
-        document.getElementById('form-dettaglio-preventivo').addEventListener('submit', async (e) => {
+        document.getElementById('form-modifica-preventivo').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const btnSubmit = document.getElementById('btn-salva-modifiche-prev');
-            const id = document.getElementById('dettaglio-prev-id').value;
-            const commessaId = document.getElementById('dettaglio-prev-commessa-id').value;
-            const nuovoStato = document.getElementById('dettaglio-prev-stato').value;
-            const nuovoImporto = document.getElementById('dettaglio-prev-importo').value;
+            const btnSubmit = document.getElementById('btn-submit-modifica');
+            const id = document.getElementById('mod-prev-id').value;
             
             let nuovoFileUrl = null;
-            const fileInputMod = document.getElementById('dettaglio-prev-file');
+            const fileInputMod = document.getElementById('mod-prev-file');
             if (fileInputMod.files.length > 0) {
                 btnSubmit.innerText = "Caricamento file...";
                 nuovoFileUrl = await caricaFileSuStorage(fileInputMod.files[0], 'prev_mod');
@@ -508,35 +618,28 @@
             btnSubmit.innerText = "Salvataggio dati...";
             
             const datiAggiornati = {
-                data_emissione: document.getElementById('dettaglio-prev-data').value,
-                stato: nuovoStato,
-                importo: nuovoImporto,
-                annotazioni: document.getElementById('dettaglio-prev-annotazioni').value
+                data_emissione: document.getElementById('mod-prev-data').value,
+                importo: document.getElementById('mod-prev-importo').value,
+                annotazioni: document.getElementById('mod-prev-annotazioni').value
             };
-
-            if (nuovoFileUrl) {
-                datiAggiornati.file_url = nuovoFileUrl;
-            }
+            if (nuovoFileUrl) datiAggiornati.file_url = nuovoFileUrl;
 
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornati).eq('id', id);
 
-            if (error) {
-                alert("Errore durante l'aggiornamento: " + error.message);
-                btnSubmit.innerText = "Salva Modifiche";
-            } else {
-                if (nuovoStato === 'Accettato') {
-                    await supabaseClient.from('commesse').update({ valore: nuovoImporto, stato: 'Contratto' }).eq('id', commessaId);
-                }
-                chiudiModaleDettaglioPreventivo();
+            if (!error) {
+                // Registra la modifica nel diario
+                await supabaseClient.from('preventivi_log').insert([{ preventivo_id: id, azione: `Dati o file aggiornati dall'utente` }]);
+                
+                chiudiModaleModifica();
+                Object.assign(preventiviCorrenti[preventivoAttivoIndex], datiAggiornati);
+                aggiornaDatiSchedaUI();
+                caricaCronologia(id);
                 caricaPreventivi();
             }
         });
 
         // INIT
-        document.addEventListener('DOMContentLoaded', () => {
-            popolaTendineNuovoPreventivo();
-            caricaPreventivi();
-        });
+        document.addEventListener('DOMContentLoaded', () => { popolaTendineNuovoPreventivo(); caricaPreventivi(); });
     </script>
 </body>
 </html>
