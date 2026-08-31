@@ -292,7 +292,7 @@
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Annulla</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="submit" id="btn-submit-modifica" form="form-modifica-preventivo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
             </div>
         </div>
@@ -478,10 +478,15 @@
                 punto.className = 'flex flex-col items-center gap-2 bg-white px-2 z-10';
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                if (index < currentIdx) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
-                else if (index === currentIdx) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm shadow-lg ring-4 ring-blue-100">${index + 1}</div>`;
+                
+                // Se l'indice è minore OPPURE se siamo arrivati all'ultimo stato ("Accettato") e questo è il punto finale, diventa verde con spunta!
+                if (index < currentIdx || (statoAttuale === 'Accettato' && index === currentIdx)) {
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md font-bold">✓</div>`;
+                } else if (index === currentIdx) {
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-sm shadow-lg ring-4 ring-blue-100">${index + 1}</div>`;
+                }
 
-                let textColor = index <= currentIdx ? 'text-gray-900 font-bold' : 'text-gray-400';
+                let textColor = (index <= currentIdx || statoAttuale === 'Accettato') ? 'text-gray-900 font-bold' : 'text-gray-400';
                 punto.innerHTML = `${iconaHTML}<span class="text-[10px] mt-1 uppercase tracking-wider text-center w-24 leading-tight ${textColor}">${stato}</span>`;
                 container.appendChild(punto);
             });
@@ -517,7 +522,7 @@
             }
         }
 
-        // --- GESTIONE CAMBIO STATO (QUI AVVIENE LA MAGIA DELLA CREAZIONE CONTRATTI) ---
+        // --- GESTIONE CAMBIO STATO ---
         function preparaCambioStatoPrev(nuovoStato) {
             statoPendentePrev = nuovoStato;
             document.getElementById('span-nuovo-stato').innerText = nuovoStato.toUpperCase();
@@ -556,20 +561,13 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornamentoPrev).eq('id', prev.id);
             
             if (!error) {
-                
-                // --- INIZIO MAGIA CREAZIONE CONTRATTO ---
                 if (nuovoStato === 'Accettato') {
-                    // Aggiorna lo stato generale della commessa
                     await supabaseClient.from('commesse').update({ valore: prev.importo, stato: 'Contratto' }).eq('id', prev.commessa_id);
                     
-                    // Crea il numero del nuovo contratto trasformando la stringa "PREV-" in "CONT-"
                     const numeroContratto = prev.numero.replace('PREV-', 'CONT-');
-                    
-                    // Controllo di sicurezza: verifichiamo che non esista già un contratto per questo preventivo
                     const { data: contrattiEsistenti } = await supabaseClient.from('contratti').select('id').eq('preventivo_id', prev.id);
                     
                     if (!contrattiEsistenti || contrattiEsistenti.length === 0) {
-                        // Generazione vera e propria
                         await supabaseClient.from('contratti').insert([{
                             preventivo_id: prev.id,
                             commessa_id: prev.commessa_id,
@@ -579,7 +577,6 @@
                         }]);
                     }
                 }
-                // --- FINE MAGIA ---
 
                 await supabaseClient.from('preventivi_log').insert([{
                     preventivo_id: prev.id,
@@ -604,7 +601,6 @@
             btnSubmit.disabled = false;
         }
 
-        // CARICA IL DIARIO (CRONOLOGIA)
         async function caricaCronologia(preventivoId) {
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
