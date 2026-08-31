@@ -180,7 +180,7 @@
             <div class="p-6 space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi i dettagli per il registro (opzionale)</label>
-                    <textarea id="form-log-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Inviato preventivo aggiornato... oppure: Preventivo firmato in allegato."></textarea>
+                    <textarea id="form-log-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Inviato PDF tramite email, attendo risposta..."></textarea>
                 </div>
                 
                 <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
@@ -303,7 +303,6 @@
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // VARIABILE GLOBALE AUTORE (Simula il login)
         const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
 
         let preventiviCorrenti = [];
@@ -386,7 +385,7 @@
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
                 const iconaFile = prev.file_url ? '📎' : '';
 
-                let colorStato = 'bg-gray-100 text-gray-700'; // Bozza
+                let colorStato = 'bg-gray-100 text-gray-700';
                 if (prev.stato === 'Calcoli / Richieste') colorStato = 'bg-purple-100 text-purple-700';
                 if (prev.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
                 if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
@@ -487,7 +486,6 @@
                 container.appendChild(punto);
             });
 
-            // Tasto per annullare rimosso dalle fasi iniziali come richiesto
             if (statoAttuale === 'Bozza') {
                 azioniBox.innerHTML = `
                     <div class="flex-1"></div>
@@ -519,7 +517,7 @@
             }
         }
 
-        // --- GESTIONE NUOVO MODALE CRONOLOGIA E CAMBIO STATO ---
+        // --- GESTIONE CAMBIO STATO (QUI AVVIENE LA MAGIA DELLA CREAZIONE CONTRATTI) ---
         function preparaCambioStatoPrev(nuovoStato) {
             statoPendentePrev = nuovoStato;
             document.getElementById('span-nuovo-stato').innerText = nuovoStato.toUpperCase();
@@ -558,9 +556,30 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornamentoPrev).eq('id', prev.id);
             
             if (!error) {
+                
+                // --- INIZIO MAGIA CREAZIONE CONTRATTO ---
                 if (nuovoStato === 'Accettato') {
+                    // Aggiorna lo stato generale della commessa
                     await supabaseClient.from('commesse').update({ valore: prev.importo, stato: 'Contratto' }).eq('id', prev.commessa_id);
+                    
+                    // Crea il numero del nuovo contratto trasformando la stringa "PREV-" in "CONT-"
+                    const numeroContratto = prev.numero.replace('PREV-', 'CONT-');
+                    
+                    // Controllo di sicurezza: verifichiamo che non esista già un contratto per questo preventivo
+                    const { data: contrattiEsistenti } = await supabaseClient.from('contratti').select('id').eq('preventivo_id', prev.id);
+                    
+                    if (!contrattiEsistenti || contrattiEsistenti.length === 0) {
+                        // Generazione vera e propria
+                        await supabaseClient.from('contratti').insert([{
+                            preventivo_id: prev.id,
+                            commessa_id: prev.commessa_id,
+                            numero: numeroContratto,
+                            stato: 'Da Fare',
+                            valore_finale: prev.importo
+                        }]);
+                    }
                 }
+                // --- FINE MAGIA ---
 
                 await supabaseClient.from('preventivi_log').insert([{
                     preventivo_id: prev.id,
