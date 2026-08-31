@@ -11,6 +11,8 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .input-read-only:disabled { background-color: transparent; border-color: transparent; color: #111827; font-weight: 500; padding-left: 0; appearance: none; -webkit-appearance: none; }
+        .input-read-only:disabled + .select-icon { display: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
@@ -100,7 +102,7 @@
                 </div>
             </div>
             <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
-                ✏️ Modifica Importo/File
+                ✏️ Modifica Dati
             </button>
         </div>
 
@@ -134,7 +136,7 @@
                             <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
                         </div>
                         <div class="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni / Note interne</p>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni Originali</p>
                             <p class="text-sm text-gray-700 italic" id="scheda-annotazioni">Nessuna annotazione.</p>
                         </div>
                     </div>
@@ -145,7 +147,7 @@
                     <h3 class="text-base font-bold text-gray-800 mb-4 w-full text-left">File Preventivo</h3>
                     <div id="scheda-box-file" class="w-full flex flex-col items-center gap-3">
                         <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-2xl mb-2">📄</div>
-                        <a href="#" id="scheda-link-file" target="_blank" class="w-full block py-2.5 bg-[#2e2a5b] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#3f3a7a] transition-colors">Apri PDF Allegato</a>
+                        <a href="#" id="scheda-link-file" target="_blank" class="w-full block py-2.5 bg-[#2e2a5b] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#3f3a7a] transition-colors">Apri Documento</a>
                     </div>
                     <div id="scheda-nessun-file" class="w-full flex flex-col items-center gap-2 hidden">
                         <div class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-2xl mb-2">🚫</div>
@@ -156,9 +158,9 @@
 
             <!-- DIARIO / CRONOLOGIA ATTIVITÀ -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-4">Diario di Attività</h3>
-                <div id="lista-cronologia" class="space-y-3">
-                    <p class="text-sm text-gray-500 italic">Caricamento cronologia...</p>
+                <h3 class="text-base font-bold text-gray-800 mb-6">Registro Attività e Comunicazioni</h3>
+                <div id="lista-cronologia" class="space-y-4">
+                    <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
                 </div>
             </div>
 
@@ -166,6 +168,29 @@
     </div>
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
+
+    <!-- FINESTRA MODALE: CONFERMA CAMBIO STATO E INSERIMENTO NOTA -->
+    <div id="modal-cambio-stato-prev" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Registra Attività</h3>
+                    <p class="text-xs text-gray-500">Conferma passaggio allo stato: <strong class="text-[#2e2a5b]" id="span-nuovo-stato"></strong></p>
+                </div>
+                <button type="button" onclick="chiudiModaleCambioStato()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi i dettagli per il registro (opzionale)</label>
+                <textarea id="form-log-nota" rows="4" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Inviato PDF tramite email, il cliente ci fa sapere giovedì... / Oppure: Preventivo accettato telefonicamente, attendo firma."></textarea>
+            </div>
+            
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white">
+                <button type="button" onclick="chiudiModaleCambioStato()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="button" onclick="confermaCambioStato()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">Conferma e Salva</button>
+            </div>
+        </div>
+    </div>
 
     <!-- FINESTRA MODALE: NUOVO PREVENTIVO -->
     <div id="modal-nuovo-preventivo" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -180,7 +205,6 @@
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-preventivo" class="space-y-5">
-                    
                     <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">1. Scegli il Cliente *</label>
@@ -213,8 +237,8 @@
                             <input type="number" step="0.01" id="form-prev-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none placeholder-gray-300">
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni</label>
-                            <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="Note interne..."></textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni di base</label>
+                            <textarea id="form-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
                         </div>
                         <div class="col-span-2 p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Allega il Preventivo (PDF, Doc, Immagini)</label>
@@ -256,7 +280,7 @@
                         </div>
                         
                         <div class="col-span-2">
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Annotazioni</label>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Annotazioni originali</label>
                             <textarea id="mod-prev-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none"></textarea>
                         </div>
                         
@@ -286,6 +310,7 @@
         let listaCommessePrev = [];
         
         const sequenzaStatiPrev = ['Bozza', 'Inviato', 'Accettato'];
+        let statoPendentePrev = ''; // Variabile per tracciare lo stato scelto nel modale
 
         // --- GESTIONE UPLOAD FILE ---
         async function caricaFileSuStorage(file, prefisso) {
@@ -379,7 +404,7 @@
         function apriSchedaPreventivo(index) {
             preventivoAttivoIndex = index;
             aggiornaDatiSchedaUI();
-            caricaCronologia(preventiviCorrenti[index].id); // Carica il diario
+            caricaCronologia(preventiviCorrenti[index].id); 
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -394,7 +419,6 @@
         function aggiornaDatiSchedaUI() {
             const prev = preventiviCorrenti[preventivoAttivoIndex];
             
-            // Intestazione
             document.getElementById('scheda-titolo').innerText = prev.numero;
             document.getElementById('scheda-badge-stato').innerText = prev.stato || 'Bozza';
             
@@ -404,7 +428,6 @@
             if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
 
-            // Dati Griglia
             const nomeCliente = (prev.commesse && prev.commesse.clienti) ? prev.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
             const nomeCantiere = prev.commesse ? `${prev.commesse.numero} - ${prev.commesse.nome_cantiere || ''}` : 'Senza Cantiere';
             const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '0,00 €';
@@ -412,9 +435,8 @@
             document.getElementById('scheda-cliente').innerText = nomeCliente;
             document.getElementById('scheda-commessa').innerText = nomeCantiere;
             document.getElementById('scheda-importo').innerText = importo;
-            document.getElementById('scheda-annotazioni').innerText = prev.annotazioni || 'Nessuna annotazione inserita.';
+            document.getElementById('scheda-annotazioni').innerText = prev.annotazioni || 'Nessuna annotazione base inserita.';
 
-            // Gestione File
             const boxFile = document.getElementById('scheda-box-file');
             const noFile = document.getElementById('scheda-nessun-file');
             if (prev.file_url) {
@@ -437,7 +459,7 @@
 
             if (statoAttuale === 'Rifiutato') {
                 container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ PREVENTIVO RIFIUTATO O SCADUTO</div>`;
-                azioniBox.innerHTML = `<button onclick="cambiaStatoPrevDB('Bozza')" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm">Ripristina in Bozza</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaCambioStatoPrev('Bozza')" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm">Ripristina in Bozza</button>`;
                 return;
             }
 
@@ -459,24 +481,40 @@
                 container.appendChild(punto);
             });
 
-            // Bottoni in base allo stato
+            // I bottoni ora richiamano la funzione preparaCambioStatoPrev (che apre il modale log)
             if (statoAttuale === 'Bozza') {
-                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="cambiaStatoPrevDB('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Segna come Inviato <span>&rarr;</span></button>`;
+                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors flex items-center gap-2">Segna come Inviato <span>&rarr;</span></button>`;
             } else if (statoAttuale === 'Inviato') {
                 azioniBox.innerHTML = `
-                    <button onclick="cambiaStatoPrevDB('Bozza')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Bozza</button>
+                    <button onclick="preparaCambioStatoPrev('Bozza')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Torna a Bozza</button>
                     <div class="flex-1"></div>
-                    <button onclick="cambiaStatoPrevDB('Rifiutato')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-5 py-2.5 rounded-lg shadow-sm transition-colors">❌ Rifiutato</button>
-                    <button onclick="cambiaStatoPrevDB('Accettato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors">✅ Segna Accettato</button>
+                    <button onclick="preparaCambioStatoPrev('Rifiutato')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-5 py-2.5 rounded-lg shadow-sm transition-colors">❌ Rifiutato</button>
+                    <button onclick="preparaCambioStatoPrev('Accettato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-sm transition-colors">✅ Segna Accettato</button>
                 `;
             } else if (statoAttuale === 'Accettato') {
-                azioniBox.innerHTML = `<button onclick="cambiaStatoPrevDB('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Riporta a Inviato</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaCambioStatoPrev('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2.5 rounded-lg transition-colors">&larr; Riporta a Inviato</button>`;
             }
         }
 
-        // CAMBIO STATO E LOG CRONOLOGIA
-        async function cambiaStatoPrevDB(nuovoStato) {
+        // --- GESTIONE NUOVO MODALE CRONOLOGIA E CAMBIO STATO ---
+        function preparaCambioStatoPrev(nuovoStato) {
+            statoPendentePrev = nuovoStato;
+            document.getElementById('span-nuovo-stato').innerText = nuovoStato.toUpperCase();
+            document.getElementById('form-log-nota').value = ''; // Pulisci la casella di testo
+            document.getElementById('modal-cambio-stato-prev').classList.remove('hidden');
+        }
+
+        function chiudiModaleCambioStato() {
+            document.getElementById('modal-cambio-stato-prev').classList.add('hidden');
+            statoPendentePrev = '';
+        }
+
+        async function confermaCambioStato() {
+            const notaUtente = document.getElementById('form-log-nota').value;
             const prev = preventiviCorrenti[preventivoAttivoIndex];
+            const nuovoStato = statoPendentePrev;
+
+            // 1. Aggiorna lo stato nella tabella principale preventivi
             const { error } = await supabaseClient.from('preventivi').update({ stato: nuovoStato }).eq('id', prev.id);
             
             if (!error) {
@@ -485,16 +523,20 @@
                     await supabaseClient.from('commesse').update({ valore: prev.importo, stato: 'Contratto' }).eq('id', prev.commessa_id);
                 }
 
-                // Scrivi nel DIARIO DI ATTIVITÀ
+                // 2. Scrivi nel DIARIO DI ATTIVITÀ con la nota personalizzata
                 await supabaseClient.from('preventivi_log').insert([{
                     preventivo_id: prev.id,
-                    azione: `Stato aggiornato in: ${nuovoStato.toUpperCase()}`
+                    azione: `Stato aggiornato in: ${nuovoStato.toUpperCase()}`,
+                    nota: notaUtente || null
                 }]);
 
                 prev.stato = nuovoStato; 
+                chiudiModaleCambioStato();
                 aggiornaDatiSchedaUI();
-                caricaCronologia(prev.id); // Aggiorna il diario visivo
-                caricaPreventivi(); // Aggiorna la tabella in background
+                caricaCronologia(prev.id); 
+                caricaPreventivi(); 
+            } else {
+                alert("Errore cambio stato: " + error.message);
             }
         }
 
@@ -519,12 +561,18 @@
                 const dateObj = new Date(log.created_at);
                 const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 
+                // Se c'è una nota, la visualizza in un riquadro grigio
+                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
+
                 html += `
-                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0 last:pb-0">
-                        <div class="w-2 h-2 rounded-full bg-blue-400 mt-2"></div>
-                        <div>
-                            <p class="text-sm font-bold text-gray-800">${log.azione}</p>
-                            <p class="text-xs text-gray-500">${dataFormat}</p>
+                    <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                        <div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>
+                        <div class="flex-1">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
+                                <p class="text-sm font-bold text-gray-900">${log.azione}</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
+                            </div>
+                            ${notaHtml}
                         </div>
                     </div>
                 `;
@@ -565,20 +613,18 @@
                 commessa_id: document.getElementById('form-prev-commessa').value,
                 numero: document.getElementById('form-prev-numero').value,
                 data_emissione: document.getElementById('form-prev-data').value,
-                stato: 'Bozza', // Forza Bozza
+                stato: 'Bozza', 
                 importo: document.getElementById('form-prev-importo').value,
                 annotazioni: document.getElementById('form-prev-annotazioni').value,
                 file_url: fileUrl
             };
 
-            // ATTENZIONE: Aggiungo .select() per farmi restituire l'ID appena creato da Supabase
             const { data: result, error } = await supabaseClient.from('preventivi').insert([nuovoPreventivo]).select();
 
             if (error) {
                 alert("Errore salvataggio: " + error.message);
                 btnSubmit.innerText = "Salva in Bozza";
             } else {
-                // Salva nel DIARIO che è stato creato
                 if(result && result.length > 0) {
                     await supabaseClient.from('preventivi_log').insert([{ preventivo_id: result[0].id, azione: `Creato nuovo preventivo in BOZZA` }]);
                 }
@@ -587,7 +633,7 @@
             }
         });
 
-        // 5. MODIFICA DATI PREVENTIVO (Dal pulsante in alto nella scheda)
+        // 5. MODIFICA DATI PREVENTIVO
         function apriModaleModifica() {
             const prev = preventiviCorrenti[preventivoAttivoIndex];
             document.getElementById('mod-prev-id').value = prev.id;
@@ -627,8 +673,7 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornati).eq('id', id);
 
             if (!error) {
-                // Registra la modifica nel diario
-                await supabaseClient.from('preventivi_log').insert([{ preventivo_id: id, azione: `Dati o file aggiornati dall'utente` }]);
+                await supabaseClient.from('preventivi_log').insert([{ preventivo_id: id, azione: `Dati o allegati aggiornati dall'utente` }]);
                 
                 chiudiModaleModifica();
                 Object.assign(preventiviCorrenti[preventivoAttivoIndex], datiAggiornati);
