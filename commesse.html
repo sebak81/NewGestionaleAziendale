@@ -117,34 +117,40 @@
             <!-- CARD AVANZAMENTO LAVORI (STEPPER) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento</h3>
-                
-                <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container">
-                    <!-- Generato via Javascript -->
-                </div>
-
-                <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni">
-                    <!-- Generato via Javascript -->
-                </div>
+                <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
+                <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MOCKUP TABS -->
+            <!-- MENU TABS INTERATTIVO -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
-                <button class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b]">Riepilogo e Pagamenti</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Preventivo e Ordini</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Rilievi</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Verbali e Interventi</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700">Documenti e Note</button>
+                <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Pagamenti</button>
+                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
+                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Ordini (Presto)</button>
+                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Interventi (Presto)</button>
             </div>
 
-            <!-- CARD RIEPILOGO FINANZIARIO -->
-            <div class="grid grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato</p>
-                    <p class="text-3xl font-bold text-emerald-600">0,00 €</p>
+            <!-- CONTENUTO TAB 1: RIEPILOGO FINANZIARIO -->
+            <div id="tab-content-riepilogo" class="block">
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato (Da sviluppare)</p>
+                        <p class="text-3xl font-bold text-emerald-600">0,00 €</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Residuo da Incassare</p>
+                        <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">0,00 €</p>
+                    </div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Residuo da Incassare</p>
-                    <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">0,00 €</p>
+            </div>
+
+            <!-- CONTENUTO TAB 2: PREVENTIVI -->
+            <div id="tab-content-preventivi" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
+                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Gestisci in Preventivi &rarr;</a>
+                </div>
+                <div id="lista-preventivi-commessa" class="space-y-3">
+                    <p class="text-sm text-gray-500">Caricamento preventivi in corso...</p>
                 </div>
             </div>
 
@@ -166,14 +172,12 @@
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuova-commessa" class="space-y-5">
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale (Fatturazione) *</label>
                             <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                                 <option value="">Caricamento clienti...</option>
                             </select>
-                            
                             <div class="mt-2 flex items-center gap-2">
                                 <input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] focus:ring-[#2e2a5b] w-4 h-4 cursor-pointer">
                                 <label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati fatturazione per cantiere</label>
@@ -184,7 +188,6 @@
                             <input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-600">
                         </div>
                     </div>
-
                     <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
                         <h4 class="text-sm font-semibold text-blue-900 mb-3">Dati Cantiere / Destinazione Lavori</h4>
                         <div class="space-y-4">
@@ -241,7 +244,6 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-modifica-commessa" class="space-y-4">
                     <input type="hidden" id="mod-com-id"> 
-                    
                     <div class="pt-2">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Dati Cantiere</h4>
                         <div class="space-y-4">
@@ -275,7 +277,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 mb-1">Valore Lavori (€)</label>
@@ -354,11 +355,14 @@
             });
         }
 
-        // 2. LOGICA VISTA A TUTTO SCHERMO (SCHEDA)
+        // 2. LOGICA VISTA A TUTTO SCHERMO E TABS
         function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
             aggiornaDatiSchedaUI();
             
+            // Riporta il tab sempre su "Riepilogo" quando apri una commessa
+            cambiaTab('riepilogo');
+
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
         }
@@ -369,6 +373,92 @@
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
+        function cambiaTab(tabName) {
+            // Gestione Pulsanti Tab
+            const btnRiep = document.getElementById('tab-btn-riepilogo');
+            const btnPrev = document.getElementById('tab-btn-preventivi');
+            
+            // Reset stili
+            btnRiep.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
+            btnPrev.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
+            
+            // Nascondi Contenuti
+            document.getElementById('tab-content-riepilogo').className = "hidden";
+            document.getElementById('tab-content-preventivi').className = "hidden";
+
+            // Attiva Tab Selezionato
+            if (tabName === 'riepilogo') {
+                btnRiep.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
+                document.getElementById('tab-content-riepilogo').className = "block";
+            } else if (tabName === 'preventivi') {
+                btnPrev.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
+                document.getElementById('tab-content-preventivi').className = "block space-y-4";
+                
+                // Carica i preventivi associati
+                caricaPreventiviDiQuestaCommessa();
+            }
+        }
+
+        // CARICA I PREVENTIVI NELLA SCHEDA COMMESSA
+        async function caricaPreventiviDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const divLista = document.getElementById('lista-preventivi-commessa');
+            divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
+
+            const { data: preventivi, error } = await supabaseClient
+                .from('preventivi')
+                .select('*')
+                .eq('commessa_id', com.id)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento preventivi.</p>';
+                return;
+            }
+
+            if (!preventivi || preventivi.length === 0) {
+                divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun preventivo associato a questa commessa.</p></div>';
+                return;
+            }
+
+            let html = '';
+            preventivi.forEach(prev => {
+                const importo = prev.importo ? `€ ${parseFloat(prev.importo).toFixed(2)}` : '--';
+                const dataSplit = prev.data_emissione ? prev.data_emissione.split('-') : ['','',''];
+                const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
+                
+                let colorStato = 'bg-gray-100 text-gray-700';
+                if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
+                if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
+                if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
+
+                // Bottone PDF se presente
+                let btnAllegato = '';
+                if (prev.file_url) {
+                    btnAllegato = `<a href="${prev.file_url}" target="_blank" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-bold flex items-center gap-1 transition-colors border border-gray-200">📄 Apri PDF</a>`;
+                } else {
+                    btnAllegato = `<span class="text-xs text-gray-400 italic">Nessun allegato</span>`;
+                }
+
+                html += `
+                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="font-bold text-gray-900">${prev.numero}</span>
+                                <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${prev.stato || 'Bozza'}</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Emesso il: ${dataIta} &bull; Importo: <strong class="text-gray-900">${importo}</strong></p>
+                        </div>
+                        <div>
+                            ${btnAllegato}
+                        </div>
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+        }
+
+        // AGGIORNA DATI SCHEDA E STEPPER
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -448,7 +538,7 @@
             }
         }
 
-        // 3. LOGICA MODIFICA DATI FINESTRA (Pulsante in alto a dx)
+        // 3. LOGICA MODIFICA DATI FINESTRA
         function apriModaleModifica() {
             const com = commesseCorrenti[commessaAttivaIndex];
             document.getElementById('mod-com-id').value = com.id;
