@@ -122,7 +122,7 @@
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MENU TABS (Ora con "Ordini Fornitori" al posto giusto) -->
+            <!-- MENU TABS -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
                 <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
@@ -173,7 +173,7 @@
                 <div id="lista-contratti-commessa" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENUTO TAB NUOVO: ORDINI FORNITORI -->
+            <!-- CONTENUTO TAB: ORDINI FORNITORI -->
             <div id="tab-content-ordini" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
@@ -185,7 +185,7 @@
                             <tr>
                                 <th class="px-4 py-3">Fornitore</th>
                                 <th class="px-4 py-3">Materiale</th>
-                                <th class="px-4 py-3">Stato & Consegna</th>
+                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
@@ -210,7 +210,7 @@
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
 
-    <!-- MODALE: GESTISCI ORDINE (Replicato da ordini.html per agire direttamente dalla commessa!) -->
+    <!-- MODALE: GESTISCI ORDINE (Identico all'Ufficio Acquisti ma con Auto-Avanzamento) -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -478,7 +478,6 @@
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
-        // GESTIONE DEI TABS (Adesso include anche Ordini)
         function cambiaTab(tabName) {
             const tabs = ['riepilogo', 'preventivi', 'contratti', 'ordini', 'fatture'];
             
@@ -519,7 +518,7 @@
             document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
         }
 
-        // TAB ORDINI FORNITORI (NUOVO)
+        // TAB ORDINI FORNITORI
         async function caricaOrdiniDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const tbody = document.getElementById('lista-ordini-commessa');
@@ -538,7 +537,7 @@
                 return;
             }
 
-            ordiniCommessaCache = ordini; // Salvo in cache locale per il modal
+            ordiniCommessaCache = ordini; 
             let html = '';
             
             ordini.forEach((ord, i) => {
@@ -569,7 +568,7 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
                         <td class="px-4 py-3 text-gray-700 text-xs">${ord.descrizione}</td>
-                        <td class="px-4 py-3">
+                        <td class="px-4 py-3 w-40">
                             <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${nomeStatoBadge}</span>
                             ${stringaConsegna}
                         </td>
@@ -697,7 +696,8 @@
             divLista.innerHTML = html;
         }
 
-        // AGGIORNAMENTO UI DELLA SCHEDA
+
+        // AGGIORNAMENTO UI DELLA SCHEDA E STEPPER COMMESSA
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -769,6 +769,26 @@
 
         async function cambiaStatoDB(nuovoStato) {
             const com = commesseCorrenti[commessaAttivaIndex];
+
+            // --- CONTROLLO BLOCCO 'IN CONSEGNA' ---
+            if (nuovoStato === 'In Consegna') {
+                const { data: ordini } = await supabaseClient
+                    .from('ordini_fornitori')
+                    .select('stato, contratti!inner(commessa_id)')
+                    .eq('contratti.commessa_id', com.id);
+
+                if (ordini && ordini.length > 0) {
+                    const tuttiConfermati = ordini.every(o => o.stato === 'Ordine confermato ed inviato al Fornitore');
+                    if (!tuttiConfermati) {
+                        alert("⚠️ BLOCCO: Impossibile passare a 'In Consegna'. Tutti gli ordini ai fornitori devono prima essere nello stato 'Ordine Confermato'.");
+                        return;
+                    }
+                } else {
+                    if (!confirm("⚠️ Nessun ordine registrato per questa commessa. Procedere a 'In Consegna' comunque?")) return;
+                }
+            }
+            // --------------------------------------
+
             const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
             if (!error) {
                 await supabaseClient.from('commesse_log').insert([{
@@ -784,7 +804,7 @@
             }
         }
 
-        // --- GESTIONE ORDINE INNESTATO (Replicata per lavorare da dentro la Commessa) ---
+        // --- GESTIONE ORDINE INNESTATO ---
         const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore'];
         let statoPendenteOrdine = '';
         
@@ -933,6 +953,30 @@
                     file_url: fileUrl, 
                     autore: UTENTE_CORRENTE
                 }]);
+
+                // --- CONTROLLO AVANZAMENTO AUTOMATICO A "IN CONSEGNA" ---
+                if (com.stato === 'Ordini') {
+                    const { data: tuttiOrdini } = await supabaseClient
+                        .from('ordini_fornitori')
+                        .select('stato, contratti!inner(commessa_id)')
+                        .eq('contratti.commessa_id', com.id);
+                    
+                    if (tuttiOrdini && tuttiOrdini.length > 0) {
+                        const tuttiConfermati = tuttiOrdini.every(o => o.stato === 'Ordine confermato ed inviato al Fornitore');
+                        if (tuttiConfermati) {
+                            await supabaseClient.from('commesse').update({ stato: 'In Consegna' }).eq('id', com.id);
+                            await supabaseClient.from('commesse_log').insert([{
+                                commessa_id: com.id,
+                                azione: `⚡ Tutti i pre-ordini sono stati confermati! Il cantiere avanza in automatico a: IN CONSEGNA`,
+                                autore: 'Sistema Auto'
+                            }]);
+                            com.stato = 'In Consegna';
+                            aggiornaDatiSchedaUI(); // Aggiorna graficamente lo stepper della commessa live
+                            caricaCommesse(); // Aggiorna elenco retrostante
+                        }
+                    }
+                }
+                // --------------------------------------------------------
 
                 chiudiModaleGestioneOrdine();
                 caricaOrdiniDiQuestaCommessa();
