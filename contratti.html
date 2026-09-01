@@ -70,6 +70,7 @@
                                 <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
                                 <th class="px-6 py-4">Stato Esecutivo</th>
                                 <th class="px-6 py-4">Valore Finale</th>
+                                <th class="px-6 py-4 text-center">Allegato</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-contratti" class="divide-y divide-gray-100">
@@ -106,7 +107,45 @@
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- SEZIONE PRE-ORDINI MULTI-FORNITORE (Visibile attivamente in fase Pre-Ordini o successive) -->
+            <!-- RIEPILOGO DATI E ALLEGATO -->
+            <div class="grid grid-cols-3 gap-6">
+                
+                <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">Riepilogo Contratto</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Cliente</p>
+                            <p class="font-bold text-[#2e2a5b]" id="scheda-cliente">Caricamento...</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Valore Finale</p>
+                            <p class="font-bold text-emerald-600 text-lg" id="scheda-importo">0,00 €</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xs text-gray-500 font-medium mb-1">Commessa di Riferimento</p>
+                            <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
+                        </div>
+                        <div class="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni</p>
+                            <p class="text-sm text-gray-700 italic" id="scheda-annotazioni">Nessuna annotazione.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 w-full text-left">Documento Contratto</h3>
+                    <div id="scheda-box-file" class="w-full flex flex-col items-center gap-3">
+                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-2xl mb-2">📄</div>
+                        <a href="#" id="scheda-link-file" target="_blank" class="w-full block py-2.5 bg-[#2e2a5b] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#3f3a7a] transition-colors">Apri PDF Contratto</a>
+                    </div>
+                    <div id="scheda-nessun-file" class="w-full flex flex-col items-center gap-2 hidden">
+                        <div class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-2xl mb-2">🚫</div>
+                        <p class="text-sm text-gray-500">Nessun file presente</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEZIONE PRE-ORDINI MULTI-FORNITORE -->
             <div id="sezione-preordini" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-3">
                     <div>
@@ -137,28 +176,9 @@
                 </div>
             </div>
 
-            <!-- RIEPILOGO DATI -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">Riepilogo Amministrativo</h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium mb-1">Cliente</p>
-                        <p class="font-bold text-[#2e2a5b]" id="scheda-cliente">Caricamento...</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium mb-1">Valore Finale Contratto</p>
-                        <p class="font-bold text-emerald-600 text-lg" id="scheda-importo">0,00 €</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium mb-1">Commessa Collegata</p>
-                        <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
-                    </div>
-                </div>
-            </div>
-
             <!-- DIARIO / CRONOLOGIA ATTIVITÀ -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Registro Attività Contratto</h3>
+                <h3 class="text-base font-bold text-gray-800 mb-6">Registro Attività e Comunicazioni</h3>
                 <div id="lista-cronologia" class="space-y-4">
                     <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
                 </div>
@@ -221,6 +241,12 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Annotazioni per il registro</label>
                     <textarea id="form-contratto-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Dettagli sullo stato..."></textarea>
                 </div>
+                
+                <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Allega Contratto Firmato / Documento</label>
+                    <p class="text-xs text-gray-500 mb-3">Verrà salvato nella cartella dedicata <code class="bg-gray-100 px-1 py-0.5 rounded text-blue-600">contratti_docs</code>.</p>
+                    <input type="file" id="form-contratto-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                </div>
             </div>
             
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white">
@@ -240,22 +266,37 @@
         let contrattoAttivoIndex = null;
         let listaFornitoriCache = [];
 
-        // 6 Fasi del Contratto
         const sequenzaStatiContratto = ['Da Fare', 'Rilievo Esecutivo', 'Pre-Ordini', 'Stesura', 'Inviato', 'Confermato'];
         let statoPendenteContratto = '';
+
+        // --- GESTIONE UPLOAD FILE NEL BUCKET DEDICATO "contratti_docs" ---
+        async function caricaFileContrattoSuStorage(file) {
+            if (!file) return null;
+            const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+            const fileName = `CONT_${Date.now()}_${cleanFileName}`;
+            
+            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) {
+                alert("Errore upload Storage: " + error.message + ". Assicurati di aver creato il bucket public 'contratti_docs' su Supabase.");
+                return null;
+            }
+            
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
 
         // 1. CARICAMENTO CONTRATTI
         async function caricaContratti() {
             const { data: contratti, error } = await supabaseClient
                 .from('contratti')
-                .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale))')
+                .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale)), preventivi(file_url)')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-contratti');
             const conteggio = document.getElementById('conteggio-contratti');
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore di caricamento dati.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati. Assicurati che le colonne "annotazioni" e "file_url" esistano nella tabella contratti.</td></tr>';
                 return;
             }
 
@@ -264,7 +305,7 @@
             tbody.innerHTML = '';
 
             if (contratti.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessun contratto attivo. Promuovi un preventivo ad "Accettato" per crearne uno!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nessun contratto attivo. Promuovi un preventivo ad "Accettato" per crearne uno!</td></tr>';
                 return;
             }
 
@@ -276,6 +317,9 @@
                 const nomeCliente = (con.commesse && con.commesse.clienti) ? con.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
                 const nomeCantiere = con.commesse ? (con.commesse.nome_cantiere || con.commesse.numero) : 'Commessa eliminata';
                 const valore = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '--';
+                
+                const filePresente = con.file_url || (con.preventivi ? con.preventivi.file_url : null);
+                const iconaFile = filePresente ? '📎' : '';
 
                 let colorStato = 'bg-gray-100 text-gray-700';
                 if (con.stato === 'Rilievo Esecutivo') colorStato = 'bg-purple-100 text-purple-700';
@@ -291,6 +335,7 @@
                     <td class="px-6 py-4 text-gray-600">${nomeCantiere}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${con.stato || 'Da Fare'}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${valore}</td>
+                    <td class="px-6 py-4 text-center text-lg">${iconaFile}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -301,7 +346,7 @@
             contrattoAttivoIndex = index;
             aggiornaDatiSchedaContrattoUI();
             caricaOrdiniContratto(contrattiCorrenti[index].id);
-            caricaCronologiaContratto(contrattiCorrenti[index].id);
+            caricaCronologiaContratto(contrattiCorrenti[index].preventivo_id);
             caricaFornitoriTendina();
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
@@ -331,10 +376,23 @@
             const nomeCliente = (con.commesse && con.commesse.clienti) ? con.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
             const nomeCantiere = con.commesse ? `${con.commesse.numero} - ${con.commesse.nome_cantiere || ''}` : 'Senza Cantiere';
             const importo = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '0,00 €';
-
+            
+            document.getElementById('scheda-annotazioni').innerText = con.annotazioni || 'Nessuna annotazione.';
             document.getElementById('scheda-cliente').innerText = nomeCliente;
             document.getElementById('scheda-commessa').innerText = nomeCantiere;
             document.getElementById('scheda-importo').innerText = importo;
+
+            const fileAttivo = con.file_url || (con.preventivi ? con.preventivi.file_url : null);
+            const boxFile = document.getElementById('scheda-box-file');
+            const noFile = document.getElementById('scheda-nessun-file');
+            if (fileAttivo) {
+                boxFile.classList.remove('hidden');
+                noFile.classList.add('hidden');
+                document.getElementById('scheda-link-file').href = fileAttivo;
+            } else {
+                boxFile.classList.add('hidden');
+                noFile.classList.remove('hidden');
+            }
 
             disegnaStepperContratto(con.stato || 'Da Fare');
         }
@@ -365,7 +423,6 @@
                 container.appendChild(punto);
             });
 
-            // Logica Bottoni di Avanzamento
             if (statoAttuale === 'Da Fare') {
                 azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaStatoContratto('Rilievo Esecutivo')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2.5 rounded-lg shadow-sm transition-colors">Avvia Rilievo Esecutivo &rarr;</button>`;
             } else if (statoAttuale === 'Rilievo Esecutivo') {
@@ -397,7 +454,6 @@
 
         // 3. GESTIONE PRE-ORDINI MULTI-FORNITORE
         async function caricaFornitoriTendina() {
-            // Legge dalla futura tabella fornitori (o rubrica)
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda, categoria').order('nome_azienda');
             if (fornitori) {
                 listaFornitoriCache = fornitori;
@@ -473,11 +529,8 @@
             tbody.innerHTML = html;
         }
 
-        // 4. CONTROLLO DI SICUREZZA PER PASSAGGIO A STESURA
         async function verificaEPassaStesura() {
             const con = contrattiCorrenti[contrattoAttivoIndex];
-            
-            // Controlla se ci sono ordini
             const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', con.id);
             
             if (!ordini || ordini.length === 0) {
@@ -487,11 +540,12 @@
             preparaStatoContratto('Stesura');
         }
 
-        // 5. GESTIONE CAMBIO STATO E DIARIO
+        // 4. GESTIONE CAMBIO STATO E DIARIO
         function preparaStatoContratto(nuovoStato) {
             statoPendenteContratto = nuovoStato;
             document.getElementById('span-nuovo-stato-contratto').innerText = nuovoStato.toUpperCase();
             document.getElementById('form-contratto-nota').value = '';
+            document.getElementById('form-contratto-file').value = '';
             document.getElementById('modal-cambio-stato-contratto').classList.remove('hidden');
         }
 
@@ -501,18 +555,40 @@
         }
 
         async function confermaCambioStatoContratto() {
+            const btnSubmit = document.getElementById('btn-conferma-stato-contratto');
             const nota = document.getElementById('form-contratto-nota').value;
+            const fileInput = document.getElementById('form-contratto-file');
+            
             const con = contrattiCorrenti[contrattoAttivoIndex];
             const nuovoStato = statoPendenteContratto;
 
-            const { error } = await supabaseClient.from('contratti').update({ stato: nuovoStato }).eq('id', con.id);
+            btnSubmit.innerText = "Salvataggio...";
+            btnSubmit.disabled = true;
+
+            let nuovoFileUrl = null;
+            if (fileInput.files.length > 0) {
+                btnSubmit.innerText = "Caricamento file...";
+                nuovoFileUrl = await caricaFileContrattoSuStorage(fileInput.files[0]);
+            }
+
+            let datiAggiornamento = { stato: nuovoStato };
+            if (nuovoFileUrl) {
+                datiAggiornamento.file_url = nuovoFileUrl;
+            }
+            if (nota && !con.annotazioni) {
+                datiAggiornamento.annotazioni = nota;
+            }
+
+            const { error } = await supabaseClient.from('contratti').update(datiAggiornamento).eq('id', con.id);
 
             if (!error) {
-                // Registra nel diario
+                if (nuovoFileUrl) con.file_url = nuovoFileUrl;
+
                 await supabaseClient.from('preventivi_log').insert([{
-                    preventivo_id: con.preventivo_id, // Usiamo lo stesso log collegato al preventivo di origine
+                    preventivo_id: con.preventivo_id,
                     azione: `Contratto aggiornato in: ${nuovoStato.toUpperCase()}`,
                     nota: nota || null,
+                    file_url: nuovoFileUrl,
                     autore: UTENTE_CORRENTE
                 }]);
 
@@ -524,6 +600,9 @@
             } else {
                 alert("Errore aggiornamento: " + error.message);
             }
+
+            btnSubmit.innerText = "Conferma e Salva";
+            btnSubmit.disabled = false;
         }
 
         async function caricaCronologiaContratto(preventivoId) {
@@ -547,6 +626,7 @@
                 const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
 
                 html += `
                     <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
@@ -557,6 +637,7 @@
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat} ${autoreText}</p>
                             </div>
                             ${notaHtml}
+                            ${fileHtml}
                         </div>
                     </div>
                 `;
