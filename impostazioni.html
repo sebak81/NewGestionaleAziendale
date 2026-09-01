@@ -54,49 +54,70 @@
                 <div class="flex justify-between items-center border-b border-gray-100 pb-4">
                     <div>
                         <h2 class="text-lg font-bold text-gray-900">Rubrica Fornitori</h2>
-                        <p class="text-xs text-gray-500">Aziende produttrici e partner commerciali (Serramenti, Zanzariere, ecc.)</p>
+                        <p class="text-xs text-gray-500">Aziende produttrici e partner commerciali con categorie multiple</p>
                     </div>
                 </div>
 
                 <!-- Form Inserimento Nuovo Fornitore -->
-                <form id="form-nuovo-fornitore" class="grid grid-cols-1 sm:grid-cols-5 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 items-end">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label>
-                        <input type="text" id="fornitore-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi">
+                <form id="form-nuovo-fornitore" class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label>
+                            <input type="text" id="fornitore-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Email Ordini</label>
+                            <input type="email" id="fornitore-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="ordini@azienda.it">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Telefono</label>
+                            <input type="text" id="fornitore-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="0331 ...">
+                        </div>
                     </div>
+
+                    <!-- SELEZIONE MULTIPLA CATEGORIE -->
                     <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Categoria Merceologica</label>
-                        <select id="fornitore-categoria" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                            <option value="Serramenti">Serramenti</option>
-                            <option value="Zanzariere">Zanzariere</option>
-                            <option value="Scuri / Tapparelle">Scuri / Tapparelle</option>
-                            <option value="Vetri">Vetri</option>
-                            <option value="Accessori / Maniglie">Accessori / Maniglie</option>
-                            <option value="Altro">Altro</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-600 mb-2">Categorie Merceologiche (Seleziona una o più voci)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-white p-3 border border-gray-200 rounded-lg max-h-48 overflow-y-auto" id="container-categorie-checkbox">
+                            <!-- Inserite via codice o statiche -->
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (PVC/ALU)" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Serramenti (PVC/ALU)</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (PVC/ALU/Legno/Combinati)" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Serramenti (PVC/ALU/Legno/Combinati)</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoncini ALU</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoncini</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Zanzariere" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Zanzariere</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Avvolgibili ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Avvolgibili ALU</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Teli Oscuranti/Filtranti" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Teli Oscuranti/Filtranti</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte a Soffietto" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte a Soffietto</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoni Garage" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoni Garage</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Monoblocchi" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Monoblocchi</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Maniglieria" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Maniglieria</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Lavorazioni in legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Lavorazioni in legno</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri PVC" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri PVC</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri ALU</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri in Legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri in Legno</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Cassonetti in Legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Cassonetti in Legno</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte Interne" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte Interne</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte Blindate" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte Blindate</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Vetreria" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Vetreria</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Ferramenta" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Ferramenta</label>
+                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Pannellature" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Pannellature</label>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Email Ordini</label>
-                        <input type="email" id="fornitore-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="ordini@azienda.it">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Telefono</label>
-                        <input type="text" id="fornitore-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="0331 ...">
-                    </div>
-                    <div>
-                        <button type="submit" id="btn-salva-fornitore" class="w-full bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
-                            + Aggiungi
+
+                    <div class="flex justify-end pt-2">
+                        <button type="submit" id="btn-salva-fornitore" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
+                            + Aggiungi Fornitore
                         </button>
                     </div>
                 </form>
 
                 <!-- Tabella Elenco Fornitori -->
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto pt-2">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
                                 <th class="px-4 py-3">Azienda</th>
-                                <th class="px-4 py-3">Categoria</th>
+                                <th class="px-4 py-3">Categorie</th>
                                 <th class="px-4 py-3">Email Ordini</th>
                                 <th class="px-4 py-3">Telefono</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
@@ -138,10 +159,25 @@
 
             let html = '';
             fornitori.forEach(f => {
+                // Gestione categorie multiple (se salvate come stringa separata da virgole o array)
+                let categorieList = [];
+                if (f.categoria) {
+                    categorieList = f.categoria.includes(',') ? f.categoria.split(',') : [f.categoria];
+                }
+                
+                let categorieBadgeHtml = '';
+                if (categorieList.length > 0) {
+                    categorieList.forEach(cat => {
+                        categorieBadgeHtml += `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1">${cat.trim()}</span>`;
+                    });
+                } else {
+                    categorieBadgeHtml = '<span class="text-gray-400 italic text-xs">Nessuna categoria</span>';
+                }
+
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-4 py-3 font-bold text-gray-900">${f.nome_azienda}</td>
-                        <td class="px-4 py-3"><span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-semibold">${f.categoria || 'Generico'}</span></td>
+                        <td class="px-4 py-3 max-w-xs">${categorieBadgeHtml}</td>
                         <td class="px-4 py-3 text-gray-600">${f.email || '--'}</td>
                         <td class="px-4 py-3 text-gray-600">${f.telefono || '--'}</td>
                         <td class="px-4 py-3 text-center">
@@ -153,15 +189,20 @@
             tbody.innerHTML = html;
         }
 
-        // 2. AGGIUNGI NUOVO FORNITORE
+        // 2. AGGIUNGI NUOVO FORNITORE (CON RACCOLTA CHECKBOX MULTIPLE)
         document.getElementById('form-nuovo-fornitore').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salva-fornitore');
             btn.innerText = "Salvataggio...";
 
+            // Raccogli tutte le categorie spuntate
+            const checkboxes = document.querySelectorAll('input[name="categoria"]:checked');
+            let categorieSelezionate = [];
+            checkboxes.forEach(cb => categorieSelezionate.push(cb.value));
+
             const nuovoFornitore = {
                 nome_azienda: document.getElementById('fornitore-nome').value,
-                categoria: document.getElementById('fornitore-categoria').value,
+                categoria: categorieSelezionate.join(', '), // Salva come stringa unita da virgola
                 email: document.getElementById('fornitore-email').value,
                 telefono: document.getElementById('fornitore-telefono').value
             };
@@ -174,7 +215,7 @@
                 document.getElementById('form-nuovo-fornitore').reset();
                 caricaFornitori();
             }
-            btn.innerText = "+ Aggiungi";
+            btn.innerText = "+ Aggiungi Fornitore";
         });
 
         // 3. ELIMINA FORNITORE
