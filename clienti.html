@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 ESSE - Clienti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800 relative">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
+        <div class="p-6 flex items-center gap-3">
+            <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
+            <span class="font-bold text-lg">3 ESSE</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
+            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Clienti</a>
+            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
+            <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
+            <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
+            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
+            <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
+        </nav>
+        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
+                <div>
+                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
+                    <p class="text-xs text-gray-500 uppercase">Owner</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- SCHERMATA PRINCIPALE (ELENCO CLIENTI) -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="p-8 pb-4">
+            <h1 class="text-xl font-bold">Rubrica Clienti 👥</h1>
+            <p class="text-sm text-gray-500 mt-1">Anagrafica completa e dati di fatturazione</p>
+        </header>
+
+        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
+            <div class="mb-6 flex justify-between items-end">
+                <div>
+                    <h2 class="text-3xl font-bold tracking-tight">Clienti</h2>
+                    <p class="text-sm text-gray-500 mt-1" id="conteggio-clienti">Caricamento in corso...</p>
+                </div>
+                <button onclick="apriModaleCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                    <span>+</span> Nuovo Cliente
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1 relative">
+                        <input type="text" id="input-ricerca" onkeyup="filtraClienti()" placeholder="Cerca per nome, P.IVA o email..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-4">Ragione Sociale / Nome</th>
+                                <th class="px-6 py-4">Contatti</th>
+                                <th class="px-6 py-4">Città / Indirizzo</th>
+                                <th class="px-6 py-4">P.IVA / Cod.Fiscale</th>
+                                <th class="px-6 py-4 text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabella-clienti" class="divide-y divide-gray-100">
+                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Caricamento clienti...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODALE GESTIONE CLIENTE (Z-50) ================= -->
+    <div id="modal-cliente" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="modale-titolo">Nuovo Cliente</h3>
+                    <p class="text-xs text-gray-500">Inserisci i dati anagrafici e fiscali</p>
+                </div>
+                <button type="button" onclick="chiudiModaleCliente()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 space-y-6 overflow-y-auto no-scrollbar">
+                <form id="form-cliente" class="space-y-6">
+                    <input type="hidden" id="cli-id">
+                    
+                    <!-- Dati Base -->
+                    <div>
+                        <h4 class="text-xs font-bold text-[#2e2a5b] uppercase tracking-wider mb-3 border-b border-gray-100 pb-1">Dati Generali</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Nome / Ragione Sociale *</label>
+                                <input type="text" id="cli-nome" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-900">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
+                                <input type="text" id="cli-telefono" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Email Ufficiale</label>
+                                <input type="email" id="cli-email" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indirizzo -->
+                    <div>
+                        <h4 class="text-xs font-bold text-[#2e2a5b] uppercase tracking-wider mb-3 border-b border-gray-100 pb-1">Sede e Indirizzo</h4>
+                        <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12 md:col-span-12">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo (Via/Piazza, Civico)</label>
+                                <input type="text" id="cli-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div class="col-span-12 md:col-span-6">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Città</label>
+                                <input type="text" id="cli-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div class="col-span-6 md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">CAP</label>
+                                <input type="text" id="cli-cap" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            </div>
+                            <div class="col-span-6 md:col-span-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Provincia (Sigla)</label>
+                                <input type="text" id="cli-provincia" maxlength="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none uppercase text-center" placeholder="MI">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dati Fatturazione Elettronica -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-200 pb-1">Dati per Fatturazione Elettronica</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Partita IVA</label>
+                                <input type="text" id="cli-piva" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Codice Fiscale</label>
+                                <input type="text" id="cli-cf" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-medium uppercase">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo PEC</label>
+                                <input type="email" id="cli-pec" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none text-blue-700">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Codice Destinatario (SDI)</label>
+                                <input type="text" id="cli-sdi" maxlength="7" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold tracking-widest text-center uppercase" placeholder="XXXXXXX">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
+                <button type="button" onclick="chiudiModaleCliente()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="submit" form="form-cliente" id="btn-salva-cliente" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Salva Cliente</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+
+    <script>
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let clientiCache = [];
+
+        // 1. CARICAMENTO CLIENTI
+        async function caricaClienti() {
+            const { data: clienti, error } = await supabaseClient
+                .from('clienti')
+                .select('*')
+                .order('nome_ragione_sociale', { ascending: true });
+
+            const tbody = document.getElementById('tabella-clienti');
+            const conteggio = document.getElementById('conteggio-clienti');
+
+            if (error) { 
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore caricamento dati dal server.</td></tr>'; 
+                return; 
+            }
+
+            clientiCache = clienti || [];
+            conteggio.innerText = `${clientiCache.length} clienti registrati`;
+            disegnaTabella(clientiCache);
+        }
+
+        // Funzione per disegnare la tabella (usata anche dal filtro ricerca)
+        function disegnaTabella(arrayClienti) {
+            const tbody = document.getElementById('tabella-clienti');
+            tbody.innerHTML = '';
+
+            if (arrayClienti.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato.</td></tr>';
+                return;
+            }
+
+            arrayClienti.forEach(c => {
+                const telefono = c.telefono ? `📞 ${c.telefono}` : '';
+                const email = c.email ? `✉️ ${c.email}` : '';
+                const contattiHtml = [telefono, email].filter(Boolean).join('<br>') || '<span class="text-gray-300 italic">Nessun recapito</span>';
+
+                const piva_cf = [c.partita_iva, c.codice_fiscale].filter(Boolean).join(' / ') || '--';
+                
+                const indirizzoCompleto = [c.indirizzo, c.citta, c.provincia].filter(Boolean).join(', ') || '--';
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition-colors';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-bold text-gray-900">${c.nome_ragione_sociale}</td>
+                    <td class="px-6 py-4 text-xs text-gray-600">${contattiHtml}</td>
+                    <td class="px-6 py-4 text-xs text-gray-600">${indirizzoCompleto}</td>
+                    <td class="px-6 py-4 text-xs font-medium text-gray-700 uppercase">${piva_cf}</td>
+                    <td class="px-6 py-4 text-center whitespace-nowrap">
+                        <button onclick="apriModaleCliente(${c.id})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors shadow-sm mr-1">✏️ Modifica</button>
+                        <button onclick="eliminaCliente(${c.id})" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold transition-colors shadow-sm" title="Elimina">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // RICERCA IN TEMPO REALE
+        function filtraClienti() {
+            const query = document.getElementById('input-ricerca').value.toLowerCase();
+            const clientiFiltrati = clientiCache.filter(c => 
+                (c.nome_ragione_sociale && c.nome_ragione_sociale.toLowerCase().includes(query)) ||
+                (c.partita_iva && c.partita_iva.toLowerCase().includes(query)) ||
+                (c.email && c.email.toLowerCase().includes(query))
+            );
+            disegnaTabella(clientiFiltrati);
+        }
+
+        // 2. GESTIONE MODALE (APRI/CHIUDI E SALVA)
+        function apriModaleCliente(id = null) {
+            document.getElementById('form-cliente').reset();
+            document.getElementById('cli-id').value = '';
+
+            if (id) {
+                document.getElementById('modale-titolo').innerText = "Modifica Cliente";
+                const c = clientiCache.find(x => x.id == id);
+                if (c) {
+                    document.getElementById('cli-id').value = c.id;
+                    document.getElementById('cli-nome').value = c.nome_ragione_sociale || '';
+                    document.getElementById('cli-telefono').value = c.telefono || '';
+                    document.getElementById('cli-email').value = c.email || '';
+                    document.getElementById('cli-indirizzo').value = c.indirizzo || '';
+                    document.getElementById('cli-citta').value = c.citta || '';
+                    document.getElementById('cli-cap').value = c.cap || '';
+                    document.getElementById('cli-provincia').value = c.provincia || '';
+                    document.getElementById('cli-piva').value = c.partita_iva || '';
+                    document.getElementById('cli-cf').value = c.codice_fiscale || '';
+                    document.getElementById('cli-pec').value = c.pec || '';
+                    document.getElementById('cli-sdi').value = c.codice_sdi || '';
+                }
+            } else {
+                document.getElementById('modale-titolo').innerText = "Nuovo Cliente";
+            }
+
+            document.getElementById('modal-cliente').classList.remove('hidden');
+        }
+
+        function chiudiModaleCliente() {
+            document.getElementById('modal-cliente').classList.add('hidden');
+        }
+
+        document.getElementById('form-cliente').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salva-cliente');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const id = document.getElementById('cli-id').value;
+            
+            const datiCliente = {
+                nome_ragione_sociale: document.getElementById('cli-nome').value,
+                telefono: document.getElementById('cli-telefono').value || null,
+                email: document.getElementById('cli-email').value || null,
+                indirizzo: document.getElementById('cli-indirizzo').value || null,
+                citta: document.getElementById('cli-citta').value || null,
+                cap: document.getElementById('cli-cap').value || null,
+                provincia: document.getElementById('cli-provincia').value.toUpperCase() || null,
+                partita_iva: document.getElementById('cli-piva').value || null,
+                codice_fiscale: document.getElementById('cli-cf').value.toUpperCase() || null,
+                pec: document.getElementById('cli-pec').value || null,
+                codice_sdi: document.getElementById('cli-sdi').value.toUpperCase() || null
+            };
+
+            let error;
+            if (id) {
+                // Aggiornamento
+                const res = await supabaseClient.from('clienti').update(datiCliente).eq('id', id);
+                error = res.error;
+            } else {
+                // Inserimento
+                const res = await supabaseClient.from('clienti').insert([datiCliente]);
+                error = res.error;
+            }
+
+            if (!error) {
+                chiudiModaleCliente();
+                caricaClienti();
+            } else {
+                alert("Errore salvataggio: " + error.message);
+            }
+
+            btn.innerText = "Salva Cliente";
+            btn.disabled = false;
+        });
+
+        // 3. ELIMINAZIONE CLIENTE
+        async function eliminaCliente(id) {
+            // Controllo basico per evitare di cancellare clienti con commesse collegate
+            // In un database reale "Cascade" o "Restrict" farà il lavoro sporco.
+            if(!confirm("ATTENZIONE: Sei sicuro di voler eliminare questo cliente? L'operazione è irreversibile e potrebbe fallire se ci sono commesse o preventivi legati a lui.")) return;
+
+            const { error } = await supabaseClient.from('clienti').delete().eq('id', id);
+            if (!error) {
+                caricaClienti();
+            } else {
+                alert("Impossibile eliminare il cliente. Probabilmente ha già delle commesse aperte o dei preventivi associati. \n\nDettaglio: " + error.message);
+            }
+        }
+
+        // INIT
+        document.addEventListener('DOMContentLoaded', caricaClienti);
+    </script>
+</body>
+</html>
