@@ -11,8 +11,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .input-read-only:disabled { background-color: transparent; border-color: transparent; color: #111827; font-weight: 500; padding-left: 0; appearance: none; -webkit-appearance: none; }
-        .input-read-only:disabled + .select-icon { display: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
@@ -155,9 +153,19 @@
                 </div>
             </div>
 
-            <!-- DIARIO / CRONOLOGIA ATTIVITÀ -->
+            <!-- DIARIO / CRONOLOGIA GLOBALE COMMESSA -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Registro Attività e Comunicazioni</h3>
+                <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
+                <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include telefonate, avanzamenti del preventivo e dei futuri contratti collegati a questo cantiere.</p>
+                
+                <!-- INPUT NOTA RAPIDA MANUALE -->
+                <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente (es. Chiamato, mi ha detto che...)" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                    <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
+                        Aggiungi Nota
+                    </button>
+                </div>
+
                 <div id="lista-cronologia" class="space-y-4">
                     <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
                 </div>
@@ -294,7 +302,7 @@
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
-                <button type="button" onclick="chiudiModaleModifica()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Annulla</button>
                 <button type="submit" id="btn-submit-modifica" form="form-modifica-preventivo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
             </div>
         </div>
@@ -362,7 +370,7 @@
         async function caricaPreventivi() {
             const { data: preventivi, error } = await supabaseClient
                 .from('preventivi')
-                .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale))')
+                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-preventivi');
@@ -387,7 +395,7 @@
                 const dataIta = prev.data_emissione ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
                 const iconaFile = prev.file_url ? '📎' : '';
 
-                let colorStato = 'bg-gray-100 text-gray-700';
+                let colorStato = 'bg-gray-100 text-gray-700'; // Bozza
                 if (prev.stato === 'Calcoli / Richieste') colorStato = 'bg-purple-100 text-purple-700';
                 if (prev.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
                 if (prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
@@ -411,7 +419,11 @@
         function apriSchedaPreventivo(index) {
             preventivoAttivoIndex = index;
             aggiornaDatiSchedaUI();
-            caricaCronologia(preventiviCorrenti[index].id); 
+            
+            // ATTENZIONE: Ora carichiamo il diario passandogli l'ID della COMMESSA, non del preventivo!
+            const commessaId = preventiviCorrenti[index].commessa_id;
+            caricaCronologia(commessaId); 
+            
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
         }
@@ -480,8 +492,6 @@
                 punto.className = 'flex flex-col items-center gap-2 bg-white px-2 z-10';
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                
-                // Se l'indice è minore OPPURE se siamo arrivati all'ultimo stato ("Accettato") e questo è il punto finale, diventa verde con spunta!
                 if (index < currentIdx || (statoAttuale === 'Accettato' && index === currentIdx)) {
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md font-bold">✓</div>`;
                 } else if (index === currentIdx) {
@@ -492,6 +502,8 @@
                 punto.innerHTML = `${iconaHTML}<span class="text-[10px] mt-1 uppercase tracking-wider text-center w-24 leading-tight ${textColor}">${stato}</span>`;
                 container.appendChild(punto);
             });
+
+            const btnAnnulla = `<button onclick="preparaCambioStatoPrev('Rifiutato')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-4 py-2.5 rounded-lg shadow-sm transition-colors">❌ Annulla / Rifiuta</button>`;
 
             if (statoAttuale === 'Bozza') {
                 azioniBox.innerHTML = `
@@ -580,9 +592,10 @@
                     }
                 }
 
-                await supabaseClient.from('preventivi_log').insert([{
-                    preventivo_id: prev.id,
-                    azione: `Stato aggiornato in: ${nuovoStato.toUpperCase()}`,
+                // ATTENZIONE: Inserimento nella nuova tabella COMMESSE_LOG
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: prev.commessa_id,
+                    azione: `Preventivo aggiornato in: ${nuovoStato.toUpperCase()}`,
                     nota: notaUtente || null,
                     file_url: nuovoFileUrl,
                     autore: UTENTE_CORRENTE
@@ -593,7 +606,7 @@
 
                 chiudiModaleCambioStato();
                 aggiornaDatiSchedaUI();
-                caricaCronologia(prev.id); 
+                caricaCronologia(prev.commessa_id); 
                 caricaPreventivi(); 
             } else {
                 alert("Errore cambio stato: " + error.message);
@@ -603,18 +616,43 @@
             btnSubmit.disabled = false;
         }
 
-        async function caricaCronologia(preventivoId) {
+        // --- GESTIONE NOTA MANUALE ---
+        async function salvaNotaLibera() {
+            const inputNota = document.getElementById('input-nota-libera');
+            const testo = inputNota.value;
+            
+            if (!testo || testo.trim() === '') return;
+
+            const prev = preventiviCorrenti[preventivoAttivoIndex];
+            
+            const { error } = await supabaseClient.from('commesse_log').insert([{
+                commessa_id: prev.commessa_id,
+                azione: "Comunicazione / Appunto Manuale",
+                nota: testo,
+                autore: UTENTE_CORRENTE
+            }]);
+
+            if (!error) {
+                inputNota.value = '';
+                caricaCronologia(prev.commessa_id);
+            } else {
+                alert("Errore salvataggio nota: " + error.message);
+            }
+        }
+
+        // CARICA IL DIARIO (CRONOLOGIA GLOBALE DALLA NUOVA TABELLA)
+        async function caricaCronologia(commessaId) {
             const divLog = document.getElementById('lista-cronologia');
-            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
 
             const { data: logs, error } = await supabaseClient
-                .from('preventivi_log')
+                .from('commesse_log')
                 .select('*')
-                .eq('preventivo_id', preventivoId)
+                .eq('commessa_id', commessaId)
                 .order('created_at', { ascending: false });
 
             if (error || !logs || logs.length === 0) {
-                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata.</p>';
+                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata in questa commessa.</p>';
                 return;
             }
 
@@ -627,9 +665,15 @@
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
                 const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
 
+                // Seleziona l'icona in base al tipo di azione
+                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
+                if (log.azione === "Comunicazione / Appunto Manuale") {
+                    icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                }
+
                 html += `
                     <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                        <div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>
+                        ${icona}
                         <div class="flex-1">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
                                 <p class="text-sm font-bold text-gray-900">${log.azione}</p>
@@ -673,8 +717,10 @@
 
             btnSubmit.innerText = "Salvataggio dati...";
 
+            const commessaSelezionata = document.getElementById('form-prev-commessa').value;
+
             const nuovoPreventivo = {
-                commessa_id: document.getElementById('form-prev-commessa').value,
+                commessa_id: commessaSelezionata,
                 numero: document.getElementById('form-prev-numero').value,
                 data_emissione: document.getElementById('form-prev-data').value,
                 stato: 'Bozza', 
@@ -690,9 +736,9 @@
                 btnSubmit.innerText = "Salva in Bozza";
             } else {
                 if(result && result.length > 0) {
-                    await supabaseClient.from('preventivi_log').insert([{ 
-                        preventivo_id: result[0].id, 
-                        azione: `Creato nuovo preventivo in BOZZA`, 
+                    await supabaseClient.from('commesse_log').insert([{ 
+                        commessa_id: commessaSelezionata, 
+                        azione: `Creato nuovo preventivo (PREV) in BOZZA`, 
                         file_url: fileUrl,
                         autore: UTENTE_CORRENTE
                     }]);
@@ -720,6 +766,7 @@
             e.preventDefault();
             const btnSubmit = document.getElementById('btn-submit-modifica');
             const id = document.getElementById('mod-prev-id').value;
+            const prev = preventiviCorrenti[preventivoAttivoIndex];
             
             const datiAggiornati = {
                 data_emissione: document.getElementById('mod-prev-data').value,
@@ -730,15 +777,15 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornati).eq('id', id);
 
             if (!error) {
-                await supabaseClient.from('preventivi_log').insert([{ 
-                    preventivo_id: id, 
-                    azione: `Dati anagrafici base aggiornati dall'utente`,
+                await supabaseClient.from('commesse_log').insert([{ 
+                    commessa_id: prev.commessa_id, 
+                    azione: `Dati anagrafici preventivo aggiornati dall'utente`,
                     autore: UTENTE_CORRENTE
                 }]);
                 chiudiModaleModifica();
                 Object.assign(preventiviCorrenti[preventivoAttivoIndex], datiAggiornati);
                 aggiornaDatiSchedaUI();
-                caricaCronologia(id);
+                caricaCronologia(prev.commessa_id);
                 caricaPreventivi();
             }
         });
