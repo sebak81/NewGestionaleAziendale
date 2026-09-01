@@ -44,82 +44,32 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
             <h1 class="text-xl font-bold">Impostazioni & Anagrafiche ⚙️</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione fornitori, categorie e parametri del sistema</p>
+            <p class="text-sm text-gray-500 mt-1">Gestione fornitori, reparti e rubrica aziendale</p>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar max-w-6xl w-full">
+        <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar max-w-7xl w-full">
             
             <!-- SEZIONE FORNITORI -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-4">
                     <div>
-                        <h2 class="text-lg font-bold text-gray-900">Rubrica Fornitori</h2>
-                        <p class="text-xs text-gray-500">Aziende produttrici e partner commerciali con categorie multiple</p>
+                        <h2 class="text-lg font-bold text-gray-900">Rubrica Fornitori & Reparti</h2>
+                        <p class="text-xs text-gray-500">Gestisci i partner commerciali e i relativi referenti interni</p>
                     </div>
+                    <button onclick="apriModaleFornitore()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                        <span>+</span> Nuovo Fornitore
+                    </button>
                 </div>
 
-                <!-- Form Inserimento Nuovo Fornitore -->
-                <form id="form-nuovo-fornitore" class="bg-gray-50 p-5 rounded-xl border border-gray-100 space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label>
-                            <input type="text" id="fornitore-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Email Ordini</label>
-                            <input type="email" id="fornitore-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="ordini@azienda.it">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Telefono</label>
-                            <input type="text" id="fornitore-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="0331 ...">
-                        </div>
-                    </div>
-
-                    <!-- SELEZIONE MULTIPLA CATEGORIE -->
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-2">Categorie Merceologiche (Seleziona una o più voci)</label>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-white p-3 border border-gray-200 rounded-lg max-h-48 overflow-y-auto" id="container-categorie-checkbox">
-                            <!-- Inserite via codice o statiche -->
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (PVC/ALU)" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Serramenti (PVC/ALU)</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (PVC/ALU/Legno/Combinati)" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Serramenti (PVC/ALU/Legno/Combinati)</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoncini ALU</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoncini</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Zanzariere" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Zanzariere</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Avvolgibili ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Avvolgibili ALU</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Teli Oscuranti/Filtranti" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Teli Oscuranti/Filtranti</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte a Soffietto" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte a Soffietto</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoni Garage" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Portoni Garage</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Monoblocchi" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Monoblocchi</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Maniglieria" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Maniglieria</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Lavorazioni in legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Lavorazioni in legno</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri PVC" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri PVC</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri ALU" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri ALU</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri in Legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Scuri in Legno</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Cassonetti in Legno" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Cassonetti in Legno</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte Interne" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte Interne</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte Blindate" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Porte Blindate</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Vetreria" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Vetreria</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Ferramenta" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Ferramenta</label>
-                            <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Pannellature" class="rounded text-[#2e2a5b] focus:ring-[#2e2a5b]"> Pannellature</label>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end pt-2">
-                        <button type="submit" id="btn-salva-fornitore" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
-                            + Aggiungi Fornitore
-                        </button>
-                    </div>
-                </form>
-
                 <!-- Tabella Elenco Fornitori -->
-                <div class="overflow-x-auto pt-2">
+                <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
-                                <th class="px-4 py-3">Azienda</th>
+                                <th class="px-4 py-3">Azienda / Sede</th>
                                 <th class="px-4 py-3">Categorie</th>
-                                <th class="px-4 py-3">Email Ordini</th>
-                                <th class="px-4 py-3">Telefono</th>
+                                <th class="px-4 py-3">Contatti Generali</th>
+                                <th class="px-4 py-3">Referenti / Reparti</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
@@ -133,100 +83,326 @@
         </div>
     </main>
 
+    <!-- ================= MODALE GESTIONE FORNITORE & REFERENTI (Z-50) ================= -->
+    <div id="modal-fornitore" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col my-auto">
+            
+            <!-- Intestazione Modale -->
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="modale-titolo">Scheda Fornitore</h3>
+                    <p class="text-xs text-gray-500">Inserisci i dati aziendali e i referenti per reparto</p>
+                </div>
+                <button type="button" onclick="chiudiModaleFornitore()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <!-- Corpo Modale -->
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
+                <form id="form-fornitore" class="space-y-6">
+                    <input type="hidden" id="fornitore-id">
+
+                    <!-- Dati Anagrafici Generali -->
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">1. Informazioni Aziendali</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label>
+                                <input type="text" id="f-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi SRL">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede</label>
+                                <input type="text" id="f-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Via Roma 10">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Città</label>
+                                <input type="text" id="f-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Milano (MI)">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tel. Azienda</label>
+                                    <input type="text" id="f-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="02 ...">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Email Azienda</label>
+                                    <input type="email" id="f-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="info@...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Categorie Multiple -->
+                        <div class="pt-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-2">Categorie Merceologiche Trattate</label>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-50 p-3 border border-gray-200 rounded-lg max-h-36 overflow-y-auto" id="container-categorie-checkbox">
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (PVC/ALU)" class="rounded text-[#2e2a5b]"> Serramenti (PVC/ALU)</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Serramenti (Combinati)" class="rounded text-[#2e2a5b]"> Serramenti (Combinati)</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini ALU" class="rounded text-[#2e2a5b]"> Portoncini ALU</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoncini" class="rounded text-[#2e2a5b]"> Portoncini</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Zanzariere" class="rounded text-[#2e2a5b]"> Zanzariere</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Avvolgibili ALU" class="rounded text-[#2e2a5b]"> Avvolgibili ALU</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Teli Oscuranti/Filtranti" class="rounded text-[#2e2a5b]"> Teli Oscuranti</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte a Soffietto" class="rounded text-[#2e2a5b]"> Porte a Soffietto</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Portoni Garage" class="rounded text-[#2e2a5b]"> Portoni Garage</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Monoblocchi" class="rounded text-[#2e2a5b]"> Monoblocchi</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Maniglieria" class="rounded text-[#2e2a5b]"> Maniglieria</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Lavorazioni in legno" class="rounded text-[#2e2a5b]"> Lavorazioni legno</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Scuri PVC/ALU/Legno" class="rounded text-[#2e2a5b]"> Scuri (Tutti)</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Cassonetti in Legno" class="rounded text-[#2e2a5b]"> Cassonetti Legno</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Porte Interne/Blindate" class="rounded text-[#2e2a5b]"> Porte Interne/Blindate</label>
+                                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer"><input type="checkbox" name="categoria" value="Vetreria / Ferramenta" class="rounded text-[#2e2a5b]"> Vetreria / Ferramenta</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sotto-Tabella Referenti Dinamici -->
+                    <div class="space-y-3 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Elenco Referenti & Reparti</h4>
+                                <p class="text-[11px] text-gray-500">Aggiungi i contatti specifici (es. Ufficio Ordini, Amministrazione, Assistenza)</p>
+                            </div>
+                            <button type="button" onclick="aggiungiRigaReferente()" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-bold transition-colors flex items-center gap-1">
+                                <span>+</span> Aggiungi Referente
+                            </button>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-xl overflow-hidden">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-gray-50 text-gray-500 uppercase font-semibold">
+                                    <tr>
+                                        <th class="p-2.5">Nome Referente</th>
+                                        <th class="p-2.5">Reparto / Mansione</th>
+                                        <th class="p-2.5">Telefono Diretto</th>
+                                        <th class="p-2.5">Email Diretta</th>
+                                        <th class="p-2.5 text-center w-12">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabella-referenti-dinamica" class="divide-y divide-gray-100 bg-white">
+                                    <!-- Righe dinamiche iniettate via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer Modale -->
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+                <button type="button" onclick="chiudiModaleFornitore()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="submit" form="form-fornitore" id="btn-salva-fornitore-def" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Fornitore</button>
+            </div>
+        </div>
+    </div>
+
     <script src="config.js"></script>
 
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 1. CARICAMENTO FORNITORI IN TABELLA
+        // 1. CARICAMENTO FORNITORI E LORO REFERENTI
         async function caricaFornitori() {
             const { data: fornitori, error } = await supabaseClient
                 .from('fornitori')
-                .select('*')
+                .select('*, fornitori_referenti(*)')
                 .order('nome_azienda', { ascending: true });
 
             const tbody = document.getElementById('tabella-fornitori');
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-red-500">Errore nel caricamento della tabella fornitori.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-red-500">Errore di connessione a Supabase.</td></tr>';
                 return;
             }
 
             if (!fornitori || fornitori.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun fornitore registrato. Inserisci il primo qui sopra!</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun fornitore registrato. Clicca su "+ Nuovo Fornitore" in alto.</td></tr>';
                 return;
             }
 
             let html = '';
+            fornitori.then = fornitori; // alias
             fornitori.forEach(f => {
-                // Gestione categorie multiple (se salvate come stringa separata da virgole o array)
-                let categorieList = [];
-                if (f.categoria) {
-                    categorieList = f.categoria.includes(',') ? f.categoria.split(',') : [f.categoria];
-                }
-                
+                // Badge categorie
+                let categorieList = f.categoria ? (f.categoria.includes(',') ? f.categoria.split(',') : [f.categoria]) : [];
                 let categorieBadgeHtml = '';
-                if (categorieList.length > 0) {
-                    categorieList.forEach(cat => {
-                        categorieBadgeHtml += `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1">${cat.trim()}</span>`;
+                categorieList.forEach(cat => {
+                    categorieBadgeHtml += `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1">${cat.trim()}</span>`;
+                });
+
+                // Dati generali azienda
+                const indirizzoCitta = [f.indirizzo, f.citta].filter(Boolean).join(' - ') || '--';
+                const contattiGen = `<div class="text-xs text-gray-600">📞 ${f.telefono || 'N/D'}</div><div class="text-xs text-gray-600">✉️ ${f.email || 'N/D'}</div><div class="text-[11px] text-gray-400 mt-0.5">📍 ${indirizzoCitta}</div>`;
+
+                // Elenco Referenti
+                let referentiHtml = '';
+                if (f.fornitori_referenti && f.fornitori_referenti.length > 0) {
+                    referentiHtml = '<div class="space-y-1.5">';
+                    f.fornitori_referenti.forEach(ref => {
+                        referentiHtml += `
+                            <div class="bg-gray-50 p-2 rounded-lg border border-gray-100 text-xs">
+                                <span class="font-bold text-gray-900">${ref.nome_referente}</span> 
+                                <span class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-semibold text-[10px]">${ref.mansione_reparto || 'Generico'}</span>
+                                <div class="text-gray-500 text-[11px] mt-0.5">📞 ${ref.telefono || '--'} &bull; ✉️ ${ref.email || '--'}</div>
+                            </div>
+                        `;
                     });
+                    referentiHtml += '</div>';
                 } else {
-                    categorieBadgeHtml = '<span class="text-gray-400 italic text-xs">Nessuna categoria</span>';
+                    referentiHtml = '<span class="text-gray-400 italic text-xs">Nessun referente specificato</span>';
                 }
 
                 html += `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 font-bold text-gray-900">${f.nome_azienda}</td>
-                        <td class="px-4 py-3 max-w-xs">${categorieBadgeHtml}</td>
-                        <td class="px-4 py-3 text-gray-600">${f.email || '--'}</td>
-                        <td class="px-4 py-3 text-gray-600">${f.telefono || '--'}</td>
-                        <td class="px-4 py-3 text-center">
-                            <button onclick="eliminaFornitore(${f.id})" class="text-red-400 hover:text-red-600 font-bold text-sm px-2 py-1 transition-colors" title="Elimina fornitore">&times;</button>
+                    <tr class="hover:bg-gray-50 transition-colors align-top">
+                        <td class="px-4 py-4 font-bold text-gray-900">
+                            ${f.nome_azienda}
+                            <div class="mt-2 flex gap-2">
+                                <button onclick="apriModaleFornitore(${f.id})" class="text-xs font-semibold text-[#2e2a5b] hover:underline">✏️ Modifica</button>
+                                <button onclick="eliminaFornitore(${f.id})" class="text-xs font-semibold text-red-500 hover:underline">🗑️ Elimina</button>
+                            </div>
                         </td>
+                        <td class="px-4 py-4 max-w-xs">${categorieBadgeHtml || '--'}</td>
+                        <td class="px-4 py-4">${contattiGen}</td>
+                        <td class="px-4 py-4">${referentiHtml}</td>
+                        <td class="px-4 py-4 text-center"></td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
         }
 
-        // 2. AGGIUNGI NUOVO FORNITORE (CON RACCOLTA CHECKBOX MULTIPLE)
-        document.getElementById('form-nuovo-fornitore').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-salva-fornitore');
-            btn.innerText = "Salvataggio...";
+        // 2. GESTIONE MODALE (APRI/CHIUDI E SALVA)
+        async function apriModaleFornitore(id = null) {
+            document.getElementById('form-fornitore').reset();
+            document.getElementById('fornitore-id').value = '';
+            document.getElementById('tabella-referenti-dinamica').innerHTML = '';
+            
+            // Deseleziona tutte le checkbox categorie
+            document.querySelectorAll('input[name="categoria"]').forEach(cb => cb.checked = false);
 
-            // Raccogli tutte le categorie spuntate
+            if (id) {
+                document.getElementById('modale-titolo').innerText = "Modifica Fornitore & Referenti";
+                
+                // Carica dati azienda
+                const { data: f } = await supabaseClient.from('fornitori').select('*').eq('id', id).single();
+                if (f) {
+                    document.getElementById('fornitore-id').value = f.id;
+                    document.getElementById('f-nome').value = f.nome_azienda || '';
+                    document.getElementById('f-indirizzo').value = f.indirizzo || '';
+                    document.getElementById('f-citta').value = f.citta || '';
+                    document.getElementById('f-telefono').value = f.telefono || '';
+                    document.getElementById('f-email').value = f.email || '';
+
+                    // Spunta categorie
+                    if (f.categoria) {
+                        const cats = f.categoria.split(',').map(c => c.trim());
+                        document.querySelectorAll('input[name="categoria"]').forEach(cb => {
+                            if (cats.includes(cb.value)) cb.checked = true;
+                        });
+                    }
+                }
+
+                // Carica referenti collegati
+                const { data: refs } = await supabaseClient.from('fornitori_referenti').select('*').eq('fornitore_id', id);
+                if (refs && refs.length > 0) {
+                    refs.forEach(r => aggiungiRigaReferente(r.nome_referente, r.mansione_reparto, r.telefono, r.email));
+                }
+            } else {
+                document.getElementById('modale-titolo').innerText = "Nuovo Fornitore";
+                aggiungiRigaReferente(); // Aggiunge una riga vuota di default
+            }
+
+            document.getElementById('modal-fornitore').classList.remove('hidden');
+        }
+
+        function chiudiModaleFornitore() {
+            document.getElementById('modal-fornitore').classList.add('hidden');
+        }
+
+        // 3. TABELLA DINAMICA REFERENTI NELLA MODALE
+        function aggiungiRigaReferente(nome = '', reparto = '', tel = '', email = '') {
+            const tbody = document.getElementById('tabella-referenti-dinamica');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-2"><input type="text" class="ref-nome w-full px-2 py-1.5 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-[#2e2a5b]" placeholder="Mario Rossi" value="${nome}"></td>
+                <td class="p-2"><input type="text" class="ref-reparto w-full px-2 py-1.5 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-[#2e2a5b]" placeholder="Ufficio Ordini" value="${reparto}"></td>
+                <td class="p-2"><input type="text" class="ref-tel w-full px-2 py-1.5 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-[#2e2a5b]" placeholder="333..." value="${tel}"></td>
+                <td class="p-2"><input type="email" class="ref-email w-full px-2 py-1.5 border border-gray-200 rounded text-xs outline-none focus:ring-1 focus:ring-[#2e2a5b]" placeholder="mario@..." value="${email}"></td>
+                <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 font-bold text-base">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        // 4. SALVATAGGIO COMPLESSIVO (AZIENDA + REFERENTI)
+        document.getElementById('form-fornitore').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salva-fornitore-def');
+            btn.innerText = "Salvataggio in corso...";
+            btn.disabled = true;
+
+            const idEsistente = document.getElementById('fornitore-id').value;
+
+            // Raccogli categorie
             const checkboxes = document.querySelectorAll('input[name="categoria"]:checked');
             let categorieSelezionate = [];
             checkboxes.forEach(cb => categorieSelezionate.push(cb.value));
 
-            const nuovoFornitore = {
-                nome_azienda: document.getElementById('fornitore-nome').value,
-                categoria: categorieSelezionate.join(', '), // Salva come stringa unita da virgola
-                email: document.getElementById('fornitore-email').value,
-                telefono: document.getElementById('fornitore-telefono').value
+            const datiFornitore = {
+                nome_azienda: document.getElementById('f-nome').value,
+                indirizzo: document.getElementById('f-indirizzo').value,
+                citta: document.getElementById('f-citta').value,
+                telefono: document.getElementById('f-telefono').value,
+                email: document.getElementById('f-email').value,
+                categoria: categorieSelezionate.join(', ')
             };
 
-            const { error } = await supabaseClient.from('fornitori').insert([nuovoFornitore]);
+            let fornitoreId = idEsistente;
 
-            if (error) {
-                alert("Errore durante il salvataggio: " + error.message);
+            if (idEsistente) {
+                // Aggiorna Azienda
+                await supabaseClient.from('fornitori').update(datiFornitore).eq('id', idEsistente);
+                // Cancella i vecchi referenti per ricaricare i nuovi puliti
+                await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', idEsistente);
             } else {
-                document.getElementById('form-nuovo-fornitore').reset();
-                caricaFornitori();
+                // Inserisci Nuova Azienda
+                const { data: nuovoF, error: errF } = await supabaseClient.from('fornitori').insert([datiFornitore]).select();
+                if (errF) { alert("Errore salvataggio azienda: " + errF.message); btn.innerText = "Salva Fornitore"; btn.disabled = false; return; }
+                fornitoreId = nuovoF[0].id;
             }
-            btn.innerText = "+ Aggiungi Fornitore";
+
+            // Raccogli e salva i referenti dalla tabella dinamica
+            const righeReferenti = document.querySelectorAll('#tabella-referenti-dinamica tr');
+            let batchReferenti = [];
+
+            righeReferenti.forEach(riga => {
+                const nome = riga.querySelector('.ref-nome').value;
+                if (nome.trim() !== '') {
+                    batchReferenti.push({
+                        fornitore_id: fornitoreId,
+                        nome_referente: nome,
+                        mansione_reparto: riga.querySelector('.ref-reparto').value,
+                        telefono: riga.querySelector('.ref-tel').value,
+                        email: riga.querySelector('.ref-email').value
+                    });
+                }
+            });
+
+            if (batchReferenti.length > 0) {
+                await supabaseClient.from('fornitori_referenti').insert(batchReferenti);
+            }
+
+            chiudiModaleFornitore();
+            caricaFornitori();
+            btn.innerText = "Salva Fornitore";
+            btn.disabled = false;
         });
 
-        // 3. ELIMINA FORNITORE
+        // 5. ELIMINA FORNITORE
         async function eliminaFornitore(id) {
-            if (!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
+            if (!confirm("Sei sicuro di voler eliminare questo fornitore e tutti i suoi referenti associati?")) return;
 
             const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
             if (!error) {
                 caricaFornitori();
             } else {
-                alert("Errore durante l'eliminazione: " + error.message);
+                alert("Errore eliminazione: " + error.message);
             }
         }
 
