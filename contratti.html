@@ -125,7 +125,7 @@
                             <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
                         </div>
                         <div class="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni</p>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni Originali</p>
                             <p class="text-sm text-gray-700 italic" id="scheda-annotazioni">Nessuna annotazione.</p>
                         </div>
                     </div>
@@ -161,7 +161,7 @@
                         <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500">
                             <tr>
                                 <th class="px-4 py-3">Fornitore & Categoria</th>
-                                <th class="px-4 py-3">Descrizione</th>
+                                <th class="px-4 py-3">Descrizione & Note</th>
                                 <th class="px-4 py-3">Preventivato</th>
                                 <th class="px-4 py-3">Confermato</th>
                                 <th class="px-4 py-3 w-40">Stato & Consegna</th>
@@ -250,7 +250,7 @@
         </div>
     </div>
 
-    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE (CON STEPPER INTERATTIVO E DATA) -->
+    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE (CON STEPPER INTERATTIVO, DATA E NOTE) -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
@@ -292,6 +292,12 @@
                             <p class="text-[10px] text-blue-600 mb-2">Imposta o aggiorna la data prevista di consegna comunicata dal fornitore.</p>
                             <input type="date" id="gest-ord-data-consegna" class="w-full sm:w-1/2 px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-700">
                         </div>
+
+                        <!-- ANNOTAZIONI -->
+                        <div class="col-span-2 mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni / Note</label>
+                            <textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Maniglia difettosa richiesta in sostituzione, ritardo previsto..."></textarea>
+                        </div>
                     </div>
 
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
@@ -303,7 +309,6 @@
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <!-- ATTENZIONE: Questo tasto salva materialmente le scelte fatte nello Stepper e i file -->
                 <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
             </div>
         </div>
@@ -617,6 +622,7 @@
             ordini.forEach((ord, i) => {
                 // Allineamento dati vecchi ai nuovi nomi
                 let statoPulito = ord.stato;
+                if(statoPulito === 'Conferma') statoPulito = 'Conferma Arrivata'; // Fallback per vecchi record
                 if(statoPulito === 'Da controllare ed inviare') statoPulito = 'Da Controllare';
                 if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
 
@@ -625,6 +631,8 @@
                 const costoPrevisto = ord.costo_previsto ? `€ ${parseFloat(ord.costo_previsto).toFixed(2)}` : '--';
                 const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
                 
+                const annotazioniHtml = ord.annotazioni ? `<div class="text-[10px] text-gray-500 italic mt-1 bg-gray-50 p-1.5 rounded">📝 ${ord.annotazioni}</div>` : '';
+
                 // Formattazione data arrivo se presente
                 let stringaConsegna = '';
                 if (ord.data_arrivo_merce) {
@@ -661,7 +669,10 @@
                             <div class="font-bold text-gray-900">${fornitoreNome}</div>
                             <div class="text-[10px] uppercase text-gray-500 mt-0.5">${categoria}</div>
                         </td>
-                        <td class="px-4 py-3 text-gray-700 text-xs">${ord.descrizione}</td>
+                        <td class="px-4 py-3 text-gray-700 text-xs">
+                            ${ord.descrizione}
+                            ${annotazioniHtml}
+                        </td>
                         <td class="px-4 py-3 text-gray-500 text-xs">${costoPrevisto}</td>
                         <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
                         <td class="px-4 py-3 w-40">
@@ -692,12 +703,14 @@
             
             // Pulisce e allinea il vecchio nome se presente
             let statoPartenza = ord.stato || 'Richiesta Inviata';
+            if(statoPartenza === 'Conferma') statoPartenza = 'Conferma Arrivata';
             if(statoPartenza === 'Da controllare ed inviare') statoPartenza = 'Da Controllare';
             if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
             
             document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
             document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
             document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || '';
+            document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; // Carica annotazioni
             document.getElementById('gest-ord-file').value = ''; 
 
             impostaStatoPendenteOrdine(statoPartenza);
@@ -731,7 +744,7 @@
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4';
             container.appendChild(bgLine);
 
-            const etichetteBrevi = ['Richiesta', 'Conferma', 'Controllo', 'Inviato al Forn.'];
+            const etichetteBrevi = ['Richiesta', 'Conferma Arrivata', 'Controllo', 'Inviato al Forn.'];
 
             sequenzaStatiOrdine.forEach((stato, index) => {
                 const punto = document.createElement('div');
@@ -745,7 +758,7 @@
                 }
 
                 let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`;
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-20 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`;
                 container.appendChild(punto);
             });
 
@@ -792,6 +805,7 @@
             const nuovoCosto = document.getElementById('gest-ord-costo-conf').value || null;
             const nuovaRev = document.getElementById('gest-ord-revisione').value;
             const dataConsegna = document.getElementById('gest-ord-data-consegna').value || null;
+            const noteOrdine = document.getElementById('gest-ord-annotazioni').value || null;
             const fileInputUpdate = document.getElementById('gest-ord-file');
             
             const con = contrattiCorrenti[contrattoAttivoIndex];
@@ -808,13 +822,13 @@
             }
 
             let datiUpdate = {
-                stato: statoPendenteOrdine, // Usa lo stato scelto dallo Stepper!
+                stato: statoPendenteOrdine,
                 costo_confermato: nuovoCosto,
                 revisione: nuovaRev,
-                data_arrivo_merce: dataConsegna
+                data_arrivo_merce: dataConsegna,
+                annotazioni: noteOrdine
             };
             
-            // Aggiunta file storico (accodamento con virgola)
             if(fileUrl) {
                 if (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') {
                     datiUpdate.file_url = ordOriginale.file_url + ',' + fileUrl;
@@ -841,7 +855,8 @@
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: con.commessa_id,
                     azione: testoLog,
-                    file_url: fileUrl, // Nel log metto solo il link al nuovo file caricato ora
+                    nota: noteOrdine, // La nota finisce anche nel diario globale!
+                    file_url: fileUrl, 
                     autore: UTENTE_CORRENTE
                 }]);
 
