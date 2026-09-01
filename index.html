@@ -145,7 +145,7 @@
                 <!-- Radar Attività Aziendale (Log Globale ERP) -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
-                        <h3 class="text-base font-bold text-gray-800">Radar Attività (ERP Log)</h3>
+                        <h3 class="text-base font-bold text-gray-800">Radar Attività</h3>
                         <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Live</span>
                     </div>
                     <div class="flex-1 overflow-y-auto no-scrollbar" id="lista-attivita-recenti">
@@ -228,10 +228,11 @@
 
             // 3. CARICAMENTO RADAR (LOG GLOBALE ERP)
             const divRadar = document.getElementById('lista-attivita-recenti');
+            // Query aggiornata: legge anche il nome del cliente collegato alla commessa
             const { data: logs } = await supabaseClient.from('commesse_log')
-                .select('*, commesse(numero)')
+                .select('*, commesse(numero, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false })
-                .limit(15); // Prende le ultime 15 azioni totali dell'azienda
+                .limit(15); 
 
             if (logs && logs.length > 0) {
                 let htmlRadar = '<div class="space-y-4 pt-1">';
@@ -241,11 +242,24 @@
                     const orarioStr = dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                     const dataStr = isToday ? `Oggi alle ${orarioStr}` : `${dateObj.toLocaleDateString('it-IT')} - ${orarioStr}`;
                     
-                    const commessaRif = log.commesse ? `<span class="text-[#2e2a5b] font-bold">${log.commesse.numero}</span>` : 'Sistema';
+                    let commessaRif = 'Sistema';
+                    if (log.commesse) {
+                        const numCommessa = log.commesse.numero;
+                        const nomeCliente = (log.commesse.clienti && log.commesse.clienti.nome_ragione_sociale) ? log.commesse.clienti.nome_ragione_sociale : '';
+                        
+                        if (nomeCliente) {
+                            commessaRif = `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span> <span class="text-gray-500">(${nomeCliente})</span>`;
+                        } else {
+                            commessaRif = `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span>`;
+                        }
+                    }
+
                     const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
 
                     let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50 shrink-0"></div>';
-                    if (log.azione.includes("Appunto Manuale")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
+                    if (log.azione.includes("Appunto Manuale") || log.azione.includes("Comunicazione")) {
+                        icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
+                    }
                     if (log.file_url) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">📎</div>';
 
                     htmlRadar += `
