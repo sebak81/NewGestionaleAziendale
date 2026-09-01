@@ -27,6 +27,7 @@
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
             <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
             <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
+            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
@@ -123,12 +124,12 @@
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MENU TABS INTERATTIVO -->
+            <!-- MENU TABS INTERATTIVO ORA SBLOCCATO -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
-                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi Collegati</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Contratti & Ordini (Da menu)</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Pagamenti (Presto)</button>
+                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
+                <button onclick="cambiaTab('contratti')" id="tab-btn-contratti" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Contratti</button>
+                <button onclick="cambiaTab('fatture')" id="tab-btn-fatture" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Fatturazione</button>
             </div>
 
             <!-- CONTENUTO TAB 1: RIEPILOGO FINANZIARIO E DIARIO GLOBALE -->
@@ -137,8 +138,8 @@
                 <!-- Box Finanziari -->
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato (Da sviluppare)</p>
-                        <p class="text-3xl font-bold text-emerald-600">0,00 €</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato Acconti</p>
+                        <p class="text-3xl font-bold text-emerald-600" id="scheda-incassato">0,00 €</p>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Valore Attuale Cantiere</p>
@@ -163,17 +164,38 @@
                         <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
                     </div>
                 </div>
-
             </div>
 
             <!-- CONTENUTO TAB 2: PREVENTIVI -->
             <div id="tab-content-preventivi" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
-                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai a gestione Preventivi &rarr;</a>
+                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Preventivi &rarr;</a>
                 </div>
                 <div id="lista-preventivi-commessa" class="space-y-3">
                     <p class="text-sm text-gray-500">Caricamento preventivi in corso...</p>
+                </div>
+            </div>
+
+            <!-- CONTENUTO TAB 3: CONTRATTI -->
+            <div id="tab-content-contratti" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Contratti Generati</h3>
+                    <a href="contratti.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Contratti &rarr;</a>
+                </div>
+                <div id="lista-contratti-commessa" class="space-y-3">
+                    <p class="text-sm text-gray-500">Caricamento contratti in corso...</p>
+                </div>
+            </div>
+
+            <!-- CONTENUTO TAB 4: FATTURAZIONE -->
+            <div id="tab-content-fatture" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture</h3>
+                    <a href="fatturazione.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Fatturazione &rarr;</a>
+                </div>
+                <div id="lista-fatture-commessa" class="space-y-3">
+                    <p class="text-sm text-gray-500">Caricamento fatture in corso...</p>
                 </div>
             </div>
 
@@ -185,7 +207,7 @@
     <!-- FINESTRA MODALE NUOVA COMMESSA -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div>
                     <h3 class="text-lg font-bold">Nuova Commessa</h3>
                     <p class="text-xs text-gray-500">Collega un nuovo lavoro a un cliente</p>
@@ -246,7 +268,7 @@
                     </div>
                 </form>
             </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea Commessa</button>
             </div>
@@ -256,7 +278,7 @@
     <!-- FINESTRA MODALE MODIFICA DATI COMMESSA -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div>
                     <h3 class="text-lg font-bold">Modifica Dati Cantiere</h3>
                     <p class="text-xs text-gray-500">Aggiorna le informazioni operative del cantiere</p>
@@ -301,7 +323,7 @@
                     </div>
                 </form>
             </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors">Annulla</button>
                 <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Modifiche</button>
             </div>
@@ -318,7 +340,6 @@
         let commesseCorrenti = []; 
         let totaleCommesse = 0; 
         
-        // Sequenza Stati Esecutivi Cantiere
         const sequenzaStati = [
             'Preventivazione', 'Rilievo Esecutive', 'Contratto', 'Acconto', 
             'Ordini', 'In Consegna', 'In Posa', 'Collaudo', 'Saldo', 'Conclusa'
@@ -380,8 +401,8 @@
             aggiornaDatiSchedaUI();
             cambiaTab('riepilogo'); // Apri tab Riepilogo
             
-            // Carica Diario Globale per questa commessa
             caricaCronologia(commesseCorrenti[index].id);
+            // Non c'è bisogno di calcolare l'incasso qui, lo facciamo dentro caricaFattureDiQuestaCommessa
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -393,41 +414,54 @@
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
+        // GESTIONE DEI TABS
         function cambiaTab(tabName) {
-            const btnRiep = document.getElementById('tab-btn-riepilogo');
-            const btnPrev = document.getElementById('tab-btn-preventivi');
+            const tabs = ['riepilogo', 'preventivi', 'contratti', 'fatture'];
             
-            btnRiep.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
-            btnPrev.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
-            
-            document.getElementById('tab-content-riepilogo').className = "hidden";
-            document.getElementById('tab-content-preventivi').className = "hidden";
+            tabs.forEach(t => {
+                document.getElementById(`tab-btn-${t}`).className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
+                document.getElementById(`tab-content-${t}`).className = "hidden";
+            });
 
+            document.getElementById(`tab-btn-${tabName}`).className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
+            
             if (tabName === 'riepilogo') {
-                btnRiep.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
                 document.getElementById('tab-content-riepilogo').className = "block space-y-6";
+                // Ricalcolo al volo incassi quando torno sul riepilogo
+                calcolaIncassato();
             } else if (tabName === 'preventivi') {
-                btnPrev.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
                 document.getElementById('tab-content-preventivi').className = "block space-y-4";
                 caricaPreventiviDiQuestaCommessa();
+            } else if (tabName === 'contratti') {
+                document.getElementById('tab-content-contratti').className = "block space-y-4";
+                caricaContrattiDiQuestaCommessa();
+            } else if (tabName === 'fatture') {
+                document.getElementById('tab-content-fatture').className = "block space-y-4";
+                caricaFattureDiQuestaCommessa();
             }
         }
 
+        async function calcolaIncassato() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const { data: fatture } = await supabaseClient.from('fatture').select('importo, stato').eq('commessa_id', com.id);
+            let totaleIncassato = 0;
+            if(fatture) {
+                fatture.forEach(f => {
+                    if(f.stato === 'Pagata' && f.importo) totaleIncassato += parseFloat(f.importo);
+                });
+            }
+            document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
+        }
+
+        // TAB PREVENTIVI
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
             divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
 
-            const { data: preventivi, error } = await supabaseClient
-                .from('preventivi')
-                .select('*')
-                .eq('commessa_id', com.id)
-                .order('created_at', { ascending: false });
+            const { data: preventivi, error } = await supabaseClient.from('preventivi').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
 
-            if (error) {
-                divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento preventivi.</p>';
-                return;
-            }
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento preventivi.</p>'; return; }
 
             if (!preventivi || preventivi.length === 0) {
                 divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun preventivo associato a questa commessa.</p></div>';
@@ -445,13 +479,6 @@
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
 
-                let btnAllegato = '';
-                if (prev.file_url) {
-                    btnAllegato = `<a href="${prev.file_url}" target="_blank" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-bold flex items-center gap-1 transition-colors border border-gray-200">📄 Apri PDF</a>`;
-                } else {
-                    btnAllegato = `<span class="text-xs text-gray-400 italic">Nessun allegato</span>`;
-                }
-
                 html += `
                     <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors">
                         <div>
@@ -461,14 +488,89 @@
                             </div>
                             <p class="text-xs text-gray-500">Emesso il: ${dataIta} &bull; Importo: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+        }
+
+        // TAB CONTRATTI
+        async function caricaContrattiDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const divLista = document.getElementById('lista-contratti-commessa');
+            divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
+
+            const { data: contratti, error } = await supabaseClient.from('contratti').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
+
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento contratti.</p>'; return; }
+
+            if (!contratti || contratti.length === 0) {
+                divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun contratto generato per questa commessa.</p></div>';
+                return;
+            }
+
+            let html = '';
+            contratti.forEach(con => {
+                const importo = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '--';
+                
+                let colorStato = 'bg-gray-100 text-gray-700';
+                if (con.stato === 'Stesura' || con.stato === 'Pre-Ordini' || con.stato === 'Rilievo Esecutivo') colorStato = 'bg-yellow-100 text-yellow-800';
+                if (con.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
+                if (con.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
+
+                html += `
+                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors">
                         <div>
-                            ${btnAllegato}
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="font-bold text-gray-900">${con.numero}</span>
+                                <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${con.stato || 'Da Fare'}</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Valore Finale: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
                     </div>
                 `;
             });
             divLista.innerHTML = html;
         }
+
+        // TAB FATTURE
+        async function caricaFattureDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const divLista = document.getElementById('lista-fatture-commessa');
+            divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
+
+            const { data: fatture, error } = await supabaseClient.from('fatture').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
+
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento fatture.</p>'; return; }
+
+            if (!fatture || fatture.length === 0) {
+                divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessuna fattura/acconto in coda per questa commessa.</p></div>';
+                return;
+            }
+
+            let html = '';
+            fatture.forEach(fat => {
+                const importo = fat.importo ? `€ ${parseFloat(fat.importo).toFixed(2)}` : '<span class="text-orange-500">Da definire</span>';
+                
+                let colorStato = 'bg-gray-100 text-gray-700';
+                if (fat.stato === 'Inviata') colorStato = 'bg-blue-100 text-blue-700';
+                if (fat.stato === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
+
+                html += `
+                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors">
+                        <div>
+                            <div class="flex items-center gap-3 mb-1">
+                                <span class="font-bold text-gray-900">${fat.numero}</span>
+                                <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${fat.stato || 'Da Fare'}</span>
+                            </div>
+                            <p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">${importo}</strong></p>
+                        </div>
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+        }
+
 
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
@@ -543,7 +645,6 @@
             const com = commesseCorrenti[commessaAttivaIndex];
             const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
             if (!error) {
-                // Scrive nel diario globale della commessa
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: com.id,
                     azione: `Stato cantiere aggiornato in: ${nuovoStato.toUpperCase()}`,
@@ -603,7 +704,7 @@
                 
                 const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
-                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento</a>` : '';
 
                 let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if (log.azione === "Comunicazione / Appunto Manuale") {
@@ -657,7 +758,6 @@
 
             const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
             if (!error) {
-                // Scrive nel log
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: id,
                     azione: `Dati anagrafici e operativi del cantiere aggiornati`,
@@ -717,7 +817,6 @@
             };
             const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
             if (!error && data) { 
-                // Scrive l'atto di nascita nel log globale
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: data[0].id,
                     azione: `Apertura nuovo cantiere`,
