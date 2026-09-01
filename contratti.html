@@ -177,9 +177,19 @@
                 </div>
             </div>
 
-            <!-- DIARIO / CRONOLOGIA ATTIVITÀ -->
+            <!-- DIARIO / CRONOLOGIA GLOBALE COMMESSA -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Registro Attività e Comunicazioni</h3>
+                <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
+                <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include telefonate, avanzamenti del preventivo e di questo contratto.</p>
+                
+                <!-- INPUT NOTA RAPIDA MANUALE -->
+                <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente (es. Chiamato per rilievo, mi ha detto che...)" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                    <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
+                        Aggiungi Nota
+                    </button>
+                </div>
+
                 <div id="lista-cronologia" class="space-y-4">
                     <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
                 </div>
@@ -270,7 +280,7 @@
         const sequenzaStatiContratto = ['Da Fare', 'Rilievo Esecutivo', 'Pre-Ordini', 'Stesura', 'Inviato', 'Confermato'];
         let statoPendenteContratto = '';
 
-        // --- GESTIONE UPLOAD FILE NEL BUCKET DEDICATO "contratti_docs" ---
+        // --- GESTIONE UPLOAD FILE ---
         async function caricaFileContrattoSuStorage(file) {
             if (!file) return null;
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
@@ -278,7 +288,7 @@
             
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
             if (error) {
-                alert("Errore upload Storage: " + error.message + ". Assicurati di aver creato il bucket public 'contratti_docs' su Supabase.");
+                alert("Errore upload Storage: " + error.message);
                 return null;
             }
             
@@ -297,7 +307,7 @@
             const conteggio = document.getElementById('conteggio-contratti');
 
             if (error) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati. Assicurati che le colonne "annotazioni" e "file_url" esistano nella tabella contratti.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati.</td></tr>';
                 return;
             }
 
@@ -347,7 +357,7 @@
             contrattoAttivoIndex = index;
             aggiornaDatiSchedaContrattoUI();
             caricaOrdiniContratto(contrattiCorrenti[index].id);
-            caricaCronologiaContratto(contrattiCorrenti[index].preventivo_id);
+            caricaCronologia(contrattiCorrenti[index].commessa_id); // Ora legge il log GLOBALE della commessa
             caricaFornitoriTendina();
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
@@ -541,7 +551,7 @@
             preparaStatoContratto('Stesura');
         }
 
-        // 4. GESTIONE CAMBIO STATO E DIARIO
+        // 4. GESTIONE CAMBIO STATO E DIARIO CON ALLEGATI GLOBALI
         function preparaStatoContratto(nuovoStato) {
             statoPendenteContratto = nuovoStato;
             document.getElementById('span-nuovo-stato-contratto').innerText = nuovoStato.toUpperCase();
@@ -577,7 +587,7 @@
                 datiAggiornamento.file_url = nuovoFileUrl;
             }
             if (nota && !con.annotazioni) {
-                datiAggiornamento.annotazioni = nota;
+                datiAggiornamento.annotazioni = nota; 
             }
 
             const { error } = await supabaseClient.from('contratti').update(datiAggiornamento).eq('id', con.id);
@@ -585,8 +595,9 @@
             if (!error) {
                 if (nuovoFileUrl) con.file_url = nuovoFileUrl;
 
-                await supabaseClient.from('preventivi_log').insert([{
-                    preventivo_id: con.preventivo_id,
+                // INSERISCE NELLA TABELLA GLOBALE COMMESSE_LOG
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: con.commessa_id,
                     azione: `Contratto aggiornato in: ${nuovoStato.toUpperCase()}`,
                     nota: nota || null,
                     file_url: nuovoFileUrl,
@@ -596,7 +607,7 @@
                 con.stato = nuovoStato;
                 chiudiModaleStatoContratto();
                 aggiornaDatiSchedaContrattoUI();
-                caricaCronologiaContratto(con.preventivo_id);
+                caricaCronologia(con.commessa_id); // Aggiorna ricaricando il diario globale
                 caricaContratti();
             } else {
                 alert("Errore aggiornamento: " + error.message);
@@ -606,18 +617,43 @@
             btnSubmit.disabled = false;
         }
 
-        async function caricaCronologiaContratto(preventivoId) {
+        // --- GESTIONE NOTA MANUALE ---
+        async function salvaNotaLibera() {
+            const inputNota = document.getElementById('input-nota-libera');
+            const testo = inputNota.value;
+            
+            if (!testo || testo.trim() === '') return;
+
+            const con = contrattiCorrenti[contrattoAttivoIndex];
+            
+            const { error } = await supabaseClient.from('commesse_log').insert([{
+                commessa_id: con.commessa_id,
+                azione: "Comunicazione / Appunto Manuale",
+                nota: testo,
+                autore: UTENTE_CORRENTE
+            }]);
+
+            if (!error) {
+                inputNota.value = '';
+                caricaCronologia(con.commessa_id);
+            } else {
+                alert("Errore salvataggio nota: " + error.message);
+            }
+        }
+
+        // CARICA IL DIARIO (CRONOLOGIA GLOBALE DALLA NUOVA TABELLA)
+        async function caricaCronologia(commessaId) {
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
 
-            const { data: logs } = await supabaseClient
-                .from('preventivi_log')
+            const { data: logs, error } = await supabaseClient
+                .from('commesse_log')
                 .select('*')
-                .eq('preventivo_id', preventivoId)
+                .eq('commessa_id', commessaId)
                 .order('created_at', { ascending: false });
 
-            if (!logs || logs.length === 0) {
-                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata per questo contratto.</p>';
+            if (error || !logs || logs.length === 0) {
+                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata in questa commessa.</p>';
                 return;
             }
 
@@ -625,13 +661,19 @@
             logs.forEach(log => {
                 const dateObj = new Date(log.created_at);
                 const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                
                 const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
                 const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
 
+                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
+                if (log.azione === "Comunicazione / Appunto Manuale") {
+                    icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                }
+
                 html += `
                     <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
-                        <div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>
+                        ${icona}
                         <div class="flex-1">
                             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
                                 <p class="text-sm font-bold text-gray-900">${log.azione}</p>
