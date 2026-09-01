@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        <div class="p-8 max-w-6xl mx-auto w-full space-y-6">
+        <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
             <!-- STEPPER -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden">
@@ -164,9 +164,9 @@
                                 <th class="px-4 py-3">Descrizione</th>
                                 <th class="px-4 py-3">Preventivato</th>
                                 <th class="px-4 py-3">Confermato</th>
-                                <th class="px-4 py-3">Stato</th>
+                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
                                 <th class="px-4 py-3 text-center">Rev.</th>
-                                <th class="px-4 py-3 text-center">File e Storico</th>
+                                <th class="px-4 py-3 text-center">Storico File</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
@@ -205,13 +205,23 @@
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
                     <h3 class="text-lg font-bold">Invia Richiesta a Fornitore</h3>
-                    <p class="text-xs text-gray-500">Crea la riga d'ordine (Nasce in "Richiesta Inviata")</p>
+                    <p class="text-xs text-gray-500">Crea la riga d'ordine e allega la distinta</p>
                 </div>
                 <button type="button" onclick="chiudiModaleNuovoOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-ordine" class="space-y-4">
+                    <!-- Mini Stepper Visuale per creazione -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex items-center justify-center gap-3 mb-2">
+                        <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">1</div>
+                        <span class="text-xs font-bold text-[#2e2a5b] uppercase">Richiesta Inviata</span>
+                        <div class="w-8 h-px bg-gray-300"></div>
+                        <div class="w-6 h-6 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">2</div>
+                        <div class="w-8 h-px bg-gray-300"></div>
+                        <div class="w-6 h-6 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">3</div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label>
                         <select id="form-ord-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
@@ -235,17 +245,17 @@
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleNuovoOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo-ordine" id="btn-salva-nuovo-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Ordine</button>
+                <button type="submit" form="form-nuovo-ordine" id="btn-salva-nuovo-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea Ordine</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE (STORICO FILE INTATTO) -->
+    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE (CON STEPPER INTERATTIVO E DATA) -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
-                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine</h3>
+                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3>
                     <p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p>
                 </div>
                 <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
@@ -255,19 +265,14 @@
                 <form id="form-gestisci-ordine" class="space-y-4">
                     <input type="hidden" id="gest-ord-id">
                     
-                    <div class="grid grid-cols-2 gap-4 border-b border-gray-100 pb-4">
-                        <div class="col-span-2">
-                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Stato Avanzamento Fornitore</label>
-                            <select id="gest-ord-stato" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-gray-800 shadow-sm">
-                                <option value="Richiesta Inviata">Richiesta Inviata (In attesa preventivo)</option>
-                                <option value="Conferma Arrivata">Conferma d'Ordine Arrivata</option>
-                                <option value="Da controllare ed inviare">Da controllare ed inviare all'amministrazione</option>
-                                <option value="In Revisione">In Revisione (Modifiche in corso)</option>
-                                <option value="Approvato ed Inviato">Approvato ed Inviato in Produzione</option>
-                            </select>
-                        </div>
+                    <!-- STEPPER AVANZAMENTO ORDINE -->
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
+                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
                     </div>
 
+                    <!-- CAMPI DATI -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Costo Confermato Effettivo (€)</label>
@@ -280,18 +285,26 @@
                                 <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-r-lg font-bold border border-l-0 border-gray-200">+1</button>
                             </div>
                         </div>
+                        
+                        <!-- DATA PRESUNTA ARRIVO MERCE (Si attiva in base allo stato) -->
+                        <div id="box-data-consegna" class="col-span-2 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <label class="block text-sm font-bold text-blue-900 mb-1">📅 Data presunta arrivo merce</label>
+                            <p class="text-[10px] text-blue-600 mb-2">Imposta o aggiorna la data prevista di consegna comunicata dal fornitore.</p>
+                            <input type="date" id="gest-ord-data-consegna" class="w-full sm:w-1/2 px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-700">
+                        </div>
                     </div>
 
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma d'Ordine / Revisione</label>
-                        <p class="text-[10px] text-gray-500 mb-2">Il file non cancellerà quello vecchio, ma si affiancherà per mantenere lo storico.</p>
+                        <p class="text-[10px] text-gray-500 mb-2">Il file non cancellerà quello vecchio, ma si affiancherà per mantenere lo storico cumulativo.</p>
                         <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Aggiornamento</button>
+                <!-- ATTENZIONE: Questo tasto salva materialmente le scelte fatte nello Stepper e i file -->
+                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
             </div>
         </div>
     </div>
@@ -341,7 +354,7 @@
         const sequenzaStatiContratto = ['Da Fare', 'Rilievo Esecutivo', 'Pre-Ordini', 'Stesura', 'Inviato', 'Confermato'];
         let statoPendenteContratto = '';
 
-        // --- GESTIONE UPLOAD FILE GENERICA (Usa sempre contratti_docs) ---
+        // --- GESTIONE UPLOAD FILE GENERICA ---
         async function caricaFileSuStorage(file, prefisso) {
             if (!file) return null;
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
@@ -602,15 +615,27 @@
             let html = '';
             
             ordini.forEach((ord, i) => {
+                // Allineamento dati vecchi ai nuovi nomi
+                let statoPulito = ord.stato;
+                if(statoPulito === 'Da controllare ed inviare') statoPulito = 'Da Controllare';
+                if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
+
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
                 const categoria = ord.fornitori ? (ord.fornitori.categoria || '--') : '--';
                 const costoPrevisto = ord.costo_previsto ? `€ ${parseFloat(ord.costo_previsto).toFixed(2)}` : '--';
                 const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
                 
-                // --- MAGIA: GENERAZIONE MULTIPLA DELLE ICONE FILE ---
+                // Formattazione data arrivo se presente
+                let stringaConsegna = '';
+                if (ord.data_arrivo_merce) {
+                    const d = ord.data_arrivo_merce.split('-');
+                    stringaConsegna = `<div class="text-[10px] text-gray-500 mt-1">📅 Arrivo: <strong class="text-gray-700">${d[2]}/${d[1]}/${d[0]}</strong></div>`;
+                }
+                
+                // Formattazione storico file
                 let iconeFileHtml = '';
                 if (ord.file_url) {
-                    const arrayUrls = ord.file_url.split(','); // Separa le stringhe usando la virgola
+                    const arrayUrls = ord.file_url.split(','); 
                     arrayUrls.forEach((urlStr, indexFile) => {
                         if (urlStr.trim() !== '') {
                             iconeFileHtml += `<a href="${urlStr.trim()}" target="_blank" class="inline-block px-1.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-[10px] font-bold transition-colors mr-1 mb-1 border border-blue-100 shadow-sm" title="Apri documento ${indexFile + 1}">📎 ${indexFile + 1}</a>`;
@@ -621,10 +646,14 @@
                 }
 
                 let badgeClass = 'bg-gray-100 text-gray-600';
-                if(ord.stato === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700';
-                if(ord.stato === 'Da controllare ed inviare') badgeClass = 'bg-yellow-100 text-yellow-800';
-                if(ord.stato === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800';
-                if(ord.stato === 'Approvato ed Inviato') badgeClass = 'bg-emerald-100 text-emerald-800';
+                if(statoPulito === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700';
+                if(statoPulito === 'Da Controllare') badgeClass = 'bg-yellow-100 text-yellow-800';
+                if(statoPulito === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800';
+                if(statoPulito === 'Ordine confermato ed inviato al Fornitore') badgeClass = 'bg-emerald-100 text-emerald-800';
+
+                // Troncamento nome lungo per il badge visivo
+                let nomeStatoBadge = statoPulito;
+                if(nomeStatoBadge === 'Ordine confermato ed inviato al Fornitore') nomeStatoBadge = 'Ordine Confermato';
 
                 html += `
                     <tr class="hover:bg-gray-50">
@@ -635,7 +664,10 @@
                         <td class="px-4 py-3 text-gray-700 text-xs">${ord.descrizione}</td>
                         <td class="px-4 py-3 text-gray-500 text-xs">${costoPrevisto}</td>
                         <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase">${ord.stato}</span></td>
+                        <td class="px-4 py-3 w-40">
+                            <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${nomeStatoBadge}</span>
+                            ${stringaConsegna}
+                        </td>
                         <td class="px-4 py-3 text-center text-xs font-semibold text-gray-400">Rev. ${ord.revisione}</td>
                         <td class="px-4 py-3 text-center w-28">${iconeFileHtml}</td>
                         <td class="px-4 py-3 text-center">
@@ -647,7 +679,10 @@
             tbody.innerHTML = html;
         }
 
-        // --- GESTIONE ORDINE ESISTENTE (AGGIUNTA FILE IN CODA) ---
+        // --- GESTIONE ORDINE ESISTENTE CON STEPPER ---
+        const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore'];
+        let statoPendenteOrdine = '';
+
         function apriModaleGestioneOrdine(indexMemoria) {
             const ord = ordiniAttualiCache[indexMemoria];
             const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
@@ -655,11 +690,17 @@
             document.getElementById('gest-ord-id').value = ord.id;
             document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
             
-            document.getElementById('gest-ord-stato').value = ord.stato || 'Richiesta Inviata';
+            // Pulisce e allinea il vecchio nome se presente
+            let statoPartenza = ord.stato || 'Richiesta Inviata';
+            if(statoPartenza === 'Da controllare ed inviare') statoPartenza = 'Da Controllare';
+            if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
+            
             document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
             document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
+            document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || '';
             document.getElementById('gest-ord-file').value = ''; 
 
+            impostaStatoPendenteOrdine(statoPartenza);
             document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
         }
 
@@ -667,13 +708,90 @@
             document.getElementById('modal-gestisci-ordine').classList.add('hidden');
         }
 
+        // Modifica visiva dello Stepper Ordine
+        function impostaStatoPendenteOrdine(nuovoStato) {
+            statoPendenteOrdine = nuovoStato;
+            
+            const container = document.getElementById('stepper-container-ordine');
+            const azioniBox = document.getElementById('stepper-azioni-ordine');
+            const boxData = document.getElementById('box-data-consegna');
+            
+            container.innerHTML = ''; azioniBox.innerHTML = '';
+
+            // Se l'ordine è in revisione, mostriamo uno stato di emergenza
+            if (statoPendenteOrdine === 'In Revisione') {
+                container.innerHTML = `<div class="w-full text-center py-3 bg-orange-50 text-orange-600 font-bold rounded-lg border border-orange-200 text-sm">⚠️ ORDINE IN REVISIONE FORNITORE</div>`;
+                azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm transition-colors">Termina Revisione (Torna a Conferma Arrivata)</button>`;
+                boxData.classList.add('hidden');
+                return;
+            }
+
+            const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine);
+            const bgLine = document.createElement('div');
+            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4';
+            container.appendChild(bgLine);
+
+            const etichetteBrevi = ['Richiesta', 'Conferma', 'Controllo', 'Inviato al Forn.'];
+
+            sequenzaStatiOrdine.forEach((stato, index) => {
+                const punto = document.createElement('div');
+                punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-1 z-10';
+                
+                let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
+                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
+                } else if (index === currentIdx) {
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-[10px] shadow-md ring-2 ring-blue-100">${index + 1}</div>`;
+                }
+
+                let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`;
+                container.appendChild(punto);
+            });
+
+            // Mostra/Nascondi Data Arrivo Merce
+            if (currentIdx >= 1) { 
+                boxData.classList.remove('hidden'); 
+            } else { 
+                boxData.classList.add('hidden'); 
+            }
+
+            // Pulsanti di navigazione stato ordine
+            if (statoPendenteOrdine === 'Richiesta Inviata') {
+                azioniBox.innerHTML = `
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Segna Conferma Arrivata &rarr;</button>
+                `;
+            } else if (statoPendenteOrdine === 'Conferma Arrivata') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Richiesta Inviata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg shadow-sm transition-colors">Passa a Controllo &rarr;</button>
+                `;
+            } else if (statoPendenteOrdine === 'Da Controllare') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Ordine confermato ed inviato al Fornitore')" class="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Invia Definitivo &rarr;</button>
+                `;
+            } else if (statoPendenteOrdine === 'Ordine confermato ed inviato al Fornitore') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Riporta a Controllo</button>
+                `;
+            }
+        }
+
+        // Salvataggio form di aggiornamento Ordine
         document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btnSubmit = document.getElementById('btn-salva-gest-ordine');
+            
             const idOrdine = document.getElementById('gest-ord-id').value;
-            const nuovoStato = document.getElementById('gest-ord-stato').value;
             const nuovoCosto = document.getElementById('gest-ord-costo-conf').value || null;
             const nuovaRev = document.getElementById('gest-ord-revisione').value;
+            const dataConsegna = document.getElementById('gest-ord-data-consegna').value || null;
             const fileInputUpdate = document.getElementById('gest-ord-file');
             
             const con = contrattiCorrenti[contrattoAttivoIndex];
@@ -690,12 +808,13 @@
             }
 
             let datiUpdate = {
-                stato: nuovoStato,
+                stato: statoPendenteOrdine, // Usa lo stato scelto dallo Stepper!
                 costo_confermato: nuovoCosto,
-                revisione: nuovaRev
+                revisione: nuovaRev,
+                data_arrivo_merce: dataConsegna
             };
             
-            // MAGIA: Se carico un nuovo file, lo accodo a quelli vecchi mettendoci in mezzo una virgola!
+            // Aggiunta file storico (accodamento con virgola)
             if(fileUrl) {
                 if (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') {
                     datiUpdate.file_url = ordOriginale.file_url + ',' + fileUrl;
@@ -707,14 +826,22 @@
             const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
 
             if (!error) {
-                let testoLog = `Ordine a ${nomeFornitore} aggiornato in: ${nuovoStato.toUpperCase()}`;
+                // Testo per il log ERP
+                let nomeStatoPerLog = statoPendenteOrdine;
+                if(nomeStatoPerLog === 'Ordine confermato ed inviato al Fornitore') nomeStatoPerLog = 'Ordine Confermato Definitivo';
+                
+                let testoLog = `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`;
                 if(nuovoCosto) testoLog += ` (Costo conf. € ${parseFloat(nuovoCosto).toFixed(2)})`;
-                if(nuovaRev > ordOriginale.revisione) testoLog += ` [Inizio Rev. ${nuovaRev}]`;
+                if(dataConsegna) {
+                    const d = dataConsegna.split('-');
+                    testoLog += ` - Arrivo: ${d[2]}/${d[1]}/${d[0]}`;
+                }
+                if(nuovaRev > ordOriginale.revisione) testoLog += ` [Rev. ${nuovaRev}]`;
 
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: con.commessa_id,
                     azione: testoLog,
-                    file_url: fileUrl, // Nel log viene salvato singolarmente solo il nuovo file caricato ora
+                    file_url: fileUrl, // Nel log metto solo il link al nuovo file caricato ora
                     autore: UTENTE_CORRENTE
                 }]);
 
@@ -725,7 +852,7 @@
                 alert("Errore aggiornamento ordine: " + error.message);
             }
 
-            btnSubmit.innerText = "Salva Aggiornamento";
+            btnSubmit.innerText = "💾 Salva Aggiornamento Definitivo";
             btnSubmit.disabled = false;
         });
 
@@ -737,7 +864,7 @@
             if (!ordini || ordini.length === 0) {
                 if(!confirm("Attenzione: non hai inserito alcun pre-ordine fornitore per questo contratto. Vuoi procedere comunque con la Stesura?")) return;
             } else {
-                const tuttiConfermati = ordini.every(o => o.stato === 'Conferma Arrivata' || o.stato === 'Approvato ed Inviato');
+                const tuttiConfermati = ordini.every(o => o.stato === 'Conferma Arrivata' || o.stato === 'Da Controllare' || o.stato === 'Ordine confermato ed inviato al Fornitore');
                 if(!tuttiConfermati) {
                     if(!confirm("Attenzione: alcuni pre-ordini NON hanno ancora ricevuto la Conferma dal fornitore. Vuoi procedere comunque alla Stesura forzando i prezzi?")) return;
                 }
@@ -831,7 +958,7 @@
             } else { alert("Errore: " + error.message); }
         }
 
-        // CARICA IL DIARIO (CRONOLOGIA GLOBALE)
+        // CARICA IL DIARIO GLOBALE
         async function caricaCronologia(commessaId) {
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
