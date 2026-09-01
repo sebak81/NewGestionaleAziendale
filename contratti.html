@@ -82,10 +82,9 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO CONTRATTO (VISTA A TUTTO SCHERMO) -->
+    <!-- SCHEDA DETTAGLIO CONTRATTO E ORDINI -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         
-        <!-- Intestazione -->
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
@@ -101,16 +100,15 @@
 
         <div class="p-8 max-w-6xl mx-auto w-full space-y-6">
             
-            <!-- CARD AVANZAMENTO STATO (STEPPER A 6 FASI) -->
+            <!-- STEPPER -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Contratto & Produzione</h3>
                 <div class="relative flex justify-between items-center w-full mb-8 px-2 sm:px-8" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- RIEPILOGO DATI E ALLEGATO -->
+            <!-- RIEPILOGO -->
             <div class="grid grid-cols-3 gap-6">
-                
                 <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
                     <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">Riepilogo Contratto</h3>
                     <div class="grid grid-cols-2 gap-4">
@@ -150,11 +148,11 @@
             <div id="sezione-preordini" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-3">
                     <div>
-                        <h3 class="text-base font-bold text-gray-800">Richieste Pre-Ordini Fornitori</h3>
-                        <p class="text-xs text-gray-500">Suddividi i materiali per fornitore (Serramenti, Zanzariere, Scuri, ecc.)</p>
+                        <h3 class="text-base font-bold text-gray-800">Distinta Ordini Fornitori</h3>
+                        <p class="text-xs text-gray-500">Aggiungi materiali, gestisci le conferme d'ordine e le revisioni</p>
                     </div>
                     <button onclick="apriModaleNuovoOrdine()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
-                        <span>+</span> Aggiungi Fornitore / Ordine
+                        <span>+</span> Aggiungi Ordine a Fornitore
                     </button>
                 </div>
                 
@@ -162,29 +160,30 @@
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500">
                             <tr>
-                                <th class="px-4 py-3">Fornitore</th>
-                                <th class="px-4 py-3">Categoria</th>
-                                <th class="px-4 py-3">Descrizione Materiale</th>
-                                <th class="px-4 py-3">Costo Previsto</th>
-                                <th class="px-4 py-3">Stato Ordine</th>
+                                <th class="px-4 py-3">Fornitore & Categoria</th>
+                                <th class="px-4 py-3">Descrizione</th>
+                                <th class="px-4 py-3">Preventivato</th>
+                                <th class="px-4 py-3">Confermato</th>
+                                <th class="px-4 py-3">Stato</th>
+                                <th class="px-4 py-3 text-center">Rev.</th>
+                                <th class="px-4 py-3 text-center">File e Storico</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-ordini" class="divide-y divide-gray-100">
-                            <tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Nessun ordine inserito per questo contratto.</td></tr>
+                            <tr><td colspan="8" class="px-4 py-4 text-center text-gray-500">Nessun ordine inserito per questo contratto.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- DIARIO / CRONOLOGIA GLOBALE COMMESSA -->
+            <!-- DIARIO GLOBALE COMMESSA -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
-                <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include telefonate, avanzamenti del preventivo e di questo contratto.</p>
+                <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include tutti gli aggiornamenti del cantiere, inclusi gli avanzamenti dei fornitori.</p>
                 
-                <!-- INPUT NOTA RAPIDA MANUALE -->
                 <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                    <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente (es. Chiamato per rilievo, mi ha detto che...)" class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                    <input type="text" id="input-nota-libera" placeholder="Appunta una telefonata col cliente o fornitore..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                     <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
                         Aggiungi Nota
                     </button>
@@ -200,13 +199,13 @@
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
 
-    <!-- MODALE: AGGIUNGI PRE-ORDINE FORNITORE -->
+    <!-- MODALE: NUOVO ORDINE -->
     <div id="modal-nuovo-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
-                    <h3 class="text-lg font-bold">Nuovo Pre-Ordine Fornitore</h3>
-                    <p class="text-xs text-gray-500">Seleziona il fornitore e inserisci la richiesta materiale</p>
+                    <h3 class="text-lg font-bold">Invia Richiesta a Fornitore</h3>
+                    <p class="text-xs text-gray-500">Crea la riga d'ordine (Nasce in "Richiesta Inviata")</p>
                 </div>
                 <button type="button" onclick="chiudiModaleNuovoOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
@@ -221,17 +220,78 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Fornitura *</label>
-                        <textarea id="form-ord-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. N. 6 finestre PVC colore bianco con vetri doppi..."></textarea>
+                        <textarea id="form-ord-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. N. 6 finestre PVC..."></textarea>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Costo Previsto Stimato (€)</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Costo Preventivato (€)</label>
+                        <p class="text-[10px] text-gray-500 mb-1">Quanto pensi di spendere (utile per confronto con la conferma successiva)</p>
                         <input type="number" step="0.01" id="form-ord-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="0.00">
+                    </div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Documento di Richiesta (Es. Disegni, Distinta)</label>
+                        <input type="file" id="form-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleNuovoOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Aggiungi Ordine</button>
+                <button type="submit" form="form-nuovo-ordine" id="btn-salva-nuovo-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Ordine</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE (STORICO FILE INTATTO) -->
+    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <div>
+                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine</h3>
+                    <p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p>
+                </div>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-gestisci-ordine" class="space-y-4">
+                    <input type="hidden" id="gest-ord-id">
+                    
+                    <div class="grid grid-cols-2 gap-4 border-b border-gray-100 pb-4">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Stato Avanzamento Fornitore</label>
+                            <select id="gest-ord-stato" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-semibold text-gray-800 shadow-sm">
+                                <option value="Richiesta Inviata">Richiesta Inviata (In attesa preventivo)</option>
+                                <option value="Conferma Arrivata">Conferma d'Ordine Arrivata</option>
+                                <option value="Da controllare ed inviare">Da controllare ed inviare all'amministrazione</option>
+                                <option value="In Revisione">In Revisione (Modifiche in corso)</option>
+                                <option value="Approvato ed Inviato">Approvato ed Inviato in Produzione</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Costo Confermato Effettivo (€)</label>
+                            <input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
+                            <div class="flex items-center">
+                                <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
+                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-r-lg font-bold border border-l-0 border-gray-200">+1</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma d'Ordine / Revisione</label>
+                        <p class="text-[10px] text-gray-500 mb-2">Il file non cancellerà quello vecchio, ma si affiancherà per mantenere lo storico.</p>
+                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Aggiornamento</button>
             </div>
         </div>
     </div>
@@ -275,23 +335,19 @@
 
         let contrattiCorrenti = [];
         let contrattoAttivoIndex = null;
+        let ordiniAttualiCache = []; 
         let listaFornitoriCache = [];
 
         const sequenzaStatiContratto = ['Da Fare', 'Rilievo Esecutivo', 'Pre-Ordini', 'Stesura', 'Inviato', 'Confermato'];
         let statoPendenteContratto = '';
 
-        // --- GESTIONE UPLOAD FILE ---
-        async function caricaFileContrattoSuStorage(file) {
+        // --- GESTIONE UPLOAD FILE GENERICA (Usa sempre contratti_docs) ---
+        async function caricaFileSuStorage(file, prefisso) {
             if (!file) return null;
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-            const fileName = `CONT_${Date.now()}_${cleanFileName}`;
-            
+            const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
-            if (error) {
-                alert("Errore upload Storage: " + error.message);
-                return null;
-            }
-            
+            if (error) { alert("Errore upload Storage: " + error.message); return null; }
             const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
             return data.publicUrl;
         }
@@ -306,10 +362,7 @@
             const tbody = document.getElementById('tabella-contratti');
             const conteggio = document.getElementById('conteggio-contratti');
 
-            if (error) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati.</td></tr>';
-                return;
-            }
+            if (error) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati.</td></tr>'; return; }
 
             contrattiCorrenti = contratti || [];
             conteggio.innerText = `${contratti.length} contratti registrati`;
@@ -328,7 +381,6 @@
                 const nomeCliente = (con.commesse && con.commesse.clienti) ? con.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
                 const nomeCantiere = con.commesse ? (con.commesse.nome_cantiere || con.commesse.numero) : 'Commessa eliminata';
                 const valore = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '--';
-                
                 const filePresente = con.file_url || (con.preventivi ? con.preventivi.file_url : null);
                 const iconaFile = filePresente ? '📎' : '';
 
@@ -352,12 +404,12 @@
             });
         }
 
-        // 2. SCHEDA DETTAGLIO A TUTTO SCHERMO
+        // 2. SCHEDA DETTAGLIO
         function apriSchedaContratto(index) {
             contrattoAttivoIndex = index;
             aggiornaDatiSchedaContrattoUI();
             caricaOrdiniContratto(contrattiCorrenti[index].id);
-            caricaCronologia(contrattiCorrenti[index].commessa_id); // Ora legge il log GLOBALE della commessa
+            caricaCronologia(contrattiCorrenti[index].commessa_id);
             caricaFornitoriTendina();
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
@@ -463,7 +515,7 @@
             }
         }
 
-        // 3. GESTIONE PRE-ORDINI MULTI-FORNITORE
+        // 3. GESTIONE ORDINI MULTI-FORNITORE
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda, categoria').order('nome_azienda');
             if (fornitori) {
@@ -479,7 +531,6 @@
         function apriModaleNuovoOrdine() {
             document.getElementById('modal-nuovo-ordine').classList.remove('hidden');
         }
-
         function chiudiModaleNuovoOrdine() {
             document.getElementById('modal-nuovo-ordine').classList.add('hidden');
             document.getElementById('form-nuovo-ordine').reset();
@@ -487,7 +538,18 @@
 
         document.getElementById('form-nuovo-ordine').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btnSubmit = document.getElementById('btn-salva-nuovo-ordine');
+            const fileInput = document.getElementById('form-ord-file');
             const con = contrattiCorrenti[contrattoAttivoIndex];
+
+            btnSubmit.innerText = "Salvataggio...";
+            btnSubmit.disabled = true;
+
+            let fileUrl = null;
+            if (fileInput.files.length > 0) {
+                btnSubmit.innerText = "Caricamento file...";
+                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'ORD_REQ');
+            }
 
             const nuovoOrdine = {
                 contratto_id: con.id,
@@ -495,16 +557,30 @@
                 descrizione: document.getElementById('form-ord-descrizione').value,
                 costo_previsto: document.getElementById('form-ord-costo').value || 0,
                 stato: 'Richiesta Inviata',
-                revisione: 0
+                revisione: 0,
+                file_url: fileUrl 
             };
 
-            const { error } = await supabaseClient.from('ordini_fornitori').insert([nuovoOrdine]);
+            const { data, error } = await supabaseClient.from('ordini_fornitori').insert([nuovoOrdine]).select('*, fornitori(nome_azienda)');
             if (!error) {
+                const nomeFornitore = data[0].fornitori ? data[0].fornitori.nome_azienda : 'Fornitore';
+                
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: con.commessa_id,
+                    azione: `Nuovo Pre-Ordine registrato per: ${nomeFornitore}`,
+                    file_url: fileUrl,
+                    autore: UTENTE_CORRENTE
+                }]);
+
                 chiudiModaleNuovoOrdine();
                 caricaOrdiniContratto(con.id);
+                caricaCronologia(con.commessa_id);
             } else {
                 alert("Errore inserimento ordine: " + error.message);
             }
+
+            btnSubmit.innerText = "Salva Ordine";
+            btnSubmit.disabled = false;
         });
 
         async function caricaOrdiniContratto(contrattoId) {
@@ -513,45 +589,163 @@
             const { data: ordini, error } = await supabaseClient
                 .from('ordini_fornitori')
                 .select('*, fornitori(nome_azienda, categoria)')
-                .eq('contratto_id', contrattoId);
+                .eq('contratto_id', contrattoId)
+                .order('created_at', { ascending: true });
 
             if (error || !ordini || ordini.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500 text-sm">Nessun ordine registrato per questo contratto.</td></tr>';
+                ordiniAttualiCache = [];
+                tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-4 text-center text-gray-500 text-sm">Nessun ordine registrato per questo contratto.</td></tr>';
                 return;
             }
 
+            ordiniAttualiCache = ordini; 
             let html = '';
-            ordini.forEach(ord => {
-                const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore sconosciuto';
+            
+            ordini.forEach((ord, i) => {
+                const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
                 const categoria = ord.fornitori ? (ord.fornitori.categoria || '--') : '--';
-                const costo = ord.costo_previsto ? `€ ${parseFloat(ord.costo_previsto).toFixed(2)}` : '--';
+                const costoPrevisto = ord.costo_previsto ? `€ ${parseFloat(ord.costo_previsto).toFixed(2)}` : '--';
+                const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
+                
+                // --- MAGIA: GENERAZIONE MULTIPLA DELLE ICONE FILE ---
+                let iconeFileHtml = '';
+                if (ord.file_url) {
+                    const arrayUrls = ord.file_url.split(','); // Separa le stringhe usando la virgola
+                    arrayUrls.forEach((urlStr, indexFile) => {
+                        if (urlStr.trim() !== '') {
+                            iconeFileHtml += `<a href="${urlStr.trim()}" target="_blank" class="inline-block px-1.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-[10px] font-bold transition-colors mr-1 mb-1 border border-blue-100 shadow-sm" title="Apri documento ${indexFile + 1}">📎 ${indexFile + 1}</a>`;
+                        }
+                    });
+                } else {
+                    iconeFileHtml = '<span class="text-gray-300">--</span>';
+                }
+
+                let badgeClass = 'bg-gray-100 text-gray-600';
+                if(ord.stato === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700';
+                if(ord.stato === 'Da controllare ed inviare') badgeClass = 'bg-yellow-100 text-yellow-800';
+                if(ord.stato === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800';
+                if(ord.stato === 'Approvato ed Inviato') badgeClass = 'bg-emerald-100 text-emerald-800';
 
                 html += `
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
-                        <td class="px-4 py-3 text-gray-600 text-xs uppercase">${categoria}</td>
-                        <td class="px-4 py-3 text-gray-700 text-sm">${ord.descrizione}</td>
-                        <td class="px-4 py-3 font-semibold text-gray-900">${costo}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-bold uppercase">${ord.stato}</span></td>
+                        <td class="px-4 py-3">
+                            <div class="font-bold text-gray-900">${fornitoreNome}</div>
+                            <div class="text-[10px] uppercase text-gray-500 mt-0.5">${categoria}</div>
+                        </td>
+                        <td class="px-4 py-3 text-gray-700 text-xs">${ord.descrizione}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs">${costoPrevisto}</td>
+                        <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
+                        <td class="px-4 py-3"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase">${ord.stato}</span></td>
                         <td class="px-4 py-3 text-center text-xs font-semibold text-gray-400">Rev. ${ord.revisione}</td>
+                        <td class="px-4 py-3 text-center w-28">${iconeFileHtml}</td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors shadow-sm border border-gray-200">✏️ Aggiorna</button>
+                        </td>
                     </tr>
                 `;
             });
             tbody.innerHTML = html;
         }
 
+        // --- GESTIONE ORDINE ESISTENTE (AGGIUNTA FILE IN CODA) ---
+        function apriModaleGestioneOrdine(indexMemoria) {
+            const ord = ordiniAttualiCache[indexMemoria];
+            const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+
+            document.getElementById('gest-ord-id').value = ord.id;
+            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
+            
+            document.getElementById('gest-ord-stato').value = ord.stato || 'Richiesta Inviata';
+            document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
+            document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
+            document.getElementById('gest-ord-file').value = ''; 
+
+            document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
+        }
+
+        function chiudiModaleGestioneOrdine() {
+            document.getElementById('modal-gestisci-ordine').classList.add('hidden');
+        }
+
+        document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btn-salva-gest-ordine');
+            const idOrdine = document.getElementById('gest-ord-id').value;
+            const nuovoStato = document.getElementById('gest-ord-stato').value;
+            const nuovoCosto = document.getElementById('gest-ord-costo-conf').value || null;
+            const nuovaRev = document.getElementById('gest-ord-revisione').value;
+            const fileInputUpdate = document.getElementById('gest-ord-file');
+            
+            const con = contrattiCorrenti[contrattoAttivoIndex];
+            const ordOriginale = ordiniAttualiCache.find(o => o.id == idOrdine);
+            const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
+
+            btnSubmit.innerText = "Salvataggio...";
+            btnSubmit.disabled = true;
+
+            let fileUrl = null;
+            if (fileInputUpdate.files.length > 0) {
+                btnSubmit.innerText = "Caricamento file...";
+                fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
+            }
+
+            let datiUpdate = {
+                stato: nuovoStato,
+                costo_confermato: nuovoCosto,
+                revisione: nuovaRev
+            };
+            
+            // MAGIA: Se carico un nuovo file, lo accodo a quelli vecchi mettendoci in mezzo una virgola!
+            if(fileUrl) {
+                if (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') {
+                    datiUpdate.file_url = ordOriginale.file_url + ',' + fileUrl;
+                } else {
+                    datiUpdate.file_url = fileUrl;
+                }
+            }
+
+            const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
+
+            if (!error) {
+                let testoLog = `Ordine a ${nomeFornitore} aggiornato in: ${nuovoStato.toUpperCase()}`;
+                if(nuovoCosto) testoLog += ` (Costo conf. € ${parseFloat(nuovoCosto).toFixed(2)})`;
+                if(nuovaRev > ordOriginale.revisione) testoLog += ` [Inizio Rev. ${nuovaRev}]`;
+
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: con.commessa_id,
+                    azione: testoLog,
+                    file_url: fileUrl, // Nel log viene salvato singolarmente solo il nuovo file caricato ora
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                chiudiModaleGestioneOrdine();
+                caricaOrdiniContratto(con.id);
+                caricaCronologia(con.commessa_id);
+            } else {
+                alert("Errore aggiornamento ordine: " + error.message);
+            }
+
+            btnSubmit.innerText = "Salva Aggiornamento";
+            btnSubmit.disabled = false;
+        });
+
+        // 4. CONTROLLO PASSAGGIO A STESURA
         async function verificaEPassaStesura() {
             const con = contrattiCorrenti[contrattoAttivoIndex];
             const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', con.id);
             
             if (!ordini || ordini.length === 0) {
                 if(!confirm("Attenzione: non hai inserito alcun pre-ordine fornitore per questo contratto. Vuoi procedere comunque con la Stesura?")) return;
+            } else {
+                const tuttiConfermati = ordini.every(o => o.stato === 'Conferma Arrivata' || o.stato === 'Approvato ed Inviato');
+                if(!tuttiConfermati) {
+                    if(!confirm("Attenzione: alcuni pre-ordini NON hanno ancora ricevuto la Conferma dal fornitore. Vuoi procedere comunque alla Stesura forzando i prezzi?")) return;
+                }
             }
-
             preparaStatoContratto('Stesura');
         }
 
-        // 4. GESTIONE CAMBIO STATO E DIARIO CON ALLEGATI GLOBALI
+        // 5. GESTIONE CAMBIO STATO CONTRATTO E DIARIO
         function preparaStatoContratto(nuovoStato) {
             statoPendenteContratto = nuovoStato;
             document.getElementById('span-nuovo-stato-contratto').innerText = nuovoStato.toUpperCase();
@@ -579,7 +773,7 @@
             let nuovoFileUrl = null;
             if (fileInput.files.length > 0) {
                 btnSubmit.innerText = "Caricamento file...";
-                nuovoFileUrl = await caricaFileContrattoSuStorage(fileInput.files[0]);
+                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'CONT_STATO');
             }
 
             let datiAggiornamento = { stato: nuovoStato };
@@ -595,7 +789,6 @@
             if (!error) {
                 if (nuovoFileUrl) con.file_url = nuovoFileUrl;
 
-                // INSERISCE NELLA TABELLA GLOBALE COMMESSE_LOG
                 await supabaseClient.from('commesse_log').insert([{
                     commessa_id: con.commessa_id,
                     azione: `Contratto aggiornato in: ${nuovoStato.toUpperCase()}`,
@@ -607,7 +800,7 @@
                 con.stato = nuovoStato;
                 chiudiModaleStatoContratto();
                 aggiornaDatiSchedaContrattoUI();
-                caricaCronologia(con.commessa_id); // Aggiorna ricaricando il diario globale
+                caricaCronologia(con.commessa_id);
                 caricaContratti();
             } else {
                 alert("Errore aggiornamento: " + error.message);
@@ -623,7 +816,6 @@
             const testo = inputNota.value;
             
             if (!testo || testo.trim() === '') return;
-
             const con = contrattiCorrenti[contrattoAttivoIndex];
             
             const { error } = await supabaseClient.from('commesse_log').insert([{
@@ -636,21 +828,15 @@
             if (!error) {
                 inputNota.value = '';
                 caricaCronologia(con.commessa_id);
-            } else {
-                alert("Errore salvataggio nota: " + error.message);
-            }
+            } else { alert("Errore: " + error.message); }
         }
 
-        // CARICA IL DIARIO (CRONOLOGIA GLOBALE DALLA NUOVA TABELLA)
+        // CARICA IL DIARIO (CRONOLOGIA GLOBALE)
         async function caricaCronologia(commessaId) {
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
 
-            const { data: logs, error } = await supabaseClient
-                .from('commesse_log')
-                .select('*')
-                .eq('commessa_id', commessaId)
-                .order('created_at', { ascending: false });
+            const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
 
             if (error || !logs || logs.length === 0) {
                 divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata in questa commessa.</p>';
@@ -664,12 +850,10 @@
                 
                 const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
-                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento</a>` : '';
 
                 let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
-                if (log.azione === "Comunicazione / Appunto Manuale") {
-                    icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
-                }
+                if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
 
                 html += `
                     <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
