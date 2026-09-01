@@ -33,7 +33,7 @@
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
                 <div>
-                    <p class="font-bold text-sm">Sebastiano</p>
+                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
                     <p class="text-xs text-gray-500 uppercase">Owner</p>
                 </div>
             </div>
@@ -118,38 +118,59 @@
 
             <!-- CARD AVANZAMENTO LAVORI (STEPPER) -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento</h3>
+                <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Cantiere</h3>
                 <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
             <!-- MENU TABS INTERATTIVO -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
-                <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Pagamenti</button>
-                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Ordini (Presto)</button>
-                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Interventi (Presto)</button>
+                <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
+                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi Collegati</button>
+                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Contratti & Ordini (Da menu)</button>
+                <button class="px-4 py-2 text-sm font-medium text-gray-400 cursor-not-allowed">Pagamenti (Presto)</button>
             </div>
 
-            <!-- CONTENUTO TAB 1: RIEPILOGO FINANZIARIO -->
-            <div id="tab-content-riepilogo" class="block">
+            <!-- CONTENUTO TAB 1: RIEPILOGO FINANZIARIO E DIARIO GLOBALE -->
+            <div id="tab-content-riepilogo" class="block space-y-6">
+                
+                <!-- Box Finanziari -->
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato (Da sviluppare)</p>
                         <p class="text-3xl font-bold text-emerald-600">0,00 €</p>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Residuo da Incassare</p>
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Valore Attuale Cantiere</p>
                         <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">0,00 €</p>
                     </div>
                 </div>
+
+                <!-- DIARIO / CRONOLOGIA GLOBALE COMMESSA -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
+                    <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include tutte le modifiche, gli avanzamenti dei preventivi/contratti collegati e le note scritte a mano.</p>
+                    
+                    <!-- INPUT NOTA RAPIDA MANUALE -->
+                    <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
+                            Aggiungi Nota
+                        </button>
+                    </div>
+
+                    <div id="lista-cronologia" class="space-y-4">
+                        <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- CONTENUTO TAB 2: PREVENTIVI -->
             <div id="tab-content-preventivi" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
-                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Gestisci in Preventivi &rarr;</a>
+                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai a gestione Preventivi &rarr;</a>
                 </div>
                 <div id="lista-preventivi-commessa" class="space-y-3">
                     <p class="text-sm text-gray-500">Caricamento preventivi in corso...</p>
@@ -237,8 +258,8 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl">
                 <div>
-                    <h3 class="text-lg font-bold">Modifica Dati Commessa</h3>
-                    <p class="text-xs text-gray-500">Aggiorna le informazioni anagrafiche del cantiere</p>
+                    <h3 class="text-lg font-bold">Modifica Dati Cantiere</h3>
+                    <p class="text-xs text-gray-500">Aggiorna le informazioni operative del cantiere</p>
                 </div>
                 <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
@@ -247,7 +268,6 @@
                 <form id="form-modifica-commessa" class="space-y-4">
                     <input type="hidden" id="mod-com-id"> 
                     <div class="pt-2">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Dati Cantiere</h4>
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-xs font-medium text-gray-500 mb-1">Nome Cantiere</label>
@@ -279,12 +299,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 mb-1">Valore Lavori (€)</label>
-                            <input type="number" step="0.01" id="mod-com-valore" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                        </div>
-                    </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
@@ -298,10 +312,13 @@
 
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
+
         let listaClientiCache = [];
         let commesseCorrenti = []; 
         let totaleCommesse = 0; 
         
+        // Sequenza Stati Esecutivi Cantiere
         const sequenzaStati = [
             'Preventivazione', 'Rilievo Esecutive', 'Contratto', 'Acconto', 
             'Ordini', 'In Consegna', 'In Posa', 'Collaudo', 'Saldo', 'Conclusa'
@@ -361,9 +378,10 @@
         function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
             aggiornaDatiSchedaUI();
+            cambiaTab('riepilogo'); // Apri tab Riepilogo
             
-            // Riporta il tab sempre su "Riepilogo" quando apri una commessa
-            cambiaTab('riepilogo');
+            // Carica Diario Globale per questa commessa
+            caricaCronologia(commesseCorrenti[index].id);
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -376,32 +394,25 @@
         }
 
         function cambiaTab(tabName) {
-            // Gestione Pulsanti Tab
             const btnRiep = document.getElementById('tab-btn-riepilogo');
             const btnPrev = document.getElementById('tab-btn-preventivi');
             
-            // Reset stili
             btnRiep.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
             btnPrev.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
             
-            // Nascondi Contenuti
             document.getElementById('tab-content-riepilogo').className = "hidden";
             document.getElementById('tab-content-preventivi').className = "hidden";
 
-            // Attiva Tab Selezionato
             if (tabName === 'riepilogo') {
                 btnRiep.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
-                document.getElementById('tab-content-riepilogo').className = "block";
+                document.getElementById('tab-content-riepilogo').className = "block space-y-6";
             } else if (tabName === 'preventivi') {
                 btnPrev.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
                 document.getElementById('tab-content-preventivi').className = "block space-y-4";
-                
-                // Carica i preventivi associati
                 caricaPreventiviDiQuestaCommessa();
             }
         }
 
-        // CARICA I PREVENTIVI NELLA SCHEDA COMMESSA
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -434,7 +445,6 @@
                 if (prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
                 if (prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-700';
 
-                // Bottone PDF se presente
                 let btnAllegato = '';
                 if (prev.file_url) {
                     btnAllegato = `<a href="${prev.file_url}" target="_blank" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded text-xs font-bold flex items-center gap-1 transition-colors border border-gray-200">📄 Apri PDF</a>`;
@@ -460,7 +470,6 @@
             divLista.innerHTML = html;
         }
 
-        // AGGIORNA DATI SCHEDA E STEPPER
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -503,13 +512,13 @@
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
                 
-                if (index < currentIdx) {
+                if (index < currentIdx || (statoAttuale === 'Conclusa' && index === currentIdx)) {
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
                 } else if (index === currentIdx) {
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-orange-500 text-white font-bold text-sm shadow-lg ring-4 ring-orange-100">${index + 1}</div>`;
                 }
 
-                let textColor = index <= currentIdx ? 'text-gray-900 font-semibold' : 'text-gray-400';
+                let textColor = (index <= currentIdx || statoAttuale === 'Conclusa') ? 'text-gray-900 font-semibold' : 'text-gray-400';
                 
                 punto.innerHTML = `
                     ${iconaHTML}
@@ -534,10 +543,88 @@
             const com = commesseCorrenti[commessaAttivaIndex];
             const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
             if (!error) {
+                // Scrive nel diario globale della commessa
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `Stato cantiere aggiornato in: ${nuovoStato.toUpperCase()}`,
+                    autore: UTENTE_CORRENTE
+                }]);
+
                 com.stato = nuovoStato; 
                 aggiornaDatiSchedaUI();
+                caricaCronologia(com.id);
                 caricaCommesse(); 
             }
+        }
+
+        // --- GESTIONE DIARIO E NOTA MANUALE ---
+        async function salvaNotaLibera() {
+            const inputNota = document.getElementById('input-nota-libera');
+            const testo = inputNota.value;
+            
+            if (!testo || testo.trim() === '') return;
+
+            const com = commesseCorrenti[commessaAttivaIndex];
+            
+            const { error } = await supabaseClient.from('commesse_log').insert([{
+                commessa_id: com.id,
+                azione: "Comunicazione / Appunto Manuale",
+                nota: testo,
+                autore: UTENTE_CORRENTE
+            }]);
+
+            if (!error) {
+                inputNota.value = '';
+                caricaCronologia(com.id);
+            } else {
+                alert("Errore salvataggio nota: " + error.message);
+            }
+        }
+
+        async function caricaCronologia(commessaId) {
+            const divLog = document.getElementById('lista-cronologia');
+            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
+
+            const { data: logs, error } = await supabaseClient
+                .from('commesse_log')
+                .select('*')
+                .eq('commessa_id', commessaId)
+                .order('created_at', { ascending: false });
+
+            if (error || !logs || logs.length === 0) {
+                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività o nota registrata per questo cantiere.</p>';
+                return;
+            }
+
+            let html = '';
+            logs.forEach(log => {
+                const dateObj = new Date(log.created_at);
+                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                
+                const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
+                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento di questa attività</a>` : '';
+
+                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
+                if (log.azione === "Comunicazione / Appunto Manuale") {
+                    icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                }
+
+                html += `
+                    <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                        ${icona}
+                        <div class="flex-1">
+                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
+                                <p class="text-sm font-bold text-gray-900">${log.azione}</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat} ${autoreText}</p>
+                            </div>
+                            ${notaHtml}
+                            ${fileHtml}
+                        </div>
+                    </div>
+                `;
+            });
+            divLog.innerHTML = html;
         }
 
         // 3. LOGICA MODIFICA DATI FINESTRA
@@ -550,7 +637,6 @@
             document.getElementById('mod-com-referente').value = com.referente || '';
             document.getElementById('mod-com-tel-referente').value = com.telefono_referente || '';
             document.getElementById('mod-com-email-referente').value = com.email_referente || '';
-            document.getElementById('mod-com-valore').value = com.valore || '';
             
             document.getElementById('modal-modifica-commessa').classList.remove('hidden');
         }
@@ -566,15 +652,22 @@
                 citta_cantiere: document.getElementById('mod-com-citta').value,
                 referente: document.getElementById('mod-com-referente').value,
                 telefono_referente: document.getElementById('mod-com-tel-referente').value,
-                email_referente: document.getElementById('mod-com-email-referente').value,
-                valore: document.getElementById('mod-com-valore').value || null
+                email_referente: document.getElementById('mod-com-email-referente').value
             };
 
             const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
             if (!error) {
+                // Scrive nel log
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: id,
+                    azione: `Dati anagrafici e operativi del cantiere aggiornati`,
+                    autore: UTENTE_CORRENTE
+                }]);
+
                 chiudiModaleModifica();
                 Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati);
                 aggiornaDatiSchedaUI();
+                caricaCronologia(id);
                 caricaCommesse(); 
             }
         });
@@ -622,8 +715,18 @@
                 stato: 'Preventivazione', 
                 valore: null 
             };
-            const { error } = await supabaseClient.from('commesse').insert([nuovaCommessa]);
-            if (!error) { chiudiModaleNuovaCommessa(); caricaCommesse(); }
+            const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
+            if (!error && data) { 
+                // Scrive l'atto di nascita nel log globale
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: data[0].id,
+                    azione: `Apertura nuovo cantiere`,
+                    autore: UTENTE_CORRENTE
+                }]);
+                
+                chiudiModaleNuovaCommessa(); 
+                caricaCommesse(); 
+            }
             else { alert("Errore durante il salvataggio: " + error.message); }
         });
 
