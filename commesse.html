@@ -23,10 +23,11 @@
         </div>
         <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
-            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
+            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
             <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
             <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
+            <a href="ordini.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Ordini Fornitori</a>
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
@@ -85,10 +86,9 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO COMMESSA (VISTA A TUTTO SCHERMO) -->
+    <!-- SCHEDA DETTAGLIO COMMESSA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         
-        <!-- Intestazione Fissa in alto -->
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
@@ -105,10 +105,8 @@
             </button>
         </div>
 
-        <!-- Contenuto Scheda -->
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
-            <!-- Sotto-titolo Info Rapide -->
             <div class="text-sm text-gray-600 flex items-center gap-2">
                 <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">Nome Cliente</span> 
                 <span>&bull;</span> 
@@ -117,25 +115,24 @@
                 Valore: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
             </div>
 
-            <!-- CARD AVANZAMENTO LAVORI (STEPPER) -->
+            <!-- STEPPER CANTIERE -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Cantiere</h3>
                 <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MENU TABS INTERATTIVO ORA SBLOCCATO -->
+            <!-- MENU TABS (Ora con "Ordini Fornitori" al posto giusto) -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
                 <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
                 <button onclick="cambiaTab('contratti')" id="tab-btn-contratti" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Contratti</button>
+                <button onclick="cambiaTab('ordini')" id="tab-btn-ordini" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Ordini Fornitori</button>
                 <button onclick="cambiaTab('fatture')" id="tab-btn-fatture" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Fatturazione</button>
             </div>
 
-            <!-- CONTENUTO TAB 1: RIEPILOGO FINANZIARIO E DIARIO GLOBALE -->
+            <!-- CONTENUTO TAB 1: RIEPILOGO E DIARIO GLOBALE -->
             <div id="tab-content-riepilogo" class="block space-y-6">
-                
-                <!-- Box Finanziari -->
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato Acconti</p>
@@ -147,62 +144,130 @@
                     </div>
                 </div>
 
-                <!-- DIARIO / CRONOLOGIA GLOBALE COMMESSA -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
                     <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include tutte le modifiche, gli avanzamenti dei preventivi/contratti collegati e le note scritte a mano.</p>
-                    
-                    <!-- INPUT NOTA RAPIDA MANUALE -->
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
-                            Aggiungi Nota
-                        </button>
+                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
-
-                    <div id="lista-cronologia" class="space-y-4">
-                        <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
-                    </div>
+                    <div id="lista-cronologia" class="space-y-4"></div>
                 </div>
             </div>
 
-            <!-- CONTENUTO TAB 2: PREVENTIVI -->
+            <!-- CONTENUTO TAB PREVENTIVI -->
             <div id="tab-content-preventivi" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
                     <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Preventivi &rarr;</a>
                 </div>
-                <div id="lista-preventivi-commessa" class="space-y-3">
-                    <p class="text-sm text-gray-500">Caricamento preventivi in corso...</p>
-                </div>
+                <div id="lista-preventivi-commessa" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENUTO TAB 3: CONTRATTI -->
+            <!-- CONTENUTO TAB CONTRATTI -->
             <div id="tab-content-contratti" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Contratti Generati</h3>
                     <a href="contratti.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Contratti &rarr;</a>
                 </div>
-                <div id="lista-contratti-commessa" class="space-y-3">
-                    <p class="text-sm text-gray-500">Caricamento contratti in corso...</p>
+                <div id="lista-contratti-commessa" class="space-y-3"></div>
+            </div>
+
+            <!-- CONTENUTO TAB NUOVO: ORDINI FORNITORI -->
+            <div id="tab-content-ordini" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
+                    <a href="ordini.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai alla pagina globale Ordini &rarr;</a>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3">Fornitore</th>
+                                <th class="px-4 py-3">Materiale</th>
+                                <th class="px-4 py-3">Stato & Consegna</th>
+                                <th class="px-4 py-3 text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100">
+                            <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- CONTENUTO TAB 4: FATTURAZIONE -->
+            <!-- CONTENUTO TAB FATTURAZIONE -->
             <div id="tab-content-fatture" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture</h3>
                     <a href="fatturazione.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Fatturazione &rarr;</a>
                 </div>
-                <div id="lista-fatture-commessa" class="space-y-3">
-                    <p class="text-sm text-gray-500">Caricamento fatture in corso...</p>
-                </div>
+                <div id="lista-fatture-commessa" class="space-y-3"></div>
             </div>
 
         </div>
     </div>
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
+
+    <!-- MODALE: GESTISCI ORDINE (Replicato da ordini.html per agire direttamente dalla commessa!) -->
+    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3>
+                    <p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p>
+                </div>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-gestisci-ordine" class="space-y-4">
+                    <input type="hidden" id="gest-ord-id">
+                    
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
+                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
+                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Costo Confermato Effettivo (€)</label>
+                            <input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
+                            <div class="flex items-center">
+                                <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
+                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-r-lg font-bold border border-l-0 border-gray-200">+1</button>
+                            </div>
+                        </div>
+                        
+                        <div id="box-data-consegna" class="col-span-2 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <label class="block text-sm font-bold text-blue-900 mb-1">📅 Data presunta arrivo merce</label>
+                            <input type="date" id="gest-ord-data-consegna" class="w-full sm:w-1/2 px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-700">
+                        </div>
+
+                        <div class="col-span-2 mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni / Note</label>
+                            <textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Revisione</label>
+                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- FINESTRA MODALE NUOVA COMMESSA -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
@@ -338,6 +403,7 @@
 
         let listaClientiCache = [];
         let commesseCorrenti = []; 
+        let ordiniCommessaCache = [];
         let totaleCommesse = 0; 
         
         const sequenzaStati = [
@@ -399,10 +465,8 @@
         function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
             aggiornaDatiSchedaUI();
-            cambiaTab('riepilogo'); // Apri tab Riepilogo
-            
+            cambiaTab('riepilogo'); 
             caricaCronologia(commesseCorrenti[index].id);
-            // Non c'è bisogno di calcolare l'incasso qui, lo facciamo dentro caricaFattureDiQuestaCommessa
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -414,9 +478,9 @@
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
-        // GESTIONE DEI TABS
+        // GESTIONE DEI TABS (Adesso include anche Ordini)
         function cambiaTab(tabName) {
-            const tabs = ['riepilogo', 'preventivi', 'contratti', 'fatture'];
+            const tabs = ['riepilogo', 'preventivi', 'contratti', 'ordini', 'fatture'];
             
             tabs.forEach(t => {
                 document.getElementById(`tab-btn-${t}`).className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
@@ -427,7 +491,6 @@
             
             if (tabName === 'riepilogo') {
                 document.getElementById('tab-content-riepilogo').className = "block space-y-6";
-                // Ricalcolo al volo incassi quando torno sul riepilogo
                 calcolaIncassato();
             } else if (tabName === 'preventivi') {
                 document.getElementById('tab-content-preventivi').className = "block space-y-4";
@@ -435,6 +498,9 @@
             } else if (tabName === 'contratti') {
                 document.getElementById('tab-content-contratti').className = "block space-y-4";
                 caricaContrattiDiQuestaCommessa();
+            } else if (tabName === 'ordini') {
+                document.getElementById('tab-content-ordini').className = "block space-y-4";
+                caricaOrdiniDiQuestaCommessa();
             } else if (tabName === 'fatture') {
                 document.getElementById('tab-content-fatture').className = "block space-y-4";
                 caricaFattureDiQuestaCommessa();
@@ -453,6 +519,69 @@
             document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
         }
 
+        // TAB ORDINI FORNITORI (NUOVO)
+        async function caricaOrdiniDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const tbody = document.getElementById('lista-ordini-commessa');
+            tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>';
+
+            const { data: ordini, error } = await supabaseClient
+                .from('ordini_fornitori')
+                .select(`*, fornitori(nome_azienda, categoria), contratti!inner(commessa_id)`)
+                .eq('contratti.commessa_id', com.id)
+                .order('created_at', { ascending: false });
+
+            if (error) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-red-500 py-4">Errore di caricamento ordini.</td></tr>'; return; }
+
+            if (!ordini || ordini.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Nessun ordine fornitore presente in questa commessa.</td></tr>';
+                return;
+            }
+
+            ordiniCommessaCache = ordini; // Salvo in cache locale per il modal
+            let html = '';
+            
+            ordini.forEach((ord, i) => {
+                let statoPulito = ord.stato;
+                if(statoPulito === 'Conferma') statoPulito = 'Conferma Arrivata';
+                if(statoPulito === 'Da controllare ed inviare') statoPulito = 'Da Controllare';
+                if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
+
+                const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
+                const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '--';
+                
+                let stringaConsegna = '';
+                if (ord.data_arrivo_merce) {
+                    const d = ord.data_arrivo_merce.split('-');
+                    stringaConsegna = `<div class="text-[10px] text-gray-500 mt-1">📅 Arrivo: <strong class="text-gray-700">${d[2]}/${d[1]}/${d[0]}</strong></div>`;
+                }
+
+                let badgeClass = 'bg-gray-100 text-gray-600';
+                if(statoPulito === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700';
+                if(statoPulito === 'Da Controllare') badgeClass = 'bg-yellow-100 text-yellow-800';
+                if(statoPulito === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800';
+                if(statoPulito === 'Ordine confermato ed inviato al Fornitore') badgeClass = 'bg-emerald-100 text-emerald-800';
+
+                let nomeStatoBadge = statoPulito;
+                if(nomeStatoBadge === 'Ordine confermato ed inviato al Fornitore') nomeStatoBadge = 'Ordine Confermato';
+
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
+                        <td class="px-4 py-3 text-gray-700 text-xs">${ord.descrizione}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${nomeStatoBadge}</span>
+                            ${stringaConsegna}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Gestisci</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
         // TAB PREVENTIVI
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -460,7 +589,6 @@
             divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
 
             const { data: preventivi, error } = await supabaseClient.from('preventivi').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
-
             if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento preventivi.</p>'; return; }
 
             if (!preventivi || preventivi.length === 0) {
@@ -501,7 +629,6 @@
             divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
 
             const { data: contratti, error } = await supabaseClient.from('contratti').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
-
             if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento contratti.</p>'; return; }
 
             if (!contratti || contratti.length === 0) {
@@ -540,7 +667,6 @@
             divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
 
             const { data: fatture, error } = await supabaseClient.from('fatture').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
-
             if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento fatture.</p>'; return; }
 
             if (!fatture || fatture.length === 0) {
@@ -571,7 +697,7 @@
             divLista.innerHTML = html;
         }
 
-
+        // AGGIORNAMENTO UI DELLA SCHEDA
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -658,7 +784,168 @@
             }
         }
 
-        // --- GESTIONE DIARIO E NOTA MANUALE ---
+        // --- GESTIONE ORDINE INNESTATO (Replicata per lavorare da dentro la Commessa) ---
+        const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore'];
+        let statoPendenteOrdine = '';
+        
+        async function caricaFileSuStorage(file, prefisso) {
+            if (!file) return null;
+            const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+            const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
+            await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
+
+        function apriModaleGestioneOrdine(indexMemoria) {
+            const ord = ordiniCommessaCache[indexMemoria];
+            const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+
+            document.getElementById('gest-ord-id').value = ord.id;
+            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
+            
+            let statoPartenza = ord.stato || 'Richiesta Inviata';
+            if(statoPartenza === 'Conferma') statoPartenza = 'Conferma Arrivata';
+            if(statoPartenza === 'Da controllare ed inviare') statoPartenza = 'Da Controllare';
+            if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
+            
+            document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
+            document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
+            document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || '';
+            document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; 
+            document.getElementById('gest-ord-file').value = ''; 
+
+            impostaStatoPendenteOrdine(statoPartenza);
+            document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
+        }
+
+        function chiudiModaleGestioneOrdine() { document.getElementById('modal-gestisci-ordine').classList.add('hidden'); }
+
+        function impostaStatoPendenteOrdine(nuovoStato) {
+            statoPendenteOrdine = nuovoStato;
+            const container = document.getElementById('stepper-container-ordine');
+            const azioniBox = document.getElementById('stepper-azioni-ordine');
+            const boxData = document.getElementById('box-data-consegna');
+            
+            container.innerHTML = ''; azioniBox.innerHTML = '';
+
+            if (statoPendenteOrdine === 'In Revisione') {
+                container.innerHTML = `<div class="w-full text-center py-3 bg-orange-50 text-orange-600 font-bold rounded-lg border border-orange-200 text-sm">⚠️ ORDINE IN REVISIONE FORNITORE</div>`;
+                azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm transition-colors">Termina Revisione (Torna a Conferma Arrivata)</button>`;
+                boxData.classList.add('hidden');
+                return;
+            }
+
+            const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine);
+            const bgLine = document.createElement('div');
+            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4';
+            container.appendChild(bgLine);
+
+            const etichetteBrevi = ['Richiesta', 'Conferma Arrivata', 'Controllo', 'Inviato al Forn.'];
+
+            sequenzaStatiOrdine.forEach((stato, index) => {
+                const punto = document.createElement('div');
+                punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-1 z-10';
+                
+                let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
+                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
+                } else if (index === currentIdx) {
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-[10px] shadow-md ring-2 ring-blue-100">${index + 1}</div>`;
+                }
+
+                let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-24 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`;
+                container.appendChild(punto);
+            });
+
+            if (currentIdx >= 1) { boxData.classList.remove('hidden'); } else { boxData.classList.add('hidden'); }
+
+            if (statoPendenteOrdine === 'Richiesta Inviata') {
+                azioniBox.innerHTML = `<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Segna Conferma Arrivata &rarr;</button>`;
+            } else if (statoPendenteOrdine === 'Conferma Arrivata') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Richiesta Inviata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg shadow-sm transition-colors">Passa a Controllo &rarr;</button>
+                `;
+            } else if (statoPendenteOrdine === 'Da Controllare') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Ordine confermato ed inviato al Fornitore')" class="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Invia Definitivo &rarr;</button>
+                `;
+            } else if (statoPendenteOrdine === 'Ordine confermato ed inviato al Fornitore') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Riporta a Controllo</button>
+                `;
+            }
+        }
+
+        document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSubmit = document.getElementById('btn-salva-gest-ordine');
+            const idOrdine = document.getElementById('gest-ord-id').value;
+            const com = commesseCorrenti[commessaAttivaIndex];
+            
+            const ordOriginale = ordiniCommessaCache.find(o => o.id == idOrdine);
+            const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
+
+            btnSubmit.innerText = "Salvataggio...";
+            btnSubmit.disabled = true;
+
+            let fileUrl = null;
+            const fileInputUpdate = document.getElementById('gest-ord-file');
+            if (fileInputUpdate.files.length > 0) {
+                btnSubmit.innerText = "Caricamento file...";
+                fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
+            }
+
+            let datiUpdate = {
+                stato: statoPendenteOrdine, 
+                costo_confermato: document.getElementById('gest-ord-costo-conf').value || null,
+                revisione: document.getElementById('gest-ord-revisione').value,
+                data_arrivo_merce: document.getElementById('gest-ord-data-consegna').value || null,
+                annotazioni: document.getElementById('gest-ord-annotazioni').value || null
+            };
+            
+            if(fileUrl) {
+                if (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') {
+                    datiUpdate.file_url = ordOriginale.file_url + ',' + fileUrl;
+                } else {
+                    datiUpdate.file_url = fileUrl;
+                }
+            }
+
+            const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
+
+            if (!error) {
+                let nomeStatoPerLog = statoPendenteOrdine;
+                if(nomeStatoPerLog === 'Ordine confermato ed inviato al Fornitore') nomeStatoPerLog = 'Ordine Confermato Definitivo';
+                let testoLog = `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`;
+                
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: testoLog,
+                    nota: datiUpdate.annotazioni, 
+                    file_url: fileUrl, 
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                chiudiModaleGestioneOrdine();
+                caricaOrdiniDiQuestaCommessa();
+                caricaCronologia(com.id);
+            } else {
+                alert("Errore aggiornamento ordine: " + error.message);
+            }
+
+            btnSubmit.innerText = "💾 Salva Aggiornamento Definitivo";
+            btnSubmit.disabled = false;
+        });
+
+        // --- GESTIONE NOTA MANUALE (Diario) ---
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera');
             const testo = inputNota.value;
@@ -728,7 +1015,7 @@
             divLog.innerHTML = html;
         }
 
-        // 3. LOGICA MODIFICA DATI FINESTRA
+        // MODIFICA DATI CANTIERE
         function apriModaleModifica() {
             const com = commesseCorrenti[commessaAttivaIndex];
             document.getElementById('mod-com-id').value = com.id;
@@ -772,7 +1059,7 @@
             }
         });
 
-        // 4. LOGICA CREAZIONE NUOVA COMMESSA
+        // NUOVA COMMESSA
         document.getElementById('check-copia-dati').addEventListener('change', () => {
             const isChecked = document.getElementById('check-copia-dati').checked;
             const clienteId = document.getElementById('form-com-cliente').value;
@@ -822,11 +1109,9 @@
                     azione: `Apertura nuovo cantiere`,
                     autore: UTENTE_CORRENTE
                 }]);
-                
                 chiudiModaleNuovaCommessa(); 
                 caricaCommesse(); 
-            }
-            else { alert("Errore durante il salvataggio: " + error.message); }
+            } else { alert("Errore salvataggio: " + error.message); }
         });
 
         // INIT
