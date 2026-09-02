@@ -117,7 +117,10 @@
 
             <!-- STEPPER CANTIERE -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Cantiere</h3>
+                <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
+                    <span>Avanzamento Cantiere</span>
+                    <span class="text-xs font-normal text-gray-400">Clicca sui pallini per forzare un "salto" di stato</span>
+                </h3>
                 <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
@@ -160,7 +163,7 @@
             <div id="tab-content-preventivi" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
-                    <a href="preventivi.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Preventivi &rarr;</a>
+                    <button onclick="creaPreventivoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Preventivo</button>
                 </div>
                 <div id="lista-preventivi-commessa" class="space-y-3"></div>
             </div>
@@ -221,11 +224,22 @@
         </div>
     </div>
 
-    <!-- ========================================================================= -->
-    <!--                               AREA MODALI                                 -->
-    <!-- ========================================================================= -->
+    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
 
-    <!-- 1. MODALE: ESITO COLLAUDO / FINE LAVORI -->
+    <!-- NUOVO MODALE: AVVISO PREVENTIVO MANCANTE -->
+    <div id="modal-avviso-preventivo" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-xl">
+            <div class="text-5xl mb-4">⚠️</div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Nessun Preventivo Trovato</h3>
+            <p class="text-sm text-gray-600 mb-6">La commessa non ha ancora preventivi in stato di lavorazione. Crea prima un Nuovo Preventivo per poter procedere al rilievo esecutivo.</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="creaPreventivoDaCommessa()" class="w-full py-2.5 bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white rounded-lg text-sm font-bold shadow-sm transition-colors">Nuovo Preventivo</button>
+                <button onclick="document.getElementById('modal-avviso-preventivo').classList.add('hidden')" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-semibold transition-colors">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -272,7 +286,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo (Obbligatorio per difetti/contestazioni)</label>
                     <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
                 </div>
             </div>
@@ -283,7 +297,7 @@
         </div>
     </div>
 
-    <!-- 2. MODALE: GESTISCI ORDINE INNESTATO -->
+    <!-- MODALE: GESTISCI ORDINE INNESTATO -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -329,7 +343,7 @@
         </div>
     </div>
 
-    <!-- 3. MODALE: NUOVO ORDINE DA COMMESSA -->
+    <!-- MODALE: NUOVO ORDINE DA COMMESSA -->
     <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -360,7 +374,7 @@
         </div>
     </div>
 
-    <!-- 4. MODALE: INSERIMENTO POSA/INTERVENTO -->
+    <!-- MODALE: INSERIMENTO POSA/INTERVENTO -->
     <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -390,7 +404,7 @@
         </div>
     </div>
 
-    <!-- 5. MODALE: NUOVA COMMESSA -->
+    <!-- MODALE: NUOVA COMMESSA (ORA FUNZIONA) -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -428,12 +442,12 @@
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button>
-                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button>
+                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Commessa</button>
             </div>
         </div>
     </div>
 
-    <!-- 6. MODALE MODIFICA CON TASTO ELIMINA -->
+    <!-- MODALE MODIFICA DATI COMMESSA E TASTO ELIMINA (ORA FUNZIONA) -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -486,7 +500,7 @@
         
         let commessaAttivaIndex = null; 
 
-        // GESTIONE SMART LINK DALLA DASHBOARD E SCHEDA CLIENTI
+        // RICEVITORE PARAMETRO URL DALLA DASHBOARD / CLIENTI
         document.addEventListener('DOMContentLoaded', async () => { 
             await popolaTendinaClienti(); 
             await caricaCommesse(); 
@@ -502,7 +516,6 @@
                     const select = document.getElementById('form-com-cliente');
                     select.value = clienteId;
                     document.getElementById('check-copia-dati').checked = true;
-                    // Scatena la compilazione automatica
                     select.dispatchEvent(new Event('change'));
                 }
             }
@@ -593,6 +606,14 @@
             else if (tabName === 'fatture') { document.getElementById('tab-content-fatture').className = "block space-y-4"; caricaFattureDiQuestaCommessa(); }
         }
 
+        // --- PREVENTIVI: CREAZIONE DIRETTA DA COMMESSA ---
+        function creaPreventivoDaCommessa() {
+            if (commessaAttivaIndex !== null) {
+                const com = commesseCorrenti[commessaAttivaIndex];
+                window.location.href = `preventivi.html?action=new&commessa_id=${com.id}`;
+            }
+        }
+
         async function calcolaIncassato() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const { data: fatture } = await supabaseClient.from('fatture').select('importo, stato').eq('commessa_id', com.id);
@@ -601,7 +622,7 @@
             document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
         }
 
-        // --- STEPPER CANTIERE ---
+        // --- STEPPER CANTIERE CON SALTO STATO E BLOCCO PREVENTIVO ---
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -656,7 +677,8 @@
 
             sequenzaStati.forEach((stato, index) => {
                 const punto = document.createElement('div');
-                punto.className = 'flex flex-col items-center gap-2 bg-white px-1 sm:px-2 z-10';
+                punto.className = 'flex flex-col items-center gap-2 bg-white px-1 sm:px-2 z-10 cursor-pointer hover:scale-110 transition-transform';
+                punto.onclick = () => saltoStato(stato); // RENDE IL PALLINO CLICCABILE
                 
                 let labelVisuale = stato;
                 if (index === 7 && etichettaOverride) labelVisuale = etichettaOverride;
@@ -723,23 +745,43 @@
             }
         }
 
-        async function cambiaStatoDB(nuovoStato) {
+        // FUNZIONE PER IL SALTO LIBERO TRA GLI STATI
+        function saltoStato(nuovoStato) {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            if (com.stato === nuovoStato) return; // Se clicco dove sono già, non fa nulla
+            if (confirm(`Vuoi forzare il salto lavorazione allo stato: ${nuovoStato.toUpperCase()}?\nL'azione verrà registrata nel diario.`)) {
+                cambiaStatoDB(nuovoStato, true);
+            }
+        }
+
+        async function cambiaStatoDB(nuovoStato, isSalto = false) {
             const com = commesseCorrenti[commessaAttivaIndex];
             
+            // BLOCCO 1: Controllo Preventivi (solo se NON è un salto forzato)
+            if (!isSalto && com.stato === 'Preventivazione' && nuovoStato === 'Rilievo Esecutive') {
+                const { data: prevs } = await supabaseClient.from('preventivi').select('id').eq('commessa_id', com.id);
+                if (!prevs || prevs.length === 0) {
+                    document.getElementById('modal-avviso-preventivo').classList.remove('hidden');
+                    return; // Blocca tutto
+                }
+            }
+
+            // BLOCCO 2: In Consegna (Gli ordini devono essere confermati)
             if (nuovoStato === 'In Consegna') {
                 const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato, contratti!inner(commessa_id)').eq('contratti.commessa_id', com.id);
                 if (ordini && ordini.length > 0) {
                     const tuttiConfermati = ordini.every(o => o.stato === 'Ordine confermato ed inviato al Fornitore' || o.stato === 'Merce Arrivata in Magazzino');
                     if (!tuttiConfermati) {
                         alert("⚠️ BLOCCO: Impossibile passare a 'In Consegna'. Tutti gli ordini devono essere confermati.");
-                        return;
+                        if(!isSalto) return; // Se stiamo forzando un salto magari chiudiamo un occhio? Meglio bloccare comunque per sicurezza logistica.
                     }
                 }
             }
 
             const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
             if (!error) {
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Stato cantiere aggiornato in: ${nuovoStato.toUpperCase()}`, autore: UTENTE_CORRENTE }]);
+                let msgLog = isSalto ? `Salto lavorazione forzato in: ${nuovoStato.toUpperCase()}` : `Stato cantiere aggiornato in: ${nuovoStato.toUpperCase()}`;
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: msgLog, autore: UTENTE_CORRENTE }]);
                 com.stato = nuovoStato; aggiornaDatiSchedaUI(); caricaCronologia(com.id); caricaCommesse(); 
             }
         }
@@ -1204,7 +1246,7 @@
             divLog.innerHTML = html;
         }
 
-        // --- GESTIONE NUOVA E MODIFICA COMMESSA (FUNZIONI RIPRISTINATE E COLLEGATE) ---
+        // --- GESTIONE NUOVA E MODIFICA COMMESSA ---
         function apriModaleModifica() {
             if (commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -1254,7 +1296,6 @@
         function chiudiModaleNuovaCommessa() { 
             document.getElementById('modal-nuova-commessa').classList.add('hidden'); 
             document.getElementById('form-nuova-commessa').reset(); 
-            // Pulisce l'URL se ci eravamo arrivati da "Nuovo"
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
