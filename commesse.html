@@ -88,6 +88,7 @@
 
     <!-- SCHEDA DETTAGLIO COMMESSA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
+        
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
@@ -105,6 +106,7 @@
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+            
             <div class="text-sm text-gray-600 flex items-center gap-2">
                 <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">Nome Cliente</span> 
                 <span>&bull;</span> 
@@ -170,7 +172,6 @@
             <div id="tab-content-contratti" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Contratti Generati</h3>
-                    <a href="contratti.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Contratti &rarr;</a>
                 </div>
                 <div id="lista-contratti-commessa" class="space-y-3"></div>
             </div>
@@ -214,7 +215,6 @@
             <div id="tab-content-fatture" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture</h3>
-                    <a href="fatturazione.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai al modulo Fatturazione &rarr;</a>
                 </div>
                 <div id="lista-fatture-commessa" class="space-y-3"></div>
             </div>
@@ -247,33 +247,50 @@
                 </div>
                 <button type="button" onclick="chiudiModaleCollaudo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
+            
             <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
                 <div>
                     <label class="block text-sm font-bold text-gray-800 mb-3">Qual è l'esito dei lavori in cantiere?</label>
                     <div class="space-y-3">
-                        <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100">
-                            <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 border-gray-300">
-                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza al "Saldo".</span></div>
+                        <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                            <div>
+                                <span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span>
+                                <span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza al "Saldo". Il cliente è pronto per la fattura finale.</span>
+                            </div>
                         </label>
-                        <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100">
-                            <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 border-gray-300">
-                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa avanza al "Saldo" ma viene aperto un Ticket.</span></div>
+                        <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
+                            <div>
+                                <span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span>
+                                <span class="block text-xs text-yellow-600 mt-0.5">La commessa avanza al "Saldo" ma viene aperto un Ticket per le piccole sistemazioni.</span>
+                            </div>
                         </label>
-                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100">
-                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 border-gray-300">
-                            <div><span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span><span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza". Saldo bloccato.</span></div>
+                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                            <div>
+                                <span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span>
+                                <span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza/Ripristino". Saldo bloccato finché non si sostituiscono i materiali.</span>
+                            </div>
                         </label>
-                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100">
-                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 border-gray-300">
-                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale.</span></div>
+                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                            <div>
+                                <span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span>
+                                <span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione amministrativa.</span>
+                            </div>
                         </label>
                     </div>
                 </div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Note sul Collaudo</label><textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo (Obbligatorio per difetti/contestazioni)</label>
+                    <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
+                </div>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="button" onclick="salvaEsitoCollaudo()" class="bg-[#2e2a5b] text-white px-6 py-2.5 rounded-lg text-sm font-bold">Conferma Esito</button>
+                <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="salvaEsitoCollaudo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Esito</button>
             </div>
         </div>
     </div>
@@ -283,7 +300,7 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div><h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3><p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p></div>
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-gestisci-ordine" class="space-y-4">
@@ -299,7 +316,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
                             <div class="flex items-center">
                                 <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
-                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
+                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
                             </div>
                         </div>
                         <div id="box-data-consegna" class="col-span-2 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
@@ -310,13 +327,13 @@
                     </div>
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label>
-                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600">Annulla</button>
-                <button type="submit" form="form-gestisci-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md">💾 Salva Aggiornamento</button>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="submit" form="form-gestisci-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
             </div>
         </div>
     </div>
@@ -325,24 +342,27 @@
     <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Invia Nuova Richiesta Fornitore</h3></div>
-                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <div>
+                    <h3 class="text-lg font-bold">Invia Nuova Richiesta Fornitore</h3>
+                    <p class="text-xs text-gray-500">Crea la riga d'ordine da agganciare alla commessa</p>
+                </div>
+                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-ordine-commessa" class="space-y-4">
                     <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3">
-                        <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer">
-                        <label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label>
+                        <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer">
+                        <div><label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label></div>
                     </div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento *</label><select id="form-ord-contratto-rif" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"><option value="">Caricamento...</option></select></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Costo Preventivato Stimato (€)</label><input type="number" step="0.01" id="form-ord-new-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none" placeholder="0.00"></div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="submit" form="form-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button>
+                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea Ordine</button>
             </div>
         </div>
     </div>
@@ -352,7 +372,7 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div><h3 class="text-lg font-bold">Registra Intervento di Posa</h3></div>
-                <button type="button" onclick="chiudiModalePosa()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModalePosa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-intervento-posa" class="space-y-4">
@@ -362,24 +382,25 @@
                     </div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Lavori eseguiti / Note</label><textarea id="posa-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Foto del lavoro (o PDF)</label>
-                        <input type="file" id="posa-file" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 cursor-pointer">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Foto del lavoro</label>
+                        <input type="file" id="posa-file" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModalePosa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="submit" form="form-intervento-posa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Intervento</button>
+                <button type="button" onclick="chiudiModalePosa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="submit" form="form-intervento-posa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Intervento</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE: NUOVA COMMESSA -->
+
+    <!-- ================= MODALI BASE COMMESSA ================= -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div><h3 class="text-lg font-bold">Nuova Commessa</h3></div>
-                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuova-commessa" class="space-y-5">
@@ -394,16 +415,13 @@
                         </div>
                         <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero *</label><input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600"></div>
                     </div>
-                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg space-y-4">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Nome Cantiere</label><input type="text" id="form-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
-                            <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
-                        </div>
-                        <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50">
-                            <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
-                            <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
-                            <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                        <div class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Nome Cantiere</label><input type="text" id="form-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            <div class="grid grid-cols-12 gap-4">
+                                <div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -415,12 +433,11 @@
         </div>
     </div>
 
-    <!-- MODALE: MODIFICA DATI CANTIERE -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div>
-                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-modifica-commessa" class="space-y-4">
@@ -439,12 +456,11 @@
                     </div>
                 </form>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">🗑️ Elimina Cantiere</button>
                 <div class="flex gap-3">
                     <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button>
-                    <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button>
+                    <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button>
                 </div>
             </div>
         </div>
@@ -468,6 +484,7 @@
         
         let commessaAttivaIndex = null; 
 
+        // RICEVITORE PARAMETRO URL
         document.addEventListener('DOMContentLoaded', async () => { 
             await popolaTendinaClienti(); 
             await caricaCommesse(); 
@@ -493,6 +510,7 @@
             }
         });
 
+        // 1. CARICAMENTO BASE
         async function popolaTendinaClienti() {
             const { data: clienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta').order('nome_ragione_sociale');
             if (clienti) {
@@ -586,7 +604,7 @@
             document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
         }
 
-        // --- FUNZIONI CARICAMENTO TABS (I FILE MANCANTI) ---
+        // --- FUNZIONI CARICAMENTO TABS E LINK MAGICI ---
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -614,15 +632,16 @@
                 if(prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
 
                 html += `
-                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div onclick="window.location.href='preventivi.html?id=${prev.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
                         <div>
                             <div class="flex items-center gap-3 mb-1">
-                                <span class="font-bold text-[#2e2a5b]">${prev.numero}</span>
+                                <span class="font-bold text-[#2e2a5b] group-hover:underline">${prev.numero}</span>
                                 <span class="px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
                                 <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${prev.stato || 'Da Fare'}</span>
                             </div>
                             <p class="text-xs text-gray-500">Creato il: ${dataIta} &bull; Importo: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
+                        <div class="text-gray-400 font-bold ml-4">&rarr;</div>
                     </div>
                 `;
             });
@@ -652,14 +671,15 @@
                 if (con.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
 
                 html += `
-                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div onclick="window.location.href='contratti.html?id=${con.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
                         <div>
                             <div class="flex items-center gap-3 mb-1">
-                                <span class="font-bold text-[#2e2a5b]">${con.numero}</span>
+                                <span class="font-bold text-[#2e2a5b] group-hover:underline">${con.numero}</span>
                                 <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${con.stato || 'Da Fare'}</span>
                             </div>
                             <p class="text-xs text-gray-500">Valore Finale: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
+                        <div class="text-gray-400 font-bold ml-4">&rarr;</div>
                     </div>
                 `;
             });
@@ -688,14 +708,15 @@
                 if (fat.stato === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
 
                 html += `
-                    <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div onclick="window.location.href='fatturazione.html?id=${fat.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
                         <div>
                             <div class="flex items-center gap-3 mb-1">
-                                <span class="font-bold text-[#2e2a5b]">${fat.numero}</span>
+                                <span class="font-bold text-[#2e2a5b] group-hover:underline">${fat.numero}</span>
                                 <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${fat.stato || 'Da Fare'}</span>
                             </div>
                             <p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
+                        <div class="text-gray-400 font-bold ml-4">&rarr;</div>
                     </div>
                 `;
             });
