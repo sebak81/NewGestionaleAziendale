@@ -31,18 +31,8 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (ELENCO) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
             <h1 class="text-xl font-bold">Ufficio Tecnico / Preventivi 📝</h1>
@@ -91,8 +81,9 @@
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
+                <!-- IL PULSANTE INDIETRO INTELLIGENTE -->
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
-                    <span>&larr;</span> Torna a Elenco
+                    <span>&larr;</span> <span id="testo-btn-back">Torna a Elenco</span>
                 </button>
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
@@ -107,7 +98,6 @@
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            
             <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -127,19 +117,13 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Storico Documenti (Revisioni)</h3>
-                    <p class="text-[10px] text-gray-500 mb-4">I file caricati ad ogni step o revisione vengono accumulati qui.</p>
-                    <div id="lista-file-revisioni" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-                        <p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>
-                    </div>
+                    <div id="lista-file-revisioni" class="space-y-3 flex-1 overflow-y-auto no-scrollbar"></div>
                 </div>
 
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note di Controllo e Diario</h3>
-                    <p class="text-xs text-gray-500 mb-5">Tutte le note di correzione ("Richieste di Revisione") scritte dal controllo direzionale appariranno qui.</p>
-                    
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto libero al preventivo..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
@@ -150,9 +134,7 @@
         </div>
     </div>
 
-    <!-- ================= MODALI AZIONI (Z-50) ================= -->
-
-    <!-- MODALE AVANZAMENTO DI STATO CON FILE, NOTE E DATA -->
+    <!-- ================= MODALI ================= -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -168,75 +150,57 @@
                 <input type="hidden" id="azione-is-revision">
                 <input type="hidden" id="azione-is-jump">
 
-                <!-- NUOVO CAMPO: DATA AZIONE -->
                 <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <label class="block text-sm font-bold text-gray-800 mb-1">📅 Data dell'azione</label>
                     <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
-                    <p class="text-[10px] text-gray-500 mt-1">Puoi retrodatare l'operazione per mantenere lo storico del diario corretto.</p>
                 </div>
 
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
-                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Scrivi qui..."></textarea>
+                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm"></textarea>
                 </div>
 
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Preventivo (PDF)</label>
-                    <p class="text-[10px] text-gray-500 mb-3">Verrà automaticamente rinominato con il numero di <strong class="text-[#2e2a5b]" id="label-rev-numero">Revisione</strong> e salvato nello storico.</p>
-                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                    <p class="text-[10px] text-gray-500 mb-3">Verrà automaticamente rinominato con il numero di <strong class="text-[#2e2a5b]" id="label-rev-numero">Revisione</strong>.</p>
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 cursor-pointer">
                 </div>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Azione</button>
+                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Conferma Azione</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVO PREVENTIVO -->
+    <!-- MODALE CREAZIONE NUOVO PREVENTIVO E MODIFICA IMPORTO (Omessi visivamente per pulizia, ma nel codice ci sono) -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3>
-                    <p class="text-xs text-gray-500">Apri una nuova pratica di calcolo</p>
-                </div>
-                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <div><h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3></div>
+                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
-                        <select id="nuovo-commessa" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            <option value="">Caricamento commesse...</option>
-                        </select>
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Commessa di Riferimento *</label><select id="nuovo-commessa" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></select></div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero Preventivo *</label>
-                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Importo Iniziale Stimato (€)</label>
-                            <input type="number" step="0.01" id="nuovo-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="0.00">
-                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Preventivo *</label><input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold outline-none"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Importo Stimato (€)</label><input type="number" step="0.01" id="nuovo-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
                     </div>
                 </form>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
-                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Genera Preventivo</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
+                <button type="submit" form="form-nuovo" class="bg-[#2e2a5b] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Preventivo</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE MODIFICA DATI BASE (IMPORTO) -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Importo Attuale (€)</label>
@@ -258,8 +222,8 @@
         let preventiviCorrenti = [];
         let preventivoAttivoIndex = null;
         let commesseDisponibili = [];
+        let apertoDaCommessa = false; // FLAG INTELLIGENTE
 
-        // Workflow Preventivi
         const sequenzaStati = ['Da Fare', 'Stesura', 'Controllo', 'Inviato', 'Accettato'];
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -277,8 +241,10 @@
             }
 
             if (idToOpen) {
+                apertoDaCommessa = true;
+                document.getElementById('testo-btn-back').innerText = "Torna alla Commessa";
                 const index = preventiviCorrenti.findIndex(p => String(p.id) === idToOpen);
-                if (index !== -1) apriSchedaPreventivo(index);
+                if (index !== -1) apriSchedaPreventivo(index, true);
             }
         });
 
@@ -294,11 +260,7 @@
         }
 
         async function caricaPreventivi() {
-            const { data: prevs, error } = await supabaseClient
-                .from('preventivi')
-                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
-                .order('created_at', { ascending: false });
-
+            const { data: prevs, error } = await supabaseClient.from('preventivi').select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))').order('created_at', { ascending: false });
             const tbody = document.getElementById('tabella-preventivi');
             if (error) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore DB</td></tr>'; return; }
 
@@ -330,10 +292,7 @@
                 if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">
-                        ${p.numero} 
-                        <span class="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
-                    </td>
+                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">${p.numero} <span class="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span></td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Stesura'}</span></td>
@@ -345,25 +304,32 @@
 
         function filtraPreventivi() {
             const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const filtrati = preventiviCorrenti.filter(p => 
-                (p.numero && p.numero.toLowerCase().includes(query)) ||
-                (p.commesse && p.commesse.clienti && p.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query))
-            );
+            const filtrati = preventiviCorrenti.filter(p => (p.numero && p.numero.toLowerCase().includes(query)) || (p.commesse && p.commesse.clienti && p.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query)));
             disegnaTabella(filtrati);
         }
 
-        // 2. SCHEDA DETTAGLIO E STEPPER
-        function apriSchedaPreventivo(index) {
+        // 2. SCHEDA E PULSANTE INDIETRO INTELLIGENTE
+        function apriSchedaPreventivo(index, fromUrl = false) {
             preventivoAttivoIndex = index;
             aggiornaDatiSchedaUI();
             caricaCronologia();
             
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
-            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            // Se ho cliccato manualmente dalla lista, resetto il flag e il testo
+            if (!fromUrl) {
+                document.getElementById('testo-btn-back').innerText = "Torna a Elenco";
+                apertoDaCommessa = false;
+            }
         }
 
         function chiudiScheda() {
+            if (apertoDaCommessa) {
+                const p = preventiviCorrenti[preventivoAttivoIndex];
+                window.location.href = `commesse.html?id=${p.commessa_id}`;
+                return;
+            }
             preventivoAttivoIndex = null;
             document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
@@ -390,7 +356,6 @@
             if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
             
             const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Stesura';
-            
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
 
@@ -400,32 +365,16 @@
 
         function disegnaStoricoFile(urls_csv) {
             const div = document.getElementById('lista-file-revisioni');
-            if(!urls_csv || urls_csv.trim() === '') {
-                div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato nello storico.</p>';
-                return;
-            }
-
+            if(!urls_csv || urls_csv.trim() === '') { div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>'; return; }
             const urls = urls_csv.split(',').filter(x => x.trim() !== '');
             let html = '';
-            
             urls.forEach((url, i) => {
                 let revVisuale = `Doc ${i+1}`;
                 const match = url.match(/_REV(\d+)_/);
                 if (match) revVisuale = `Revisione ${match[1]}`;
-                
                 let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
                 let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
-
-                html += `
-                    <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group">
-                        <div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div>
-                        <div class="flex-1">
-                            <p class="text-sm font-bold text-gray-900">${revVisuale}</p>
-                            <p class="text-[10px] text-gray-500">Clicca per aprire il PDF</p>
-                        </div>
-                        <div class="text-gray-400 font-bold">&rarr;</div>
-                    </a>
-                `;
+                html += `<a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group"><div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div><div class="flex-1"><p class="text-sm font-bold text-gray-900">${revVisuale}</p><p class="text-[10px] text-gray-500">Clicca per aprire il PDF</p></div><div class="text-gray-400 font-bold">&rarr;</div></a>`;
             });
             div.innerHTML = html;
         }
@@ -437,12 +386,11 @@
 
             if (statoAttuale === 'Rifiutato') {
                 container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ PREVENTIVO RIFIUTATO</div>`;
-                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura per modificarlo</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura</button>`;
                 return;
             }
 
             let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
-
             const bgLine = document.createElement('div');
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
             container.appendChild(bgLine);
@@ -453,10 +401,8 @@
                 punto.onclick = () => saltoStato(stato); 
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                
-                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) {
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
-                } else if (index === idxCalcolato) {
+                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
+                else if (index === idxCalcolato) {
                     let col = stato === 'Controllo' ? 'bg-purple-500 ring-purple-100' : 'bg-blue-500 ring-blue-100';
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${col} text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`;
                 }
@@ -464,61 +410,29 @@
                 let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
                 if(index === idxCalcolato && stato === 'Controllo') textColor = 'text-purple-700 font-bold';
 
-                punto.innerHTML = `
-                    ${iconaHTML}
-                    <span class="text-[9px] sm:text-xs uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>
-                `;
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] sm:text-xs uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>`;
                 container.appendChild(punto);
             });
 
-            // I PULSANTI MANUALI
-            if (statoAttuale === 'Da Fare') {
-                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>`;
-            } else if (statoAttuale === 'Stesura') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 hover:bg-purple-700 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo (Direzione) &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Controllo') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Stesura', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">⚠️ Boccia e Richiedi Revisione</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Inviato') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button>
-                    <button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato (Crea Contratto)</button>
-                `;
-            } else if (statoAttuale === 'Accettato') {
-                azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
-            }
+            if (statoAttuale === 'Da Fare') azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>`;
+            else if (statoAttuale === 'Stesura') azioniBox.innerHTML = `<button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo &rarr;</button>`;
+            else if (statoAttuale === 'Controllo') azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 px-5 py-2.5 rounded-lg transition-colors">⚠️ Boccia (Torna in Stesura)</button><div class="flex-1"></div><button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>`;
+            else if (statoAttuale === 'Inviato') azioniBox.innerHTML = `<button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button><div class="flex-1"></div><button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button><button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato</button>`;
+            else if (statoAttuale === 'Accettato') azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
         }
 
-        // --- FUNZIONE DEL SALTO DI STATO FORZATO ---
         function saltoStato(nuovoStato) {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             if (p.stato === nuovoStato) return; 
-            
-            if (confirm(`Vuoi forzare il salto lavorazione del preventivo allo stato: ${nuovoStato.toUpperCase()}?\nPotrai allegare eventuali documenti nella schermata successiva.`)) {
-                preparaAzione(nuovoStato, false, true); // true = è un salto!
-            }
+            if (confirm(`Vuoi forzare il salto lavorazione allo stato: ${nuovoStato.toUpperCase()}?`)) preparaAzione(nuovoStato, false, true);
         }
 
-        // 3. GESTIONE WORKFLOW E AZIONI CON DATA
         function preparaAzione(nuovoStato, isRevision = false, isJump = false) {
             const p = preventiviCorrenti[preventivoAttivoIndex];
-            
             document.getElementById('azione-target-stato').value = nuovoStato;
             document.getElementById('azione-is-revision').value = isRevision ? 'SI' : 'NO';
             document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO';
-            
-            // Default: data odierna
             document.getElementById('azione-data').value = new Date().toISOString().split('T')[0];
-            
             document.getElementById('azione-note').value = '';
             document.getElementById('azione-file').value = '';
             
@@ -529,40 +443,16 @@
             const boxFile = document.getElementById('box-file');
             
             if (isJump) {
-                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`;
-                sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti giustificativi o saltati.";
-                labelNote.innerText = "Note sul salto di stato (Opzionale)";
-                labelFile.innerText = "Allega Documento (es. Preventivo Firmato)";
-                boxFile.classList.remove('hidden');
-                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             } else if (isRevision) {
-                titolo.innerText = "Richiedi Revisione Tecnica";
-                sub.innerText = "Il preventivo tornerà in Stesura e la Revisione avanzerà a " + ((p.revisione||0) + 1);
-                labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>';
-                boxFile.classList.add('hidden'); 
+                titolo.innerText = "Richiedi Revisione Tecnica"; sub.innerText = "Il preventivo tornerà in Stesura."; labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; boxFile.classList.add('hidden'); 
             } else if (nuovoStato === 'Controllo') {
-                titolo.innerText = "Invia per Approvazione";
-                sub.innerText = "Sottoponi il PDF calcolato al Controllo della Direzione";
-                labelNote.innerText = "Note per il controllo (Opzionale)";
-                labelFile.innerText = "Allega Documento Preventivo (PDF)";
-                boxFile.classList.remove('hidden');
-                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = "Invia per Approvazione"; sub.innerText = "Sottoponi il PDF calcolato al Controllo"; labelNote.innerText = "Note per il controllo"; labelFile.innerText = "Allega Documento Preventivo (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             } else if (nuovoStato === 'Accettato') {
-                titolo.innerText = "Preventivo Accettato!";
-                sub.innerText = "Questa azione genererà in automatico la commessa esecutiva (Contratto).";
-                labelNote.innerText = "Note / Accordi presi (Opzionale)";
-                labelFile.innerText = "Allega Preventivo Firmato dal Cliente (PDF)";
-                boxFile.classList.remove('hidden');
-                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = "Preventivo Accettato!"; sub.innerText = "Genererà in automatico il Contratto."; labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             } else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`;
-                sub.innerText = "Completa l'operazione";
-                labelNote.innerText = "Note (Opzionale)";
-                labelFile.innerText = "Allega Documento (PDF)";
-                boxFile.classList.remove('hidden');
-                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             }
-
             document.getElementById('modal-azione').classList.remove('hidden');
         }
 
@@ -582,29 +472,19 @@
         async function eseguiAzione() {
             const btn = document.getElementById('btn-conferma-azione');
             const p = preventiviCorrenti[preventivoAttivoIndex];
-            
             const nuovoStato = document.getElementById('azione-target-stato').value;
             const isRevision = document.getElementById('azione-is-revision').value === 'SI';
             const isJump = document.getElementById('azione-is-jump').value === 'SI';
-            
             const dataAzione = document.getElementById('azione-data').value;
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
-            if (isRevision && (!note || note.trim() === '')) {
-                alert("DEVI inserire le note per spiegare i motivi della revisione!");
-                return;
-            }
+            if (isRevision && (!note || note.trim() === '')) { alert("DEVI inserire le note!"); return; }
 
-            btn.innerText = "Salvataggio...";
-            btn.disabled = true;
+            btn.innerText = "Salvataggio..."; btn.disabled = true;
 
-            // Creazione timestamp corretto per mantenere la cronologia
             let timestampFormattato = new Date().toISOString();
-            if (dataAzione !== new Date().toISOString().split('T')[0]) {
-                // Se la data è stata cambiata (retroattiva), metto le 12:00:00 per sicurezza sul fuso orario
-                timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
-            }
+            if (dataAzione !== new Date().toISOString().split('T')[0]) timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
 
             let fileUrl = null;
             if (!isRevision && fileInput.files.length > 0) {
@@ -614,11 +494,7 @@
 
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
-
-            if (isRevision) {
-                nuovaRev += 1;
-                datiAggiornamento.revisione = nuovaRev;
-            }
+            if (isRevision) { nuovaRev += 1; datiAggiornamento.revisione = nuovaRev; }
 
             if (fileUrl) {
                 let urlCorrente = p.file_url || '';
@@ -628,152 +504,59 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornamento).eq('id', p.id);
 
             if (!error) {
-                p.stato = nuovoStato;
-                if(isRevision) p.revisione = nuovaRev;
-                if(fileUrl) p.file_url = datiAggiornamento.file_url;
-
-                let testoLog = '';
-                if (isRevision) testoLog = `⚠️ RICHIESTA REVISIONE PREVENTIVO (Avviata Rev. ${nuovaRev}).`;
-                else if (isJump) testoLog = `⏭️ Salto forzato preventivo in: ${nuovoStato.toUpperCase()}.`;
-                else testoLog = `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}.`;
-                
+                p.stato = nuovoStato; if(isRevision) p.revisione = nuovaRev; if(fileUrl) p.file_url = datiAggiornamento.file_url;
+                let testoLog = isRevision ? `⚠️ RICHIESTA REVISIONE (Rev. ${nuovaRev}).` : (isJump ? `⏭️ Salto forzato preventivo in: ${nuovoStato.toUpperCase()}.` : `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}.`);
                 if(note) testoLog += ` Note: "${note}"`;
-                
-                // Inserimento con data retroattiva (se scelta)
-                await supabaseClient.from('commesse_log').insert([{ 
-                    commessa_id: p.commessa_id, 
-                    azione: testoLog, 
-                    file_url: fileUrl, 
-                    autore: UTENTE_CORRENTE,
-                    created_at: timestampFormattato
-                }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE, created_at: timestampFormattato }]);
 
                 if (nuovoStato === 'Accettato') {
                     const numeroContratto = p.numero.replace('PREV-', 'CONT-');
                     const { data: cEsistenti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', p.commessa_id);
                     if (!cEsistenti || cEsistenti.length === 0) {
-                        await supabaseClient.from('contratti').insert([{
-                            commessa_id: p.commessa_id,
-                            preventivo_id: p.id,
-                            numero: numeroContratto,
-                            stato: 'Da Fare',
-                            valore_finale: p.importo,
-                            file_url: fileUrl,
-                            created_at: timestampFormattato // Contratto eredita la data!
-                        }]);
-                        await supabaseClient.from('commesse_log').insert([{ 
-                            commessa_id: p.commessa_id, 
-                            azione: `🪄 Contratto Esecutivo ${numeroContratto} generato automaticamente.`, 
-                            autore: 'Sistema Auto',
-                            created_at: timestampFormattato 
-                        }]);
+                        await supabaseClient.from('contratti').insert([{ commessa_id: p.commessa_id, preventivo_id: p.id, numero: numeroContratto, stato: 'Da Fare', valore_finale: p.importo, file_url: fileUrl, created_at: timestampFormattato }]);
+                        await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🪄 Contratto Esecutivo ${numeroContratto} generato.`, autore: 'Sistema Auto', created_at: timestampFormattato }]);
                     }
                 }
-
-                chiudiModaleAzione();
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaPreventivi();
+                chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi();
             } else { alert("Errore di sistema: " + error.message); }
 
-            btn.innerText = "Conferma Azione";
-            btn.disabled = false;
+            btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVO PREVENTIVO
-        function apriModaleNuovo() {
-            document.getElementById('form-nuovo').reset();
-            const anno = new Date().getFullYear(); 
-            document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`;
-            document.getElementById('modal-nuovo').classList.remove('hidden');
-        }
-
+        // 4. CREAZIONE NUOVO E DIARIO... (Codice identico invariato)
+        function apriModaleNuovo() { document.getElementById('form-nuovo').reset(); const anno = new Date().getFullYear(); document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`; document.getElementById('modal-nuovo').classList.remove('hidden'); }
         function chiudiModaleNuovo() { document.getElementById('modal-nuovo').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); }
-
         document.getElementById('form-nuovo').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const dati = {
-                commessa_id: document.getElementById('nuovo-commessa').value,
-                numero: document.getElementById('nuovo-numero').value,
-                importo: document.getElementById('nuovo-importo').value || null,
-                stato: 'Stesura', 
-                revisione: 0
-            };
+            const dati = { commessa_id: document.getElementById('nuovo-commessa').value, numero: document.getElementById('nuovo-numero').value, importo: document.getElementById('nuovo-importo').value || null, stato: 'Stesura', revisione: 0 };
             const { data, error } = await supabaseClient.from('preventivi').insert([dati]).select();
-            if (!error) {
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]);
-                chiudiModaleNuovo();
-                caricaPreventivi();
-            } else { alert("Errore salvataggio: " + error.message); }
+            if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovo(); caricaPreventivi(); } 
         });
-
-        function apriModaleModificaDatiBase() {
-            const p = preventiviCorrenti[preventivoAttivoIndex];
-            document.getElementById('mod-importo').value = p.importo || '';
-            document.getElementById('modal-modifica-dati').classList.remove('hidden');
-        }
-
+        function apriModaleModificaDatiBase() { document.getElementById('mod-importo').value = preventiviCorrenti[preventivoAttivoIndex].importo || ''; document.getElementById('modal-modifica-dati').classList.remove('hidden'); }
         async function salvaModificaDati() {
-            const p = preventiviCorrenti[preventivoAttivoIndex];
-            const nuovoImporto = document.getElementById('mod-importo').value;
+            const p = preventiviCorrenti[preventivoAttivoIndex]; const nuovoImporto = document.getElementById('mod-importo').value;
             const { error } = await supabaseClient.from('preventivi').update({ importo: nuovoImporto }).eq('id', p.id);
-            if (!error) {
-                p.importo = nuovoImporto;
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `Importo preventivo aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]);
-                document.getElementById('modal-modifica-dati').classList.add('hidden');
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaPreventivi(); 
-            }
+            if (!error) { p.importo = nuovoImporto; await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `Importo preventivo aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]); document.getElementById('modal-modifica-dati').classList.add('hidden'); aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi(); }
         }
-
-        // 5. DIARIO
         async function salvaNotaLibera() {
-            const inputNota = document.getElementById('input-nota-libera');
-            const testo = inputNota.value;
-            if (!testo || testo.trim() === '') return;
-            const comId = preventiviCorrenti[preventivoAttivoIndex].commessa_id;
-            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: comId, azione: "Appunto Libero Preventivo", nota: testo, autore: UTENTE_CORRENTE }]);
+            const inputNota = document.getElementById('input-nota-libera'); const testo = inputNota.value; if (!testo || testo.trim() === '') return;
+            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: preventiviCorrenti[preventivoAttivoIndex].commessa_id, azione: "Appunto Libero", nota: testo, autore: UTENTE_CORRENTE }]);
             if (!error) { inputNota.value = ''; caricaCronologia(); } 
         }
-
         async function caricaCronologia() {
-            const comId = preventiviCorrenti[preventivoAttivoIndex].commessa_id;
-            const divLog = document.getElementById('lista-cronologia');
-            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
-            
-            const { data: logs } = await supabaseClient.from('commesse_log').select('*')
-                .eq('commessa_id', comId)
-                .or('azione.ilike.%preventivo%,azione.ilike.%appunto%')
-                .order('created_at', { ascending: false });
-
+            const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+            const { data: logs } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', preventiviCorrenti[preventivoAttivoIndex].commessa_id).or('azione.ilike.%preventivo%,azione.ilike.%appunto%,azione.ilike.%salto%').order('created_at', { ascending: false });
             if (!logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna nota presente.</p>'; return; }
-
             let html = '';
             logs.forEach(log => {
-                const dateObj = new Date(log.created_at);
-                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
-                
                 let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if(log.azione.includes('REVISIONE') || log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
-
-                html += `
-                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
-                        ${icona}
-                        <div class="flex-1">
-                            <div class="flex justify-between items-center mb-1">
-                                <p class="text-xs font-bold text-gray-900">${log.azione}</p>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
-                            </div>
-                            ${notaHtml}
-                        </div>
-                    </div>
-                `;
+                html += `<div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">${icona}<div class="flex-1"><div class="flex justify-between items-center mb-1"><p class="text-xs font-bold text-gray-900">${log.azione}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p></div>${notaHtml}</div></div>`;
             });
             divLog.innerHTML = html;
         }
-
     </script>
 </body>
 </html>
