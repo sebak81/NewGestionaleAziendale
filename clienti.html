@@ -31,6 +31,15 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
+        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
+                <div>
+                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
+                    <p class="text-xs text-gray-500 uppercase">Owner</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <!-- SCHERMATA PRINCIPALE (ELENCO) -->
@@ -124,6 +133,10 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
                     <h3 class="text-base font-bold text-gray-800">Storico Cantieri / Commesse</h3>
+                    <!-- TASTO NUOVA COMMESSA PER QUESTO CLIENTE -->
+                    <button onclick="creaCommessaPerCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
+                        <span>+</span> Nuova Commessa
+                    </button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
@@ -248,7 +261,6 @@
             }
         });
 
-        // 1. CARICAMENTO CLIENTI E TABELLA
         async function caricaClienti() {
             const { data: clienti, error } = await supabaseClient.from('clienti').select('*').order('nome_ragione_sociale', { ascending: true });
             const tbody = document.getElementById('tabella-clienti');
@@ -305,7 +317,6 @@
             disegnaTabella(clientiFiltrati);
         }
 
-        // 2. SCHEDA DETTAGLIO CLIENTE A TUTTO SCHERMO
         async function apriSchedaCliente(id) {
             clienteAttivoId = id;
             const c = clientiCache.find(x => x.id == id);
@@ -323,19 +334,18 @@
             document.getElementById('scheda-sdi').innerText = c.codice_sdi || '--';
             document.getElementById('scheda-pec').innerText = c.pec || '--';
 
-            // Carica le commesse collegate
             const tbodyCommesse = document.getElementById('lista-commesse-cliente');
             tbodyCommesse.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Ricerca storico in corso...</td></tr>';
             
-            const { data: commesse } = await supabaseClient.from('commesse').select('numero, nome_cantiere, stato, created_at').eq('cliente_id', id).order('created_at', { ascending: false });
+            const { data: commesse } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, stato, created_at').eq('cliente_id', id).order('created_at', { ascending: false });
 
             if(commesse && commesse.length > 0) {
                 let htmlCom = '';
                 commesse.forEach(com => {
                     const dataIta = new Date(com.created_at).toLocaleDateString('it-IT');
                     htmlCom += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3 font-bold text-gray-900">${com.numero}</td>
+                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location.href='commesse.html?id=${com.id}'">
+                            <td class="px-4 py-3 font-bold text-[#2e2a5b] hover:underline">${com.numero}</td>
                             <td class="px-4 py-3 text-gray-600">${com.nome_cantiere || '--'}</td>
                             <td class="px-4 py-3"><span class="px-2 py-1 bg-gray-100 rounded-full text-[10px] font-bold uppercase">${com.stato}</span></td>
                             <td class="px-4 py-3 text-xs text-gray-500">${dataIta}</td>
@@ -359,7 +369,13 @@
             document.getElementById('vista-elenco').classList.remove('hidden');
         }
 
-        // 3. GESTIONE MODALE FORM (NUOVO E MODIFICA)
+        // Funzione per rimandare alla pagina commesse con il cliente preselezionato
+        function creaCommessaPerCliente() {
+            if (clienteAttivoId) {
+                window.location.href = `commesse.html?action=new&cliente_id=${clienteAttivoId}`;
+            }
+        }
+
         function apriModaleNuovo() {
             document.getElementById('form-cliente').reset();
             document.getElementById('cli-id').value = '';
@@ -393,7 +409,6 @@
 
         function chiudiModaleCliente() {
             document.getElementById('modal-cliente').classList.add('hidden');
-            // Pulisce l'URL se c'era il parametro action=new
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -431,7 +446,6 @@
             if (!error) {
                 chiudiModaleCliente();
                 await caricaClienti();
-                // Se eravamo dentro la scheda dettaglio, l'aggiorniamo visivamente in real-time
                 if(id && clienteAttivoId == id) apriSchedaCliente(id);
             } else {
                 alert("Errore salvataggio: " + error.message);
@@ -441,7 +455,6 @@
             btn.disabled = false;
         });
 
-        // 4. ELIMINAZIONE CLIENTE
         async function eliminaCliente(id) {
             if(!confirm("ATTENZIONE: Sei sicuro di voler eliminare questo cliente? L'operazione è irreversibile e potrebbe fallire se ci sono commesse o preventivi legati a lui.")) return;
             const { error } = await supabaseClient.from('clienti').delete().eq('id', id);
