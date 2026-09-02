@@ -169,6 +169,8 @@
             <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
                 <input type="hidden" id="azione-target-stato">
                 <input type="hidden" id="azione-is-revision">
+                <!-- Aggiungiamo un flag nascosto per i salti forzati -->
+                <input type="hidden" id="azione-is-jump">
 
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
@@ -176,7 +178,7 @@
                 </div>
 
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                    <label class="block text-sm font-bold text-gray-800 mb-2">Allega Documento Preventivo (PDF)</label>
+                    <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Preventivo (PDF)</label>
                     <p class="text-[10px] text-gray-500 mb-3">Verrà automaticamente rinominato con il numero di <strong class="text-[#2e2a5b]" id="label-rev-numero">Revisione</strong> e salvato nello storico.</p>
                     <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                 </div>
@@ -389,6 +391,7 @@
             if(p.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
             if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
             
+            // Fallback intelligente: se lo stato è null o vuoto, lo setta a "Stesura"
             const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Stesura';
             
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
@@ -508,79 +511,63 @@
             const p = preventiviCorrenti[preventivoAttivoIndex];
             if (p.stato === nuovoStato) return; 
             
-            if (confirm(`Vuoi forzare il salto lavorazione del preventivo allo stato: ${nuovoStato.toUpperCase()}?\nL'azione verrà registrata nel diario del cantiere.`)) {
-                eseguiSaltoDiretto(nuovoStato);
+            if (confirm(`Vuoi forzare il salto lavorazione del preventivo allo stato: ${nuovoStato.toUpperCase()}?\nPotrai allegare eventuali documenti nella schermata successiva.`)) {
+                // Passiamo "true" al terzo parametro isJump
+                preparaAzione(nuovoStato, false, true);
             }
         }
 
-        async function eseguiSaltoDiretto(nuovoStato) {
-            const p = preventiviCorrenti[preventivoAttivoIndex];
-            
-            const { error } = await supabaseClient.from('preventivi').update({ stato: nuovoStato }).eq('id', p.id);
-            if (!error) {
-                p.stato = nuovoStato;
-                await supabaseClient.from('commesse_log').insert([{ 
-                    commessa_id: p.commessa_id, 
-                    azione: `Salto forzato preventivo in: ${nuovoStato.toUpperCase()}`, 
-                    autore: UTENTE_CORRENTE 
-                }]);
-                
-                // Magia contratto anche se salti direttamente ad Accettato
-                if (nuovoStato === 'Accettato') {
-                    const numeroContratto = p.numero.replace('PREV-', 'CONT-');
-                    const { data: cEsistenti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', p.commessa_id);
-                    if (!cEsistenti || cEsistenti.length === 0) {
-                        await supabaseClient.from('contratti').insert([{
-                            commessa_id: p.commessa_id, preventivo_id: p.id, numero: numeroContratto, stato: 'Da Fare', valore_finale: p.importo, file_url: p.file_url 
-                        }]);
-                        await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🪄 Contratto Esecutivo ${numeroContratto} generato automaticamente.`, autore: 'Sistema Auto' }]);
-                    }
-                }
-
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaPreventivi();
-            } else {
-                alert("Errore nel salto di stato: " + error.message);
-            }
-        }
-
-
-        // 3. GESTIONE WORKFLOW AVANZAMENTO REGOLARE
-        function preparaAzione(nuovoStato, isRevision = false) {
+        // 3. GESTIONE WORKFLOW AVANZAMENTO E REVISIONE
+        function preparaAzione(nuovoStato, isRevision = false, isJump = false) {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             
             document.getElementById('azione-target-stato').value = nuovoStato;
             document.getElementById('azione-is-revision').value = isRevision ? 'SI' : 'NO';
+            document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO'; // Flag per capire se è un salto
+            
             document.getElementById('azione-note').value = '';
             document.getElementById('azione-file').value = '';
             
             const titolo = document.getElementById('modale-azione-titolo');
             const sub = document.getElementById('modale-azione-sub');
             const labelNote = document.getElementById('label-note');
+            const labelFile = document.getElementById('label-file');
             const boxFile = document.getElementById('box-file');
             
-            if (isRevision) {
+            // Logica visiva dinamica del Modale in base al contesto
+            if (isJump) {
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`;
+                sub.innerText = "Azione manuale. Carica eventuali documenti giustificativi o saltati.";
+                labelNote.innerText = "Note sul salto di stato (Opzionale)";
+                labelFile.innerText = "Allega Documento (es. Preventivo Firmato)";
+                boxFile.classList.remove('hidden');
+                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+            } else if (isRevision) {
                 titolo.innerText = "Richiedi Revisione Tecnica";
                 sub.innerText = "Il preventivo tornerà in Stesura e la Revisione avanzerà a " + ((p.revisione||0) + 1);
                 labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>';
-                boxFile.classList.add('hidden'); 
+                boxFile.classList.add('hidden'); // Non carico file se boccio, scrivo solo note
             } else if (nuovoStato === 'Controllo') {
                 titolo.innerText = "Invia per Approvazione";
                 sub.innerText = "Sottoponi il PDF calcolato al Controllo della Direzione";
                 labelNote.innerText = "Note per il controllo (Opzionale)";
+                labelFile.innerText = "Allega Documento Preventivo (PDF)";
                 boxFile.classList.remove('hidden');
                 document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             } else if (nuovoStato === 'Accettato') {
                 titolo.innerText = "Preventivo Accettato!";
                 sub.innerText = "Questa azione genererà in automatico la commessa esecutiva (Contratto).";
                 labelNote.innerText = "Note / Accordi presi (Opzionale)";
+                labelFile.innerText = "Allega Preventivo Firmato dal Cliente (PDF)";
                 boxFile.classList.remove('hidden');
+                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             } else {
                 titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`;
                 sub.innerText = "Completa l'operazione";
                 labelNote.innerText = "Note (Opzionale)";
+                labelFile.innerText = "Allega Documento (PDF)";
                 boxFile.classList.remove('hidden');
+                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
             }
 
             document.getElementById('modal-azione').classList.remove('hidden');
@@ -605,6 +592,7 @@
             
             const nuovoStato = document.getElementById('azione-target-stato').value;
             const isRevision = document.getElementById('azione-is-revision').value === 'SI';
+            const isJump = document.getElementById('azione-is-jump').value === 'SI';
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
@@ -625,11 +613,13 @@
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
 
+            // Se è una richiesta di revisione, incremento il contatore
             if (isRevision) {
                 nuovaRev += 1;
                 datiAggiornamento.revisione = nuovaRev;
             }
 
+            // Aggiunta file storico csv (non sovrascrivo, aggiungo con la virgola)
             if (fileUrl) {
                 let urlCorrente = p.file_url || '';
                 datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl;
@@ -638,11 +628,21 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornamento).eq('id', p.id);
 
             if (!error) {
+                // AGGIORNO OGGETTO LOCALE
                 p.stato = nuovoStato;
                 if(isRevision) p.revisione = nuovaRev;
                 if(fileUrl) p.file_url = datiAggiornamento.file_url;
 
-                let testoLog = isRevision ? `⚠️ RICHIESTA REVISIONE PREVENTIVO (Avviata Rev. ${nuovaRev}).` : `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}`;
+                // LOG NEL DIARIO GLOBALE DELLA COMMESSA
+                let testoLog = '';
+                if (isRevision) {
+                    testoLog = `⚠️ RICHIESTA REVISIONE PREVENTIVO (Avviata Rev. ${nuovaRev}).`;
+                } else if (isJump) {
+                    testoLog = `⏭️ Salto forzato preventivo in: ${nuovoStato.toUpperCase()}.`;
+                } else {
+                    testoLog = `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}.`;
+                }
+                
                 if(note) testoLog += ` Note: "${note}"`;
                 
                 await supabaseClient.from('commesse_log').insert([{ 
@@ -652,8 +652,10 @@
                     autore: UTENTE_CORRENTE 
                 }]);
 
+                // MAGIA: AUTO-CREAZIONE CONTRATTO SE ACCETTATO (Anche tramite Salto!)
                 if (nuovoStato === 'Accettato') {
                     const numeroContratto = p.numero.replace('PREV-', 'CONT-');
+                    // Verifico se esiste già per non duplicare
                     const { data: cEsistenti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', p.commessa_id);
                     if (!cEsistenti || cEsistenti.length === 0) {
                         await supabaseClient.from('contratti').insert([{
@@ -662,7 +664,7 @@
                             numero: numeroContratto,
                             stato: 'Da Fare',
                             valore_finale: p.importo,
-                            file_url: fileUrl 
+                            file_url: fileUrl // Porto l'ultimo file anche nel contratto per comodità
                         }]);
                         await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🪄 Contratto Esecutivo ${numeroContratto} generato automaticamente.`, autore: 'Sistema Auto' }]);
                     }
@@ -683,6 +685,7 @@
         function apriModaleNuovo() {
             document.getElementById('form-nuovo').reset();
             const anno = new Date().getFullYear(); 
+            // Pseudo generatore numero (nel mondo reale servirebbe contare i preventivi globali, qui faccio una stima)
             document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`;
             document.getElementById('modal-nuovo').classList.remove('hidden');
         }
@@ -724,7 +727,7 @@
                 document.getElementById('modal-modifica-dati').classList.add('hidden');
                 aggiornaDatiSchedaUI();
                 caricaCronologia();
-                caricaPreventivi(); 
+                caricaPreventivi(); // aggiorno lista dietro
             }
         }
 
@@ -744,6 +747,7 @@
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
             
+            // Filtro leggermente il diario globale per mostrare solo le cose pertinenti al preventivo per pulizia
             const { data: logs } = await supabaseClient.from('commesse_log').select('*')
                 .eq('commessa_id', comId)
                 .or('azione.ilike.%preventivo%,azione.ilike.%appunto%')
@@ -758,7 +762,7 @@
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
                 
                 let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
-                if(log.azione.includes('REVISIONE')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
+                if(log.azione.includes('REVISIONE') || log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
 
                 html += `
                     <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
