@@ -23,7 +23,7 @@
         </div>
         <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
-            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
+            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
             <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
             <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Contratti</a>
@@ -45,14 +45,14 @@
     <!-- SCHERMATA PRINCIPALE (ELENCO CONTRATTI) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
-            <h1 class="text-xl font-bold">Gestione Contratti & Ordini 📑</h1>
-            <p class="text-sm text-gray-500 mt-1">Esecutivo cantieri e gestione fornitori</p>
+            <h1 class="text-xl font-bold">Gestione Contratti 📑</h1>
+            <p class="text-sm text-gray-500 mt-1">Contratti esecutivi e avanzamento pre-ordini</p>
         </header>
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
             <div class="mb-6 flex justify-between items-end">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Contratti</h2>
+                    <h2 class="text-3xl font-bold tracking-tight">Elenco Contratti</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-contratti">Caricamento in corso...</p>
                 </div>
             </div>
@@ -60,7 +60,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" placeholder="Cerca numero contratto o cantiere..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="filtraContratti()" placeholder="Cerca per numero o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
@@ -69,14 +69,14 @@
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
                                 <th class="px-6 py-4">Numero</th>
+                                <th class="px-6 py-4">Commessa / Cantiere</th>
                                 <th class="px-6 py-4">Cliente</th>
-                                <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
-                                <th class="px-6 py-4">Stato Esecutivo</th>
-                                <th class="px-6 py-4">Valore Finale</th>
-                                <th class="px-6 py-4 text-center">Allegato</th>
+                                <th class="px-6 py-4">Stato Lavorazione</th>
+                                <th class="px-6 py-4">Valore</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-contratti" class="divide-y divide-gray-100">
+                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Caricamento...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -84,265 +84,118 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO CONTRATTO E ORDINI -->
+    <!-- SCHEDA DETTAGLIO CONTRATTO -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
-        
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
-                    <span>&larr;</span> Torna ai Contratti
+                    <span>&larr;</span> Torna a Elenco
                 </button>
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
                     <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">CONT-0000/000</h2>
-                    <span id="scheda-badge-stato" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
+                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
                 </div>
             </div>
+            <button onclick="apriModaleModificaValore()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
+                ✏️ Modifica Valore Finale
+            </button>
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
-            <!-- STEPPER -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden">
-                <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Contratto & Produzione</h3>
-                <div class="relative flex justify-between items-center w-full mb-8 px-2 sm:px-8" id="stepper-container"></div>
+            <!-- RIEPILOGO HEADER -->
+            <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
+                <span class="text-gray-400">&bull;</span> 
+                <span id="scheda-sottotitolo-cliente">Cliente</span>
+                <span class="text-gray-400">&bull;</span> 
+                Valore Finale: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
+            </div>
+
+            <!-- STEPPER WORKFLOW CONTRATTO -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
+                    <span>Avanzamento Contratto (Workflow)</span>
+                    <span class="text-xs font-normal text-gray-400">Clicca sui pallini per forzare un "salto" di stato</span>
+                </h3>
+                <div class="relative flex justify-between items-center w-full mb-8 px-8 sm:px-12" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- RIEPILOGO -->
-            <div class="grid grid-cols-3 gap-6">
-                <div class="col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                    <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-2">Riepilogo Contratto</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-500 font-medium mb-1">Cliente</p>
-                            <p class="font-bold text-[#2e2a5b]" id="scheda-cliente">Caricamento...</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-medium mb-1">Valore Finale</p>
-                            <p class="font-bold text-emerald-600 text-lg" id="scheda-importo">0,00 €</p>
-                        </div>
-                        <div class="col-span-2">
-                            <p class="text-xs text-gray-500 font-medium mb-1">Commessa di Riferimento</p>
-                            <p class="font-medium text-gray-800" id="scheda-commessa">Caricamento...</p>
-                        </div>
-                        <div class="col-span-2 bg-gray-50 p-3 rounded-lg border border-gray-100">
-                            <p class="text-xs text-gray-500 font-medium mb-1">Annotazioni Originali</p>
-                            <p class="text-sm text-gray-700 italic" id="scheda-annotazioni">Nessuna annotazione.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center">
-                    <h3 class="text-base font-bold text-gray-800 mb-4 w-full text-left">Documento Contratto</h3>
-                    <div id="scheda-box-file" class="w-full flex flex-col items-center gap-3">
-                        <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center text-2xl mb-2">📄</div>
-                        <a href="#" id="scheda-link-file" target="_blank" class="w-full block py-2.5 bg-[#2e2a5b] text-white text-sm font-bold rounded-lg shadow-sm hover:bg-[#3f3a7a] transition-colors">Apri PDF Contratto</a>
-                    </div>
-                    <div id="scheda-nessun-file" class="w-full flex flex-col items-center gap-2 hidden">
-                        <div class="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center text-2xl mb-2">🚫</div>
-                        <p class="text-sm text-gray-500">Nessun file presente</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SEZIONE PRE-ORDINI MULTI-FORNITORE -->
-            <div id="sezione-preordini" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3">
-                    <div>
-                        <h3 class="text-base font-bold text-gray-800">Distinta Ordini Fornitori</h3>
-                        <p class="text-xs text-gray-500">Aggiungi materiali, gestisci le conferme d'ordine e le revisioni</p>
-                    </div>
-                    <button onclick="apriModaleNuovoOrdine()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
-                        <span>+</span> Aggiungi Ordine a Fornitore
-                    </button>
-                </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500">
-                            <tr>
-                                <th class="px-4 py-3">Fornitore & Categoria</th>
-                                <th class="px-4 py-3">Descrizione & Note</th>
-                                <th class="px-4 py-3">Preventivato</th>
-                                <th class="px-4 py-3">Confermato</th>
-                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
-                                <th class="px-4 py-3 text-center">Rev.</th>
-                                <th class="px-4 py-3 text-center">Storico File</th>
-                                <th class="px-4 py-3 text-center">Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabella-ordini" class="divide-y divide-gray-100">
-                            <tr><td colspan="8" class="px-4 py-4 text-center text-gray-500">Nessun ordine inserito per questo contratto.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- DIARIO GLOBALE COMMESSA -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
-                <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include tutti gli aggiornamenti del cantiere, inclusi gli avanzamenti dei fornitori.</p>
-                
-                <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                    <input type="text" id="input-nota-libera" placeholder="Appunta una telefonata col cliente o fornitore..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                    <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">
-                        Aggiungi Nota
-                    </button>
+                <!-- STORICO DOCUMENTI -->
+                <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Documenti Collegati</h3>
+                    <div id="lista-file-contratto" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+                        <p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>
+                    </div>
                 </div>
 
-                <div id="lista-cronologia" class="space-y-4">
-                    <p class="text-sm text-gray-500 italic">Caricamento registro...</p>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
-
-    <!-- MODALE: NUOVO ORDINE -->
-    <div id="modal-nuovo-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <!-- Aggiunto max-h-[90vh] per evitare sforamenti -->
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold">Invia Richiesta a Fornitore</h3>
-                    <p class="text-xs text-gray-500">Crea la riga d'ordine e allega la distinta</p>
-                </div>
-                <button type="button" onclick="chiudiModaleNuovoOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-nuovo-ordine" class="space-y-4">
-                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-100 flex items-center justify-center gap-3 mb-2">
-                        <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">1</div>
-                        <span class="text-xs font-bold text-[#2e2a5b] uppercase">Richiesta Inviata</span>
-                        <div class="w-8 h-px bg-gray-300"></div>
-                        <div class="w-6 h-6 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">2</div>
-                        <div class="w-8 h-px bg-gray-300"></div>
-                        <div class="w-6 h-6 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">3</div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label>
-                        <select id="form-ord-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            <option value="">Caricamento fornitori...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Fornitura *</label>
-                        <textarea id="form-ord-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. N. 6 finestre PVC..."></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Costo Preventivato (€)</label>
-                        <p class="text-[10px] text-gray-500 mb-1">Quanto pensi di spendere (utile per confronto con la conferma successiva)</p>
-                        <input type="number" step="0.01" id="form-ord-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="0.00">
-                    </div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Documento di Richiesta (Es. Disegni, Distinta)</label>
-                        <input type="file" id="form-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                    </div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleNuovoOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo-ordine" id="btn-salva-nuovo-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Crea Ordine</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: AGGIORNA E GESTISCI ORDINE ESISTENTE -->
-    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3>
-                    <p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p>
-                </div>
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-gestisci-ordine" class="space-y-4">
-                    <input type="hidden" id="gest-ord-id">
+                <!-- DIARIO -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-800 mb-2">Note e Diario Contratto</h3>
                     
-                    <!-- STEPPER AVANZAMENTO ORDINE -->
-                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
-                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
-                        <div class="flex items-center gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
+                    <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto su questo contratto..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
-
-                    <!-- CAMPI DATI -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Costo Confermato Effettivo (€)</label>
-                            <input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" placeholder="0.00">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
-                            <div class="flex items-center">
-                                <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
-                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-r-lg font-bold border border-l-0 border-gray-200">+1</button>
-                            </div>
-                        </div>
-                        
-                        <!-- DATA PRESUNTA ARRIVO MERCE -->
-                        <div id="box-data-consegna" class="col-span-2 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
-                            <label class="block text-sm font-bold text-blue-900 mb-1">📅 Data presunta arrivo merce</label>
-                            <p class="text-[10px] text-blue-600 mb-2">Imposta o aggiorna la data prevista di consegna comunicata dal fornitore.</p>
-                            <input type="date" id="gest-ord-data-consegna" class="w-full sm:w-1/2 px-4 py-2 bg-white border border-blue-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-700">
-                        </div>
-
-                        <!-- ANNOTAZIONI -->
-                        <div class="col-span-2 mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni / Note</label>
-                            <textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Maniglia difettosa richiesta in sostituzione, ritardo previsto..."></textarea>
-                        </div>
-                    </div>
-
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma d'Ordine / Revisione</label>
-                        <p class="text-[10px] text-gray-500 mb-2">Il file non cancellerà quello vecchio, ma si affiancherà per mantenere lo storico cumulativo.</p>
-                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                    </div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
+                    <div id="lista-cronologia" class="space-y-4 max-h-80 overflow-y-auto no-scrollbar"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODALE: REGISTRA ATTIVITÀ / CAMBIO STATO CONTRATTO -->
-    <div id="modal-cambio-stato-contratto" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+    <!-- ================= MODALI AZIONI (Z-50) ================= -->
+
+    <!-- MODALE AVANZAMENTO DI STATO CON FILE E NOTE -->
+    <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900">Aggiorna Stato Contratto</h3>
-                    <p class="text-xs text-gray-500">Passaggio a: <strong class="text-[#2e2a5b]" id="span-nuovo-stato-contratto"></strong></p>
+                    <h3 class="text-lg font-bold text-gray-900" id="modale-azione-titolo">Azione</h3>
+                    <p class="text-xs text-gray-500" id="modale-azione-sub">...</p>
                 </div>
-                <button type="button" onclick="chiudiModaleStatoContratto()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleAzione()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
-            <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Annotazioni per il registro</label>
-                    <textarea id="form-contratto-nota" rows="3" class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Dettagli sullo stato..."></textarea>
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
+                <input type="hidden" id="azione-target-stato">
+                <input type="hidden" id="azione-is-jump">
+
+                <div id="box-note">
+                    <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
+                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Scrivi qui..."></textarea>
                 </div>
-                
-                <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Allega Contratto Firmato / Documento</label>
-                    <p class="text-xs text-gray-500 mb-3">Verrà salvato nella cartella dedicata <code class="bg-gray-100 px-1 py-0.5 rounded text-blue-600">contratti_docs</code>.</p>
-                    <input type="file" id="form-contratto-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+
+                <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                    <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Contratto (PDF)</label>
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                 </div>
             </div>
             
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
-                <button type="button" onclick="chiudiModaleStatoContratto()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="button" id="btn-conferma-stato-contratto" onclick="confermaCambioStatoContratto()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Conferma e Salva</button>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Azione</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA VALORE FINALE -->
+    <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold text-gray-900">Modifica Valore</h3>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Valore Finale (€)</label>
+                <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
+                <button type="button" onclick="salvaModificaValore()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
             </div>
         </div>
     </div>
@@ -355,85 +208,87 @@
 
         let contrattiCorrenti = [];
         let contrattoAttivoIndex = null;
-        let ordiniAttualiCache = []; 
-        let listaFornitoriCache = [];
 
-        const sequenzaStatiContratto = ['Da Fare', 'Rilievo Esecutivo', 'Pre-Ordini', 'Stesura', 'Inviato', 'Confermato'];
-        let statoPendenteContratto = '';
+        // Nuova logica per gli stati del Contratto (non più Da Fare, Stesura, Controllo... ecc ma specifici)
+        const sequenzaStati = ['Da Fare', 'Stesura', 'Rilievo Esecutivo', 'Pre-Ordini', 'Inviato', 'Confermato'];
 
-        // --- GESTIONE UPLOAD FILE GENERICA ---
-        async function caricaFileSuStorage(file, prefisso) {
-            if (!file) return null;
-            const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-            const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
-            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
-            if (error) { alert("Errore upload Storage: " + error.message); return null; }
-            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
-            return data.publicUrl;
-        }
+        // IL RICEVITORE 
+        document.addEventListener('DOMContentLoaded', async () => {
+            await caricaContratti();
 
-        // 1. CARICAMENTO CONTRATTI
+            const urlParams = new URLSearchParams(window.location.search);
+            const idToOpen = urlParams.get('id');
+
+            if (idToOpen) {
+                const index = contrattiCorrenti.findIndex(c => String(c.id) === idToOpen);
+                if (index !== -1) {
+                    apriSchedaContratto(index);
+                }
+            }
+        });
+
         async function caricaContratti() {
-            const { data: contratti, error } = await supabaseClient
+            const { data: contr, error } = await supabaseClient
                 .from('contratti')
-                .select('*, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale)), preventivi(file_url)')
+                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-contratti');
-            const conteggio = document.getElementById('conteggio-contratti');
+            if (error) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore DB</td></tr>'; return; }
 
-            if (error) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore di caricamento dati.</td></tr>'; return; }
+            contrattiCorrenti = contr || [];
+            document.getElementById('conteggio-contratti').innerText = `${contrattiCorrenti.length} contratti registrati`;
+            disegnaTabella(contrattiCorrenti);
+        }
 
-            contrattiCorrenti = contratti || [];
-            conteggio.innerText = `${contratti.length} contratti registrati`;
+        function disegnaTabella(lista) {
+            const tbody = document.getElementById('tabella-contratti');
             tbody.innerHTML = '';
+            if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessun contratto trovato.</td></tr>'; return; }
 
-            if (contratti.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nessun contratto attivo. Promuovi un preventivo ad "Accettato" per crearne uno!</td></tr>';
-                return;
-            }
-
-            contratti.forEach((con, index) => {
+            lista.forEach((c, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.addEventListener('click', () => apriSchedaContratto(index));
+                tr.onclick = () => apriSchedaContratto(index);
+                
+                const cantiere = c.commesse ? `${c.commesse.numero} ${c.commesse.nome_cantiere ? '('+c.commesse.nome_cantiere+')' : ''}` : '--';
+                const cliente = (c.commesse && c.commesse.clienti) ? c.commesse.clienti.nome_ragione_sociale : '--';
+                const importo = c.valore_finale ? `€ ${parseFloat(c.valore_finale).toFixed(2)}` : '--';
 
-                const nomeCliente = (con.commesse && con.commesse.clienti) ? con.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
-                const nomeCantiere = con.commesse ? (con.commesse.nome_cantiere || con.commesse.numero) : 'Commessa eliminata';
-                const valore = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '--';
-                const filePresente = con.file_url || (con.preventivi ? con.preventivi.file_url : null);
-                const iconaFile = filePresente ? '📎' : '';
-
-                let colorStato = 'bg-gray-100 text-gray-700';
-                if (con.stato === 'Rilievo Esecutivo') colorStato = 'bg-purple-100 text-purple-700';
-                if (con.stato === 'Pre-Ordini') colorStato = 'bg-yellow-100 text-yellow-800';
-                if (con.stato === 'Stesura') colorStato = 'bg-blue-100 text-blue-700';
-                if (con.stato === 'Inviato') colorStato = 'bg-indigo-100 text-indigo-700';
-                if (con.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
-                if (con.stato === 'Disdetto') colorStato = 'bg-red-100 text-red-700';
+                let colorStato = 'bg-gray-100 text-gray-600';
+                if(c.stato === 'Stesura' || c.stato === 'Rilievo Esecutivo' || c.stato === 'Pre-Ordini') colorStato = 'bg-yellow-100 text-yellow-800';
+                if(c.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
+                if(c.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
+                if(c.stato === 'Disdetto') colorStato = 'bg-red-100 text-red-800';
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">${con.numero}</td>
-                    <td class="px-6 py-4 text-gray-600 font-medium">${nomeCliente}</td>
-                    <td class="px-6 py-4 text-gray-600">${nomeCantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${con.stato || 'Da Fare'}</span></td>
-                    <td class="px-6 py-4 text-gray-900 font-bold">${valore}</td>
-                    <td class="px-6 py-4 text-center text-lg">${iconaFile}</td>
+                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">${c.numero}</td>
+                    <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
+                    <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${c.stato || 'Da Fare'}</span></td>
+                    <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // 2. SCHEDA DETTAGLIO
+        function filtraContratti() {
+            const query = document.getElementById('input-ricerca').value.toLowerCase();
+            const filtrati = contrattiCorrenti.filter(c => 
+                (c.numero && c.numero.toLowerCase().includes(query)) ||
+                (c.commesse && c.commesse.clienti && c.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query))
+            );
+            disegnaTabella(filtrati);
+        }
+
         function apriSchedaContratto(index) {
             contrattoAttivoIndex = index;
-            aggiornaDatiSchedaContrattoUI();
-            caricaOrdiniContratto(contrattiCorrenti[index].id);
-            caricaCronologia(contrattiCorrenti[index].commessa_id);
-            caricaFornitoriTendina();
-
+            aggiornaDatiSchedaUI();
+            caricaCronologia();
+            
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         function chiudiScheda() {
@@ -442,581 +297,314 @@
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
-        function aggiornaDatiSchedaContrattoUI() {
-            const con = contrattiCorrenti[contrattoAttivoIndex];
+        function aggiornaDatiSchedaUI() {
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            document.getElementById('scheda-titolo').innerText = c.numero;
             
-            document.getElementById('scheda-titolo').innerText = con.numero;
-            document.getElementById('scheda-badge-stato').innerText = con.stato || 'Da Fare';
-
-            let colorStato = 'bg-gray-100 text-gray-700';
-            if (con.stato === 'Rilievo Esecutivo') colorStato = 'bg-purple-100 text-purple-700';
-            if (con.stato === 'Pre-Ordini') colorStato = 'bg-yellow-100 text-yellow-800';
-            if (con.stato === 'Stesura') colorStato = 'bg-blue-100 text-blue-700';
-            if (con.stato === 'Inviato') colorStato = 'bg-indigo-100 text-indigo-700';
-            if (con.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
-            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider`;
-
-            const nomeCliente = (con.commesse && con.commesse.clienti) ? con.commesse.clienti.nome_ragione_sociale : 'Sconosciuto';
-            const nomeCantiere = con.commesse ? `${con.commesse.numero} - ${con.commesse.nome_cantiere || ''}` : 'Senza Cantiere';
-            const importo = con.valore_finale ? `€ ${parseFloat(con.valore_finale).toFixed(2)}` : '0,00 €';
+            const cantiere = c.commesse ? `${c.commesse.numero} ${c.commesse.nome_cantiere ? '('+c.commesse.nome_cantiere+')' : ''}` : '--';
+            const cliente = (c.commesse && c.commesse.clienti) ? c.commesse.clienti.nome_ragione_sociale : '--';
+            const importo = c.valore_finale ? `€ ${parseFloat(c.valore_finale).toFixed(2)}` : '0,00 €';
             
-            document.getElementById('scheda-annotazioni').innerText = con.annotazioni || 'Nessuna annotazione.';
-            document.getElementById('scheda-cliente').innerText = nomeCliente;
-            document.getElementById('scheda-commessa').innerText = nomeCantiere;
-            document.getElementById('scheda-importo').innerText = importo;
+            document.getElementById('scheda-sottotitolo-commessa').innerText = cantiere;
+            document.getElementById('scheda-sottotitolo-cliente').innerText = cliente;
+            document.getElementById('scheda-sottotitolo-valore').innerText = importo;
 
-            const fileAttivo = con.file_url || (con.preventivi ? con.preventivi.file_url : null);
-            const boxFile = document.getElementById('scheda-box-file');
-            const noFile = document.getElementById('scheda-nessun-file');
-            if (fileAttivo) {
-                boxFile.classList.remove('hidden');
-                noFile.classList.add('hidden');
-                document.getElementById('scheda-link-file').href = fileAttivo;
-            } else {
-                boxFile.classList.add('hidden');
-                noFile.classList.remove('hidden');
-            }
+            let colorStato = 'bg-gray-100 text-gray-600';
+            if(c.stato === 'Stesura' || c.stato === 'Rilievo Esecutivo' || c.stato === 'Pre-Ordini') colorStato = 'bg-yellow-100 text-yellow-800';
+            if(c.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
+            if(c.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
+            if(c.stato === 'Disdetto') colorStato = 'bg-red-100 text-red-800';
+            
+            const statoPuro = c.stato && c.stato.trim() !== '' ? c.stato : 'Da Fare';
+            
+            document.getElementById('scheda-badge-stato').innerText = statoPuro;
+            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
 
-            disegnaStepperContratto(con.stato || 'Da Fare');
+            disegnaStepper(statoPuro);
+            disegnaStoricoFile(c.file_url);
         }
 
-        function disegnaStepperContratto(statoAttuale) {
+        function disegnaStoricoFile(urls_csv) {
+            const div = document.getElementById('lista-file-contratto');
+            if(!urls_csv || urls_csv.trim() === '') {
+                div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato nello storico.</p>';
+                return;
+            }
+
+            const urls = urls_csv.split(',').filter(x => x.trim() !== '');
+            let html = '';
+            
+            urls.forEach((url, i) => {
+                let nameVisuale = `Documento ${i+1}`;
+                
+                let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
+                let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
+
+                html += `
+                    <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group">
+                        <div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div>
+                        <div class="flex-1">
+                            <p class="text-sm font-bold text-gray-900">${nameVisuale}</p>
+                            <p class="text-[10px] text-gray-500">Clicca per aprire</p>
+                        </div>
+                        <div class="text-gray-400 font-bold">&rarr;</div>
+                    </a>
+                `;
+            });
+            div.innerHTML = html;
+        }
+
+        function disegnaStepper(statoAttuale) {
             const container = document.getElementById('stepper-container');
             const azioniBox = document.getElementById('stepper-azioni');
             container.innerHTML = ''; azioniBox.innerHTML = '';
 
-            const currentIdx = sequenzaStatiContratto.indexOf(statoAttuale);
+            if (statoAttuale === 'Disdetto') {
+                container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ CONTRATTO DISDETTO</div>`;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Da Fare')" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Ripristina</button>`;
+                return;
+            }
+
+            let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
+
             const bgLine = document.createElement('div');
-            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-6';
+            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
             container.appendChild(bgLine);
 
-            sequenzaStatiContratto.forEach((stato, index) => {
+            sequenzaStati.forEach((stato, index) => {
                 const punto = document.createElement('div');
-                punto.className = 'flex flex-col items-center gap-1 bg-white px-1 z-10';
+                punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform';
+                punto.onclick = () => saltoStato(stato); // PALLINO CLICCABILE PER IL SALTO!
                 
-                let iconaHTML = `<div class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                if (index < currentIdx || (statoAttuale === 'Confermato' && index === currentIdx)) {
-                    iconaHTML = `<div class="w-7 h-7 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md font-bold text-xs">✓</div>`;
-                } else if (index === currentIdx) {
-                    iconaHTML = `<div class="w-7 h-7 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-xs shadow-lg ring-4 ring-blue-100">${index + 1}</div>`;
+                let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
+                
+                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) {
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
+                } else if (index === idxCalcolato) {
+                    let col = 'bg-blue-500 ring-blue-100';
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${col} text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`;
                 }
 
-                let textColor = (index <= currentIdx || statoAttuale === 'Confermato') ? 'text-gray-900 font-bold' : 'text-gray-400';
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-20 leading-tight ${textColor}">${stato}</span>`;
+                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
+
+                punto.innerHTML = `
+                    ${iconaHTML}
+                    <span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-center w-14 sm:w-20 leading-tight ${textColor}">${stato}</span>
+                `;
                 container.appendChild(punto);
             });
 
+            // I PULSANTI MANUALI DI AVANZAMENTO
             if (statoAttuale === 'Da Fare') {
-                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaStatoContratto('Rilievo Esecutivo')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2.5 rounded-lg shadow-sm transition-colors">Avvia Rilievo Esecutivo &rarr;</button>`;
-            } else if (statoAttuale === 'Rilievo Esecutivo') {
                 azioniBox.innerHTML = `
-                    <button onclick="preparaStatoContratto('Da Fare')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Da Fare</button>
                     <div class="flex-1"></div>
-                    <button onclick="preparaStatoContratto('Pre-Ordini')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2.5 rounded-lg shadow-sm">Passa a Pre-Ordini &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Pre-Ordini') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaStatoContratto('Rilievo Esecutivo')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Rilievi</button>
-                    <div class="flex-1"></div>
-                    <button onclick="verificaEPassaStesura()" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Procedi a Stesura Contratto &rarr;</button>
+                    <button onclick="preparaAzione('Stesura')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Inizia Stesura / Gestione &rarr;</button>
                 `;
             } else if (statoAttuale === 'Stesura') {
                 azioniBox.innerHTML = `
-                    <button onclick="preparaStatoContratto('Pre-Ordini')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Pre-Ordini</button>
+                    <button onclick="preparaAzione('Da Fare')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
                     <div class="flex-1"></div>
-                    <button onclick="preparaStatoContratto('Inviato')" class="text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-6 py-2.5 rounded-lg shadow-sm">Segna come Inviato al Cliente &rarr;</button>
+                    <button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Passa a Rilievo Esecutivo &rarr;</button>
+                `;
+            } else if (statoAttuale === 'Rilievo Esecutivo') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Stesura')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Passa a Pre-Ordini Fornitori &rarr;</button>
+                `;
+            } else if (statoAttuale === 'Pre-Ordini') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Segna Contratto Inviato (da firmare) &rarr;</button>
                 `;
             } else if (statoAttuale === 'Inviato') {
                 azioniBox.innerHTML = `
-                    <button onclick="preparaStatoContratto('Stesura')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Stesura</button>
+                    <button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
                     <div class="flex-1"></div>
-                    <button onclick="preparaStatoContratto('Confermato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-sm">✅ Contratto Confermato!</button>
+                    <button onclick="preparaAzione('Disdetto')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Contratto Disdetto</button>
+                    <button onclick="preparaAzione('Confermato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-md">✅ Segna Firmato/Confermato</button>
+                `;
+            } else if (statoAttuale === 'Confermato') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>
                 `;
             }
         }
 
-        // 3. GESTIONE ORDINI MULTI-FORNITORE
-        async function caricaFornitoriTendina() {
-            const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda, categoria').order('nome_azienda');
-            if (fornitori) {
-                listaFornitoriCache = fornitori;
-                const select = document.getElementById('form-ord-fornitore');
-                select.innerHTML = '<option value="">-- Seleziona un fornitore --</option>';
-                fornitori.forEach(f => {
-                    select.innerHTML += `<option value="${f.id}">${f.nome_azienda} (${f.categoria || 'Generico'})</option>`;
-                });
+        // --- FUNZIONE DEL SALTO DI STATO FORZATO ---
+        function saltoStato(nuovoStato) {
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            if (c.stato === nuovoStato) return; 
+            
+            if (confirm(`Vuoi forzare il salto lavorazione del contratto allo stato: ${nuovoStato.toUpperCase()}?
+Potrai allegare eventuali documenti nella schermata successiva.`)) {
+                preparaAzione(nuovoStato, true);
             }
         }
 
-        function apriModaleNuovoOrdine() {
-            document.getElementById('modal-nuovo-ordine').classList.remove('hidden');
-        }
-        function chiudiModaleNuovoOrdine() {
-            document.getElementById('modal-nuovo-ordine').classList.add('hidden');
-            document.getElementById('form-nuovo-ordine').reset();
+        function preparaAzione(nuovoStato, isJump = false) {
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            
+            document.getElementById('azione-target-stato').value = nuovoStato;
+            document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO';
+            
+            document.getElementById('azione-note').value = '';
+            document.getElementById('azione-file').value = '';
+            
+            const titolo = document.getElementById('modale-azione-titolo');
+            const sub = document.getElementById('modale-azione-sub');
+            const labelNote = document.getElementById('label-note');
+            const labelFile = document.getElementById('label-file');
+            
+            if (isJump) {
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`;
+                sub.innerText = "Azione manuale. Carica eventuali documenti o contratti firmati.";
+                labelNote.innerText = "Note sul salto di stato (Opzionale)";
+                labelFile.innerText = "Allega Documento (es. Contratto PDF)";
+            } else if (nuovoStato === 'Confermato') {
+                titolo.innerText = "Contratto Confermato!";
+                sub.innerText = "Allega qui il documento firmato dal cliente per l'archivio.";
+                labelNote.innerText = "Note / Accordi (Opzionale)";
+                labelFile.innerText = "Allega Contratto Firmato (PDF)";
+            } else {
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`;
+                sub.innerText = "Completa l'operazione";
+                labelNote.innerText = "Note (Opzionale)";
+                labelFile.innerText = "Allega Documento (Opzionale)";
+            }
+
+            document.getElementById('modal-azione').classList.remove('hidden');
         }
 
-        document.getElementById('form-nuovo-ordine').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btn-salva-nuovo-ordine');
-            const fileInput = document.getElementById('form-ord-file');
-            const con = contrattiCorrenti[contrattoAttivoIndex];
+        function chiudiModaleAzione() { document.getElementById('modal-azione').classList.add('hidden'); }
 
-            btnSubmit.innerText = "Salvataggio...";
-            btnSubmit.disabled = true;
+        async function caricaFileSuStorage(file, prefisso) {
+            if (!file) return null;
+            const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+            const dataOggi = new Date().toISOString().split('T')[0];
+            const fileName = `${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}`;
+            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) { alert("Errore upload file: " + error.message); return null; }
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
+
+        async function eseguiAzione() {
+            const btn = document.getElementById('btn-conferma-azione');
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            
+            const nuovoStato = document.getElementById('azione-target-stato').value;
+            const isJump = document.getElementById('azione-is-jump').value === 'SI';
+            const note = document.getElementById('azione-note').value;
+            const fileInput = document.getElementById('azione-file');
+
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
 
             let fileUrl = null;
             if (fileInput.files.length > 0) {
-                btnSubmit.innerText = "Caricamento file...";
-                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'ORD_REQ');
-            }
-
-            const nuovoOrdine = {
-                contratto_id: con.id,
-                fornitore_id: document.getElementById('form-ord-fornitore').value,
-                descrizione: document.getElementById('form-ord-descrizione').value,
-                costo_previsto: document.getElementById('form-ord-costo').value || 0,
-                stato: 'Richiesta Inviata',
-                revisione: 0,
-                file_url: fileUrl 
-            };
-
-            const { data, error } = await supabaseClient.from('ordini_fornitori').insert([nuovoOrdine]).select('*, fornitori(nome_azienda)');
-            if (!error) {
-                const nomeFornitore = data[0].fornitori ? data[0].fornitori.nome_azienda : 'Fornitore';
-                
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: con.commessa_id,
-                    azione: `Nuovo Pre-Ordine registrato per: ${nomeFornitore}`,
-                    file_url: fileUrl,
-                    autore: UTENTE_CORRENTE
-                }]);
-
-                chiudiModaleNuovoOrdine();
-                caricaOrdiniContratto(con.id);
-                caricaCronologia(con.commessa_id);
-            } else {
-                alert("Errore inserimento ordine: " + error.message);
-            }
-
-            btnSubmit.innerText = "Salva Ordine";
-            btnSubmit.disabled = false;
-        });
-
-        async function caricaOrdiniContratto(contrattoId) {
-            const tbody = document.getElementById('tabella-ordini');
-            
-            const { data: ordini, error } = await supabaseClient
-                .from('ordini_fornitori')
-                .select('*, fornitori(nome_azienda, categoria)')
-                .eq('contratto_id', contrattoId)
-                .order('created_at', { ascending: true });
-
-            if (error || !ordini || ordini.length === 0) {
-                ordiniAttualiCache = [];
-                tbody.innerHTML = '<tr><td colspan="8" class="px-4 py-4 text-center text-gray-500 text-sm">Nessun ordine registrato per questo contratto.</td></tr>';
-                return;
-            }
-
-            ordiniAttualiCache = ordini; 
-            let html = '';
-            
-            ordini.forEach((ord, i) => {
-                let statoPulito = ord.stato;
-                if(statoPulito === 'Conferma') statoPulito = 'Conferma Arrivata';
-                if(statoPulito === 'Da controllare ed inviare') statoPulito = 'Da Controllare';
-                if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
-
-                const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
-                const categoria = ord.fornitori ? (ord.fornitori.categoria || '--') : '--';
-                const costoPrevisto = ord.costo_previsto ? `€ ${parseFloat(ord.costo_previsto).toFixed(2)}` : '--';
-                const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
-                
-                const annotazioniHtml = ord.annotazioni ? `<div class="text-[10px] text-gray-500 italic mt-1 bg-gray-50 p-1.5 rounded">📝 ${ord.annotazioni}</div>` : '';
-
-                let stringaConsegna = '';
-                if (ord.data_arrivo_merce) {
-                    const d = ord.data_arrivo_merce.split('-');
-                    stringaConsegna = `<div class="text-[10px] text-gray-500 mt-1">📅 Arrivo: <strong class="text-gray-700">${d[2]}/${d[1]}/${d[0]}</strong></div>`;
-                }
-                
-                let iconeFileHtml = '';
-                if (ord.file_url) {
-                    const arrayUrls = ord.file_url.split(','); 
-                    arrayUrls.forEach((urlStr, indexFile) => {
-                        if (urlStr.trim() !== '') {
-                            iconeFileHtml += `<a href="${urlStr.trim()}" target="_blank" class="inline-block px-1.5 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded text-[10px] font-bold transition-colors mr-1 mb-1 border border-blue-100 shadow-sm" title="Apri documento ${indexFile + 1}">📎 ${indexFile + 1}</a>`;
-                        }
-                    });
-                } else {
-                    iconeFileHtml = '<span class="text-gray-300">--</span>';
-                }
-
-                let badgeClass = 'bg-gray-100 text-gray-600';
-                if(statoPulito === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700';
-                if(statoPulito === 'Da Controllare') badgeClass = 'bg-yellow-100 text-yellow-800';
-                if(statoPulito === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800';
-                if(statoPulito === 'Ordine confermato ed inviato al Fornitore') badgeClass = 'bg-emerald-100 text-emerald-800';
-
-                let nomeStatoBadge = statoPulito;
-                if(nomeStatoBadge === 'Ordine confermato ed inviato al Fornitore') nomeStatoBadge = 'Ordine Confermato';
-
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <div class="font-bold text-gray-900">${fornitoreNome}</div>
-                            <div class="text-[10px] uppercase text-gray-500 mt-0.5">${categoria}</div>
-                        </td>
-                        <td class="px-4 py-3 text-gray-700 text-xs">
-                            ${ord.descrizione}
-                            ${annotazioniHtml}
-                        </td>
-                        <td class="px-4 py-3 text-gray-500 text-xs">${costoPrevisto}</td>
-                        <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
-                        <td class="px-4 py-3 w-40">
-                            <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${nomeStatoBadge}</span>
-                            ${stringaConsegna}
-                        </td>
-                        <td class="px-4 py-3 text-center text-xs font-semibold text-gray-400">Rev. ${ord.revisione}</td>
-                        <td class="px-4 py-3 text-center w-28">${iconeFileHtml}</td>
-                        <td class="px-4 py-3 text-center">
-                            <button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors shadow-sm border border-gray-200">✏️ Aggiorna</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = html;
-        }
-
-        // --- GESTIONE ORDINE ESISTENTE CON STEPPER E CAMPI OPZIONALI ---
-        const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore'];
-        let statoPendenteOrdine = '';
-
-        function apriModaleGestioneOrdine(indexMemoria) {
-            const ord = ordiniAttualiCache[indexMemoria];
-            const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
-
-            document.getElementById('gest-ord-id').value = ord.id;
-            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
-            
-            let statoPartenza = ord.stato || 'Richiesta Inviata';
-            if(statoPartenza === 'Conferma') statoPartenza = 'Conferma Arrivata';
-            if(statoPartenza === 'Da controllare ed inviare') statoPartenza = 'Da Controllare';
-            if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
-            
-            document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
-            document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
-            document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || '';
-            document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; 
-            document.getElementById('gest-ord-file').value = ''; 
-
-            impostaStatoPendenteOrdine(statoPartenza);
-            document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
-        }
-
-        function chiudiModaleGestioneOrdine() {
-            document.getElementById('modal-gestisci-ordine').classList.add('hidden');
-        }
-
-        function impostaStatoPendenteOrdine(nuovoStato) {
-            statoPendenteOrdine = nuovoStato;
-            
-            const container = document.getElementById('stepper-container-ordine');
-            const azioniBox = document.getElementById('stepper-azioni-ordine');
-            const boxData = document.getElementById('box-data-consegna');
-            
-            container.innerHTML = ''; azioniBox.innerHTML = '';
-
-            if (statoPendenteOrdine === 'In Revisione') {
-                container.innerHTML = `<div class="w-full text-center py-3 bg-orange-50 text-orange-600 font-bold rounded-lg border border-orange-200 text-sm">⚠️ ORDINE IN REVISIONE FORNITORE</div>`;
-                azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm transition-colors">Termina Revisione (Torna a Conferma Arrivata)</button>`;
-                boxData.classList.add('hidden');
-                return;
-            }
-
-            const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine);
-            const bgLine = document.createElement('div');
-            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4';
-            container.appendChild(bgLine);
-
-            const etichetteBrevi = ['Richiesta', 'Conferma Arrivata', 'Controllo', 'Inviato al Forn.'];
-
-            sequenzaStatiOrdine.forEach((stato, index) => {
-                const punto = document.createElement('div');
-                punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-1 z-10';
-                
-                let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
-                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
-                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
-                } else if (index === currentIdx) {
-                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-[10px] shadow-md ring-2 ring-blue-100">${index + 1}</div>`;
-                }
-
-                let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-24 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`;
-                container.appendChild(punto);
-            });
-
-            // Mostra/Nascondi Data Arrivo Merce
-            if (currentIdx >= 1) { 
-                boxData.classList.remove('hidden'); 
-            } else { 
-                boxData.classList.add('hidden'); 
-            }
-
-            if (statoPendenteOrdine === 'Richiesta Inviata') {
-                azioniBox.innerHTML = `
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Segna Conferma Arrivata &rarr;</button>
-                `;
-            } else if (statoPendenteOrdine === 'Conferma Arrivata') {
-                azioniBox.innerHTML = `
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Richiesta Inviata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg shadow-sm transition-colors">Passa a Controllo &rarr;</button>
-                `;
-            } else if (statoPendenteOrdine === 'Da Controllare') {
-                azioniBox.innerHTML = `
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('In Revisione')" class="text-xs font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-3 py-2 rounded-lg shadow-sm transition-colors">⚠️ Manda in Revisione</button>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Ordine confermato ed inviato al Fornitore')" class="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg shadow-sm transition-colors">Invia Definitivo &rarr;</button>
-                `;
-            } else if (statoPendenteOrdine === 'Ordine confermato ed inviato al Fornitore') {
-                azioniBox.innerHTML = `
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-3 py-2 rounded-lg transition-colors">&larr; Riporta a Controllo</button>
-                `;
-            }
-        }
-
-        document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btnSubmit = document.getElementById('btn-salva-gest-ordine');
-            
-            const idOrdine = document.getElementById('gest-ord-id').value;
-            const nuovoCosto = document.getElementById('gest-ord-costo-conf').value || null;
-            const nuovaRev = document.getElementById('gest-ord-revisione').value;
-            const dataConsegna = document.getElementById('gest-ord-data-consegna').value || null;
-            const noteOrdine = document.getElementById('gest-ord-annotazioni').value || null;
-            const fileInputUpdate = document.getElementById('gest-ord-file');
-            
-            const con = contrattiCorrenti[contrattoAttivoIndex];
-            const ordOriginale = ordiniAttualiCache.find(o => o.id == idOrdine);
-            const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
-
-            btnSubmit.innerText = "Salvataggio...";
-            btnSubmit.disabled = true;
-
-            let fileUrl = null;
-            if (fileInputUpdate.files.length > 0) {
-                btnSubmit.innerText = "Caricamento file...";
-                fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
-            }
-
-            let datiUpdate = {
-                stato: statoPendenteOrdine, 
-                costo_confermato: nuovoCosto,
-                revisione: nuovaRev,
-                data_arrivo_merce: dataConsegna,
-                annotazioni: noteOrdine
-            };
-            
-            if(fileUrl) {
-                if (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') {
-                    datiUpdate.file_url = ordOriginale.file_url + ',' + fileUrl;
-                } else {
-                    datiUpdate.file_url = fileUrl;
-                }
-            }
-
-            const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
-
-            if (!error) {
-                let nomeStatoPerLog = statoPendenteOrdine;
-                if(nomeStatoPerLog === 'Ordine confermato ed inviato al Fornitore') nomeStatoPerLog = 'Ordine Confermato Definitivo';
-                
-                let testoLog = `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`;
-                if(nuovoCosto) testoLog += ` (Costo conf. € ${parseFloat(nuovoCosto).toFixed(2)})`;
-                if(dataConsegna) {
-                    const d = dataConsegna.split('-');
-                    testoLog += ` - Arrivo: ${d[2]}/${d[1]}/${d[0]}`;
-                }
-                if(nuovaRev > ordOriginale.revisione) testoLog += ` [Rev. ${nuovaRev}]`;
-
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: con.commessa_id,
-                    azione: testoLog,
-                    nota: noteOrdine, 
-                    file_url: fileUrl, 
-                    autore: UTENTE_CORRENTE
-                }]);
-
-                chiudiModaleGestioneOrdine();
-                caricaOrdiniContratto(con.id);
-                caricaCronologia(con.commessa_id);
-            } else {
-                alert("Errore aggiornamento ordine: " + error.message);
-            }
-
-            btnSubmit.innerText = "💾 Salva Aggiornamento Definitivo";
-            btnSubmit.disabled = false;
-        });
-
-        // 4. CONTROLLO PASSAGGIO A STESURA
-        async function verificaEPassaStesura() {
-            const con = contrattiCorrenti[contrattoAttivoIndex];
-            const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', con.id);
-            
-            if (!ordini || ordini.length === 0) {
-                if(!confirm("Attenzione: non hai inserito alcun pre-ordine fornitore per questo contratto. Vuoi procedere comunque con la Stesura?")) return;
-            } else {
-                const tuttiConfermati = ordini.every(o => o.stato === 'Conferma Arrivata' || o.stato === 'Da Controllare' || o.stato === 'Ordine confermato ed inviato al Fornitore');
-                if(!tuttiConfermati) {
-                    if(!confirm("Attenzione: alcuni pre-ordini NON hanno ancora ricevuto la Conferma dal fornitore. Vuoi procedere comunque alla Stesura forzando i prezzi?")) return;
-                }
-            }
-            preparaStatoContratto('Stesura');
-        }
-
-        // 5. GESTIONE CAMBIO STATO CONTRATTO E DIARIO
-        function preparaStatoContratto(nuovoStato) {
-            statoPendenteContratto = nuovoStato;
-            document.getElementById('span-nuovo-stato-contratto').innerText = nuovoStato.toUpperCase();
-            document.getElementById('form-contratto-nota').value = '';
-            document.getElementById('form-contratto-file').value = '';
-            document.getElementById('modal-cambio-stato-contratto').classList.remove('hidden');
-        }
-
-        function chiudiModaleStatoContratto() {
-            document.getElementById('modal-cambio-stato-contratto').classList.add('hidden');
-            statoPendenteContratto = '';
-        }
-
-        async function confermaCambioStatoContratto() {
-            const btnSubmit = document.getElementById('btn-conferma-stato-contratto');
-            const nota = document.getElementById('form-contratto-nota').value;
-            const fileInput = document.getElementById('form-contratto-file');
-            
-            const con = contrattiCorrenti[contrattoAttivoIndex];
-            const nuovoStato = statoPendenteContratto;
-
-            btnSubmit.innerText = "Salvataggio...";
-            btnSubmit.disabled = true;
-
-            let nuovoFileUrl = null;
-            if (fileInput.files.length > 0) {
-                btnSubmit.innerText = "Caricamento file...";
-                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'CONT_STATO');
+                btn.innerText = "Caricamento PDF...";
+                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'CONT');
             }
 
             let datiAggiornamento = { stato: nuovoStato };
-            if (nuovoFileUrl) { datiAggiornamento.file_url = nuovoFileUrl; }
-            if (nota && !con.annotazioni) { datiAggiornamento.annotazioni = nota; }
 
-            const { error } = await supabaseClient.from('contratti').update(datiAggiornamento).eq('id', con.id);
-
-            if (!error) {
-                if (nuovoFileUrl) con.file_url = nuovoFileUrl;
-
-                // --- INIZIO MAGIA FATTURAZIONE ---
-                if (nuovoStato === 'Confermato') {
-                    const numeroFattura = con.numero.replace('CONT-', 'FATT-ACC-');
-                    const { data: fattEsistenti } = await supabaseClient.from('fatture').select('id').eq('contratto_id', con.id);
-                    
-                    if (!fattEsistenti || fattEsistenti.length === 0) {
-                        await supabaseClient.from('fatture').insert([{
-                            contratto_id: con.id,
-                            commessa_id: con.commessa_id,
-                            numero: numeroFattura,
-                            stato: 'Da Fare'
-                        }]);
-                        // Log della creazione automatica
-                        await supabaseClient.from('commesse_log').insert([{
-                            commessa_id: con.commessa_id,
-                            azione: `Generata in automatico bozza Fattura Acconto: ${numeroFattura}`,
-                            autore: UTENTE_CORRENTE
-                        }]);
-                    }
-                }
-                // --- FINE MAGIA FATTURAZIONE ---
-
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: con.commessa_id,
-                    azione: `Contratto aggiornato in: ${nuovoStato.toUpperCase()}`,
-                    nota: nota || null,
-                    file_url: nuovoFileUrl,
-                    autore: UTENTE_CORRENTE
-                }]);
-
-                con.stato = nuovoStato;
-                chiudiModaleStatoContratto();
-                aggiornaDatiSchedaContrattoUI();
-                caricaCronologia(con.commessa_id);
-                caricaContratti();
-            } else {
-                alert("Errore aggiornamento: " + error.message);
+            if (fileUrl) {
+                let urlCorrente = c.file_url || '';
+                datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl;
             }
 
-            btnSubmit.innerText = "Conferma e Salva";
-            btnSubmit.disabled = false;
+            const { error } = await supabaseClient.from('contratti').update(datiAggiornamento).eq('id', c.id);
+
+            if (!error) {
+                c.stato = nuovoStato;
+                if(fileUrl) c.file_url = datiAggiornamento.file_url;
+
+                let testoLog = isJump ? `⏭️ Salto forzato contratto in: ${nuovoStato.toUpperCase()}.` : `Avanzamento Contratto in: ${nuovoStato.toUpperCase()}.`;
+                if(note) testoLog += ` Note: "${note}"`;
+                
+                await supabaseClient.from('commesse_log').insert([{ 
+                    commessa_id: c.commessa_id, 
+                    azione: testoLog, 
+                    file_url: fileUrl, 
+                    autore: UTENTE_CORRENTE 
+                }]);
+
+                chiudiModaleAzione();
+                aggiornaDatiSchedaUI();
+                caricaCronologia();
+                caricaContratti();
+            } else { alert("Errore di sistema: " + error.message); }
+
+            btn.innerText = "Conferma Azione";
+            btn.disabled = false;
         }
 
-        // --- GESTIONE NOTA MANUALE ---
+        // Modifica solo importo da dentro la scheda
+        function apriModaleModificaValore() {
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            document.getElementById('mod-importo').value = c.valore_finale || '';
+            document.getElementById('modal-modifica-dati').classList.remove('hidden');
+        }
+
+        async function salvaModificaValore() {
+            const c = contrattiCorrenti[contrattoAttivoIndex];
+            const nuovoImporto = document.getElementById('mod-importo').value;
+            
+            const { error } = await supabaseClient.from('contratti').update({ valore_finale: nuovoImporto }).eq('id', c.id);
+            if (!error) {
+                c.valore_finale = nuovoImporto;
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: c.commessa_id, azione: `Valore finale contratto aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]);
+                document.getElementById('modal-modifica-dati').classList.add('hidden');
+                aggiornaDatiSchedaUI();
+                caricaCronologia();
+                caricaContratti(); 
+            }
+        }
+
+
+        // 5. DIARIO
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera');
             const testo = inputNota.value;
-            
             if (!testo || testo.trim() === '') return;
-            const con = contrattiCorrenti[contrattoAttivoIndex];
-            
-            const { error } = await supabaseClient.from('commesse_log').insert([{
-                commessa_id: con.commessa_id,
-                azione: "Comunicazione / Appunto Manuale",
-                nota: testo,
-                autore: UTENTE_CORRENTE
-            }]);
-
-            if (!error) {
-                inputNota.value = '';
-                caricaCronologia(con.commessa_id);
-            } else { alert("Errore: " + error.message); }
+            const comId = contrattiCorrenti[contrattoAttivoIndex].commessa_id;
+            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: comId, azione: "Appunto Contratto", nota: testo, autore: UTENTE_CORRENTE }]);
+            if (!error) { inputNota.value = ''; caricaCronologia(); } 
         }
 
-        // CARICA IL DIARIO GLOBALE
-        async function caricaCronologia(commessaId) {
+        async function caricaCronologia() {
+            const comId = contrattiCorrenti[contrattoAttivoIndex].commessa_id;
             const divLog = document.getElementById('lista-cronologia');
-            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
+            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+            
+            // Filtro leggermente il diario globale per mostrare solo le cose pertinenti al contratto
+            const { data: logs } = await supabaseClient.from('commesse_log').select('*')
+                .eq('commessa_id', comId)
+                .or('azione.ilike.%contratto%,azione.ilike.%appunto%')
+                .order('created_at', { ascending: false });
 
-            const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
-
-            if (error || !logs || logs.length === 0) {
-                divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata in questa commessa.</p>';
-                return;
-            }
+            if (!logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna nota presente.</p>'; return; }
 
             let html = '';
             logs.forEach(log => {
                 const dateObj = new Date(log.created_at);
-                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
                 
-                const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
-                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 mt-2 shadow-inner">"${log.nota}"</p>` : '';
-                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold hover:bg-blue-100 transition-colors border border-blue-100">📎 Apri Documento</a>` : '';
-
-                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
-                if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
+                if(log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
 
                 html += `
-                    <div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">
+                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
                         ${icona}
                         <div class="flex-1">
-                            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1">
-                                <p class="text-sm font-bold text-gray-900">${log.azione}</p>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat} ${autoreText}</p>
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-xs font-bold text-gray-900">${log.azione}</p>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
                             </div>
                             ${notaHtml}
-                            ${fileHtml}
                         </div>
                     </div>
                 `;
@@ -1024,8 +612,6 @@
             divLog.innerHTML = html;
         }
 
-        // INIT
-        document.addEventListener('DOMContentLoaded', caricaContratti);
     </script>
 </body>
 </html>
