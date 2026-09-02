@@ -287,7 +287,7 @@
     </div>
 
 
-    <!-- MODALE: GESTISCI ORDINE (Stesso di sempre, adattato) -->
+    <!-- MODALE: GESTISCI ORDINE INNESTATO -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -352,7 +352,6 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-ordine-commessa" class="space-y-4">
                     
-                    <!-- SPUNTA ASSISTENZA -->
                     <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3">
                         <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer">
                         <div>
@@ -366,20 +365,9 @@
                         <select id="form-ord-contratto-rif" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label>
-                        <select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm">
-                            <option value="">Caricamento fornitori...</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Fornitura *</label>
-                        <textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm" placeholder="Es. N. 6 finestre PVC..."></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Costo Preventivato Stimato (€)</label>
-                        <input type="number" step="0.01" id="form-ord-new-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none" placeholder="0.00">
-                    </div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"><option value="">Caricamento...</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Costo Preventivato Stimato (€)</label><input type="number" step="0.01" id="form-ord-new-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none" placeholder="0.00"></div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
@@ -388,7 +376,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- MODALE: INSERIMENTO POSA/INTERVENTO -->
     <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -422,7 +409,7 @@
     </div>
 
 
-    <!-- GLI ALTRI MODALI BASE (Nuova Commessa, Modifica Dati) RIMANGONO INVARIATI -->
+    <!-- ================= MODALI BASE COMMESSA (PULITI E UNIVOCI) ================= -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -454,8 +441,8 @@
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button>
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button>
+                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button>
             </div>
         </div>
     </div>
@@ -464,7 +451,7 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div>
-                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-modifica-commessa" class="space-y-4">
@@ -475,12 +462,17 @@
                             <div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                             <div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="mod-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                         </div>
+                        <div class="grid grid-cols-12 gap-4 pt-2">
+                            <div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Referente</label><input type="text" id="mod-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            <div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="mod-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            <div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="mod-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button>
-                <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva</button>
+                <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button>
+                <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button>
             </div>
         </div>
     </div>
@@ -536,7 +528,6 @@
                 const cantiere = com.nome_cantiere || '--';
                 const valore = com.valore ? `€ ${parseFloat(com.valore).toFixed(2)}` : '--';
                 
-                // Colori di emergenza nella lista per gli stati anomali
                 let bgStato = 'bg-gray-100 text-gray-600';
                 if(com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
                 if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
@@ -626,7 +617,6 @@
                 return;
             }
 
-            // TRUCCO: Se siamo in uno stato anomalo, lo 'mascheriamo' al posto di 'Collaudo' (Indice 7) per non sfasciare la grafica
             let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
             let etichettaOverride = null;
             let coloreOverride = null;
@@ -650,7 +640,7 @@
                 punto.className = 'flex flex-col items-center gap-2 bg-white px-1 sm:px-2 z-10';
                 
                 let labelVisuale = stato;
-                if (index === 7 && etichettaOverride) labelVisuale = etichettaOverride; // Sovrascrive il nome 'Collaudo'
+                if (index === 7 && etichettaOverride) labelVisuale = etichettaOverride;
 
                 let iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
                 
@@ -676,7 +666,6 @@
                 container.appendChild(punto);
             });
 
-            // PULSANTIERA AZIONI AVANZATA
             if (statoAttuale === 'In Posa') {
                 azioniBox.innerHTML = `
                     <button onclick="cambiaStatoDB('In Consegna')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
@@ -704,7 +693,6 @@
                     </div>
                 `;
             } else {
-                // Flusso Lineare Standard
                 if (idxCalcolato > 0) {
                     const prevStato = sequenzaStati[idxCalcolato - 1];
                     azioniBox.innerHTML += `<button onclick="cambiaStatoDB('${prevStato}')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg"><span>&larr;</span> Indietro</button>`;
@@ -740,14 +728,11 @@
         // --- GESTIONE NUOVO MODALE: ESITO COLLAUDO ---
         function apriModaleCollaudo() {
             document.getElementById('collaudo-note').value = '';
-            // Reset radio buttons
             document.querySelectorAll('input[name="esito_strada"]').forEach(radio => radio.checked = false);
             document.getElementById('modal-esito-collaudo').classList.remove('hidden');
         }
 
-        function chiudiModaleCollaudo() {
-            document.getElementById('modal-esito-collaudo').classList.add('hidden');
-        }
+        function chiudiModaleCollaudo() { document.getElementById('modal-esito-collaudo').classList.add('hidden'); }
 
         async function salvaEsitoCollaudo() {
             const radioSelezionato = document.querySelector('input[name="esito_strada"]:checked');
@@ -765,41 +750,25 @@
             let nuovoStato = '';
             let logAzione = '';
             
-            if (strada === "1") { 
-                nuovoStato = 'Saldo'; 
-                logAzione = "✅ COLLAUDO SUPERATO: Lavoro completato a regola d'arte."; 
-            } else if (strada === "2") { 
-                nuovoStato = 'Saldo'; 
-                logAzione = "🟡 COLLAUDO CON RISERVA: Passaggio a Saldo ma restano finiture da fare (Ticket Aperto)."; 
-            } else if (strada === "3") { 
-                nuovoStato = 'In Assistenza / Ripristino'; 
-                logAzione = "🟠 COLLAUDO FALLITO (Non Conformità/Mancanze): Cantiere spostato in Assistenza."; 
-            } else if (strada === "4") { 
-                nuovoStato = 'Contestazione'; 
-                logAzione = "🔴 CANTIERE BLOCCATO PER CONTESTAZIONE CLIENTE."; 
-            }
+            if (strada === "1") { nuovoStato = 'Saldo'; logAzione = "✅ COLLAUDO SUPERATO: Lavoro completato a regola d'arte."; } 
+            else if (strada === "2") { nuovoStato = 'Saldo'; logAzione = "🟡 COLLAUDO CON RISERVA: Passaggio a Saldo ma restano finiture da fare (Ticket Aperto)."; } 
+            else if (strada === "3") { nuovoStato = 'In Assistenza / Ripristino'; logAzione = "🟠 COLLAUDO FALLITO (Non Conformità/Mancanze): Cantiere spostato in Assistenza."; } 
+            else if (strada === "4") { nuovoStato = 'Contestazione'; logAzione = "🔴 CANTIERE BLOCCATO PER CONTESTAZIONE CLIENTE."; }
 
             const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
 
             if (!error) {
-                // Scrivo il log dettagliato
                 let testoCompletoLog = logAzione;
                 if (note) testoCompletoLog += ` Dettagli: "${note}"`;
 
-                await supabaseClient.from('commesse_log').insert([{ 
-                    commessa_id: com.id, 
-                    azione: testoCompletoLog,
-                    autore: UTENTE_CORRENTE
-                }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: testoCompletoLog, autore: UTENTE_CORRENTE }]);
 
                 com.stato = nuovoStato; 
                 chiudiModaleCollaudo();
                 aggiornaDatiSchedaUI();
                 caricaCronologia(com.id);
                 caricaCommesse();
-            } else {
-                alert("Errore salvataggio collaudo: " + error.message);
-            }
+            } else { alert("Errore salvataggio collaudo: " + error.message); }
         }
 
 
@@ -830,7 +799,6 @@
             
             document.getElementById('form-nuovo-ordine-commessa').reset();
             
-            // Auto-check Sostituzione se siamo in Assistenza
             if (com.stato === 'In Assistenza / Ripristino' || com.stato === 'Contestazione') {
                 document.getElementById('form-ord-sostituzione').checked = true;
             }
@@ -853,7 +821,7 @@
 
             const isSostituzione = document.getElementById('form-ord-sostituzione').checked;
             let testoDescrizione = document.getElementById('form-ord-new-descrizione').value;
-            if (isSostituzione) testoDescrizione = `[SOSTITUZIONE/ASSISTENZA] ${testoDescrizione}`; // Trucco per identificare le sostituzioni
+            if (isSostituzione) testoDescrizione = `[SOSTITUZIONE/ASSISTENZA] ${testoDescrizione}`;
 
             const nuovoOrdine = {
                 contratto_id: idContratto,
@@ -903,7 +871,6 @@
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
                 let descVisuale = ord.descrizione;
                 
-                // Colora l'etichetta di Sostituzione se presente
                 if (descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
                     descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
                 }
@@ -935,7 +902,7 @@
             tbody.innerHTML = html;
         }
 
-        // --- GESTIONE ORDINE INNESTATO (Idem come prima) ---
+        // --- GESTIONE ORDINE INNESTATO ---
         const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore', 'Merce Arrivata in Magazzino'];
         let statoPendenteOrdine = '';
         
