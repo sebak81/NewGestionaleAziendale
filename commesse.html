@@ -15,7 +15,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
@@ -42,7 +41,6 @@
         </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (ELENCO COMMESSE) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
             <h1 class="text-xl font-bold">Commesse Operative 🏗️</h1>
@@ -86,7 +84,6 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO COMMESSA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
@@ -115,14 +112,12 @@
                 Valore: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
             </div>
 
-            <!-- STEPPER CANTIERE -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6">Avanzamento Cantiere</h3>
                 <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
                 <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MENU TABS -->
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
                 <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
@@ -132,7 +127,6 @@
                 <button onclick="cambiaTab('fatture')" id="tab-btn-fatture" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Fatturazione</button>
             </div>
 
-            <!-- CONTENUTO TAB 1: RIEPILOGO E DIARIO GLOBALE -->
             <div id="tab-content-riepilogo" class="block space-y-6">
                 <div class="grid grid-cols-2 gap-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
@@ -156,7 +150,6 @@
                 </div>
             </div>
 
-            <!-- CONTENUTO TAB PREVENTIVI -->
             <div id="tab-content-preventivi" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
@@ -165,7 +158,6 @@
                 <div id="lista-preventivi-commessa" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENUTO TAB CONTRATTI -->
             <div id="tab-content-contratti" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Contratti Generati</h3>
@@ -174,7 +166,6 @@
                 <div id="lista-contratti-commessa" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENUTO TAB ORDINI -->
             <div id="tab-content-ordini" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
@@ -200,7 +191,6 @@
                 </div>
             </div>
 
-            <!-- CONTENUTO TAB POSA E INTERVENTI -->
             <div id="tab-content-posa" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Registro Uscite e Posa in Opera</h3>
@@ -209,7 +199,6 @@
                 <div id="lista-interventi-posa" class="space-y-3"></div>
             </div>
 
-            <!-- CONTENUTO TAB FATTURE -->
             <div id="tab-content-fatture" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture</h3>
@@ -221,9 +210,6 @@
         </div>
     </div>
 
-    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
-
-    <!-- NUOVO MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -235,7 +221,6 @@
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
-                
                 <div>
                     <label class="block text-sm font-bold text-gray-800 mb-3">Qual è l'esito dei lavori in cantiere?</label>
                     <div class="space-y-3">
@@ -277,7 +262,6 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo (Obbligatorio per difetti/contestazioni)</label>
                     <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
                 </div>
-
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
@@ -286,8 +270,6 @@
         </div>
     </div>
 
-
-    <!-- MODALE: GESTISCI ORDINE INNESTATO -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -337,8 +319,6 @@
         </div>
     </div>
 
-
-    <!-- MODALE: NUOVO ORDINE DA COMMESSA (Con Spunta Assistenza/Sostituzione) -->
     <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -351,7 +331,6 @@
             
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-ordine-commessa" class="space-y-4">
-                    
                     <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3">
                         <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer">
                         <div>
@@ -377,7 +356,6 @@
         </div>
     </div>
 
-    <!-- MODALE: INSERIMENTO POSA/INTERVENTO -->
     <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -408,12 +386,10 @@
         </div>
     </div>
 
-
-    <!-- ================= MODALI BASE COMMESSA (PULITI E UNIVOCI) ================= -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Nuova Commessa</h3></div>
+                <div><h3 class="text-lg font-bold">Nuova Commessa</h3><p class="text-xs text-gray-500">Collega un nuovo lavoro a un cliente</p></div>
                 <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
@@ -435,6 +411,11 @@
                             <div class="grid grid-cols-12 gap-4">
                                 <div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                                 <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            </div>
+                            <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50">
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                             </div>
                         </div>
                     </div>
@@ -488,7 +469,6 @@
         let ordiniCommessaCache = [];
         let totaleCommesse = 0; 
         
-        // La sequenza Lineare base
         const sequenzaStati = [
             'Preventivazione', 'Rilievo Esecutive', 'Contratto', 'Acconto', 
             'Ordini', 'In Consegna', 'In Posa', 'Collaudo', 'Saldo', 'Conclusa'
@@ -582,7 +562,7 @@
             document.getElementById('scheda-incassato').innerText = `€ ${totaleIncassato.toFixed(2)}`;
         }
 
-        // --- STEPPER INTELLIGENTE (CON BIVI E COLLAUDO) ---
+        // --- STEPPER CANTIERE ---
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -725,7 +705,118 @@
             }
         }
 
-        // --- GESTIONE NUOVO MODALE: ESITO COLLAUDO ---
+        // --- GESTIONE NUOVA E MODIFICA COMMESSA (FUNZIONI RIPRISTINATE) ---
+        function apriModaleModifica() {
+            if (commessaAttivaIndex === null) return;
+            const com = commesseCorrenti[commessaAttivaIndex];
+            document.getElementById('mod-com-id').value = com.id;
+            document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || '';
+            document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || '';
+            document.getElementById('mod-com-citta').value = com.citta_cantiere || '';
+            document.getElementById('mod-com-referente').value = com.referente || '';
+            document.getElementById('mod-com-tel-referente').value = com.telefono_referente || '';
+            document.getElementById('mod-com-email-referente').value = com.email_referente || '';
+            
+            document.getElementById('modal-modifica-commessa').classList.remove('hidden');
+        }
+
+        function chiudiModaleModifica() {
+            document.getElementById('modal-modifica-commessa').classList.add('hidden');
+        }
+
+        document.getElementById('form-modifica-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('mod-com-id').value;
+            const datiAggiornati = {
+                nome_cantiere: document.getElementById('mod-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value,
+                citta_cantiere: document.getElementById('mod-com-citta').value,
+                referente: document.getElementById('mod-com-referente').value,
+                telefono_referente: document.getElementById('mod-com-tel-referente').value,
+                email_referente: document.getElementById('mod-com-email-referente').value
+            };
+
+            const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: id,
+                    azione: `Dati anagrafici e operativi del cantiere aggiornati`,
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                chiudiModaleModifica();
+                Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati);
+                aggiornaDatiSchedaUI();
+                caricaCronologia(id);
+                caricaCommesse(); 
+            } else {
+                alert("Errore modifica commessa: " + error.message);
+            }
+        });
+
+        function apriModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
+            const anno = new Date().getFullYear(); 
+            document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`;
+            document.getElementById('check-copia-dati').checked = false; 
+        }
+
+        function chiudiModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.add('hidden'); 
+            document.getElementById('form-nuova-commessa').reset(); 
+        }
+
+        document.getElementById('check-copia-dati').addEventListener('change', () => {
+            const isChecked = document.getElementById('check-copia-dati').checked;
+            const clienteId = document.getElementById('form-com-cliente').value;
+            if (isChecked && clienteId) {
+                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId));
+                if (cliente) {
+                    document.getElementById('form-com-indirizzo').value = cliente.indirizzo || '';
+                    document.getElementById('form-com-citta').value = cliente.citta || '';
+                    document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || '';
+                }
+            } else if (!isChecked) {
+                document.getElementById('form-com-indirizzo').value = '';
+                document.getElementById('form-com-citta').value = '';
+                document.getElementById('form-com-referente').value = '';
+            }
+        });
+
+        document.getElementById('form-com-cliente').addEventListener('change', () => {
+            if(document.getElementById('check-copia-dati').checked) {
+                document.getElementById('check-copia-dati').dispatchEvent(new Event('change'));
+            }
+        });
+
+        document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nuovaCommessa = {
+                cliente_id: document.getElementById('form-com-cliente').value,
+                numero: document.getElementById('form-com-numero').value,
+                nome_cantiere: document.getElementById('form-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('form-com-indirizzo').value,
+                citta_cantiere: document.getElementById('form-com-citta').value,
+                referente: document.getElementById('form-com-referente').value,
+                telefono_referente: document.getElementById('form-com-tel-referente').value,
+                email_referente: document.getElementById('form-com-email-referente').value,
+                stato: 'Preventivazione', 
+                valore: null 
+            };
+            const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
+            if (!error && data) { 
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: data[0].id,
+                    azione: `Apertura nuovo cantiere`,
+                    autore: UTENTE_CORRENTE
+                }]);
+                chiudiModaleNuovaCommessa(); 
+                caricaCommesse(); 
+            } else { alert("Errore salvataggio: " + error.message); }
+        });
+
+
+        // --- GESTIONE COLLAUDO ---
         function apriModaleCollaudo() {
             document.getElementById('collaudo-note').value = '';
             document.querySelectorAll('input[name="esito_strada"]').forEach(radio => radio.checked = false);
@@ -772,7 +863,7 @@
         }
 
 
-        // --- TAB ORDINI FORNITORI CON SPUNTA "SOSTITUZIONE" ---
+        // --- TAB ORDINI FORNITORI ---
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
             if (fornitori) {
