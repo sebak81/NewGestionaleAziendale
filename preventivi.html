@@ -108,7 +108,6 @@
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
-            <!-- RIEPILOGO HEADER -->
             <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -128,20 +127,15 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <!-- STORICO DOCUMENTI E REVISIONI -->
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Storico Documenti (Revisioni)</h3>
                     <p class="text-[10px] text-gray-500 mb-4">I file caricati ad ogni step o revisione vengono accumulati qui.</p>
-                    <div id="lista-file-revisioni" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-                        <p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>
-                    </div>
+                    <div id="lista-file-revisioni" class="space-y-3 flex-1 overflow-y-auto no-scrollbar"></div>
                 </div>
 
-                <!-- DIARIO GLOBALE (PER VEDERE LE NOTE DI REVISIONE) -->
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note di Controllo e Diario</h3>
                     <p class="text-xs text-gray-500 mb-5">Tutte le note di correzione ("Richieste di Revisione") scritte dal controllo direzionale appariranno qui.</p>
-                    
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto libero al preventivo..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
@@ -154,7 +148,6 @@
 
     <!-- ================= MODALI AZIONI (Z-50) ================= -->
 
-    <!-- MODALE AVANZAMENTO DI STATO CON FILE E NOTE -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -164,23 +157,19 @@
                 </div>
                 <button type="button" onclick="chiudiModaleAzione()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
-            
             <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
                 <input type="hidden" id="azione-target-stato">
                 <input type="hidden" id="azione-is-revision">
-
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
                     <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Scrivi qui..."></textarea>
                 </div>
-
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2">Allega Documento Preventivo (PDF)</label>
                     <p class="text-[10px] text-gray-500 mb-3">Verrà automaticamente rinominato con il numero di <strong class="text-[#2e2a5b]" id="label-rev-numero">Revisione</strong> e salvato nello storico.</p>
-                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 cursor-pointer">
                 </div>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Azione</button>
@@ -192,13 +181,9 @@
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3>
-                    <p class="text-xs text-gray-500">Apri una nuova pratica di calcolo</p>
-                </div>
+                <div><h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3></div>
                 <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
-            
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
                     <div>
@@ -219,7 +204,6 @@
                     </div>
                 </form>
             </div>
-            
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
                 <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
                 <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Genera Preventivo</button>
@@ -232,7 +216,7 @@
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Importo Attuale (€)</label>
@@ -257,21 +241,29 @@
 
         const sequenzaStati = ['Da Fare', 'Stesura', 'Controllo', 'Inviato', 'Accettato'];
 
+        // IL RICEVITORE 
         document.addEventListener('DOMContentLoaded', async () => {
             await caricaCommesseTendina();
             await caricaPreventivi();
 
-            // Intercetta richiesta da Commesse.html di fare "Nuovo" per una specifica commessa
             const urlParams = new URLSearchParams(window.location.search);
             const action = urlParams.get('action');
             const commessaId = urlParams.get('commessa_id');
+            const idToOpen = urlParams.get('id');
+
             if (action === 'new') {
                 apriModaleNuovo();
                 if(commessaId) { document.getElementById('nuovo-commessa').value = commessaId; }
             }
+
+            if (idToOpen) {
+                const index = preventiviCorrenti.findIndex(p => String(p.id) === idToOpen);
+                if (index !== -1) {
+                    apriSchedaPreventivo(index);
+                }
+            }
         });
 
-        // 1. CARICAMENTO DATI
         async function caricaCommesseTendina() {
             const { data } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere').order('created_at', { ascending: false });
             if (data) {
@@ -341,7 +333,6 @@
             disegnaTabella(filtrati);
         }
 
-        // 2. SCHEDA DETTAGLIO E STEPPER
         function apriSchedaPreventivo(index) {
             preventivoAttivoIndex = index;
             aggiornaDatiSchedaUI();
@@ -396,12 +387,10 @@
             let html = '';
             
             urls.forEach((url, i) => {
-                // Estraggo la REV dal nome file se c'è, altrimenti metto un numero generico
                 let revVisuale = `Doc ${i+1}`;
                 const match = url.match(/_REV(\d+)_/);
                 if (match) revVisuale = `Revisione ${match[1]}`;
                 
-                // L'ultimo della lista lo coloro di verde per evidenziarlo
                 let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
                 let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
 
@@ -459,12 +448,8 @@
                 container.appendChild(punto);
             });
 
-            // AZIONI IN BASE ALLO STATO (Il cuore del Workflow)
             if (statoAttuale === 'Da Fare') {
-                azioniBox.innerHTML = `
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>
-                `;
+                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>`;
             } else if (statoAttuale === 'Stesura') {
                 azioniBox.innerHTML = `
                     <button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
@@ -479,17 +464,16 @@
                 `;
             } else if (statoAttuale === 'Inviato') {
                 azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button>
+                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button>
                     <div class="flex-1"></div>
                     <button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button>
                     <button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato (Crea Contratto)</button>
                 `;
             } else if (statoAttuale === 'Accettato') {
-                azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
             }
         }
 
-        // 3. GESTIONE WORKFLOW AVANZAMENTO E REVISIONE
         function preparaAzione(nuovoStato, isRevision = false) {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             
@@ -503,12 +487,11 @@
             const labelNote = document.getElementById('label-note');
             const boxFile = document.getElementById('box-file');
             
-            // Logica visiva dinamica del Modale in base al contesto
             if (isRevision) {
                 titolo.innerText = "Richiedi Revisione Tecnica";
                 sub.innerText = "Il preventivo tornerà in Stesura e la Revisione avanzerà a " + ((p.revisione||0) + 1);
                 labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>';
-                boxFile.classList.add('hidden'); // Non carico file se boccio, scrivo solo note
+                boxFile.classList.add('hidden'); 
             } else if (nuovoStato === 'Controllo') {
                 titolo.innerText = "Invia per Approvazione";
                 sub.innerText = "Sottoponi il PDF calcolato al Controllo della Direzione";
@@ -552,10 +535,7 @@
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
-            if (isRevision && (!note || note.trim() === '')) {
-                alert("DEVI inserire le note per spiegare i motivi della revisione!");
-                return;
-            }
+            if (isRevision && (!note || note.trim() === '')) { alert("DEVI inserire le note per spiegare i motivi della revisione!"); return; }
 
             btn.innerText = "Salvataggio...";
             btn.disabled = true;
@@ -569,13 +549,8 @@
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
 
-            // Se è una richiesta di revisione, incremento il contatore e torno in stesura
-            if (isRevision) {
-                nuovaRev += 1;
-                datiAggiornamento.revisione = nuovaRev;
-            }
+            if (isRevision) { nuovaRev += 1; datiAggiornamento.revisione = nuovaRev; }
 
-            // Aggiunta file storico csv (non sovrascrivo, aggiungo con la virgola)
             if (fileUrl) {
                 let urlCorrente = p.file_url || '';
                 datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl;
@@ -584,56 +559,36 @@
             const { error } = await supabaseClient.from('preventivi').update(datiAggiornamento).eq('id', p.id);
 
             if (!error) {
-                // AGGIORNO OGGETTO LOCALE
                 p.stato = nuovoStato;
                 if(isRevision) p.revisione = nuovaRev;
                 if(fileUrl) p.file_url = datiAggiornamento.file_url;
 
-                // LOG NEL DIARIO GLOBALE DELLA COMMESSA
                 let testoLog = isRevision ? `⚠️ RICHIESTA REVISIONE PREVENTIVO (Avviata Rev. ${nuovaRev}).` : `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}`;
                 if(note) testoLog += ` Note: "${note}"`;
                 
-                await supabaseClient.from('commesse_log').insert([{ 
-                    commessa_id: p.commessa_id, 
-                    azione: testoLog, 
-                    file_url: fileUrl, 
-                    autore: UTENTE_CORRENTE 
-                }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
 
-                // MAGIA: AUTO-CREAZIONE CONTRATTO SE ACCETTATO
                 if (nuovoStato === 'Accettato') {
                     const numeroContratto = p.numero.replace('PREV-', 'CONT-');
-                    // Verifico se esiste già per non duplicare
                     const { data: cEsistenti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', p.commessa_id);
                     if (!cEsistenti || cEsistenti.length === 0) {
                         await supabaseClient.from('contratti').insert([{
-                            commessa_id: p.commessa_id,
-                            preventivo_id: p.id,
-                            numero: numeroContratto,
-                            stato: 'Da Fare',
-                            valore_finale: p.importo,
-                            file_url: fileUrl // Porto l'ultimo file anche nel contratto per comodità
+                            commessa_id: p.commessa_id, preventivo_id: p.id, numero: numeroContratto, stato: 'Da Fare', valore_finale: p.importo, file_url: fileUrl 
                         }]);
                         await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🪄 Contratto Esecutivo ${numeroContratto} generato automaticamente.`, autore: 'Sistema Auto' }]);
                     }
                 }
 
-                chiudiModaleAzione();
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaPreventivi();
+                chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi();
             } else { alert("Errore di sistema: " + error.message); }
 
             btn.innerText = "Conferma Azione";
             btn.disabled = false;
         }
 
-
-        // 4. CREAZIONE NUOVO PREVENTIVO E MODIFICA DATI
         function apriModaleNuovo() {
             document.getElementById('form-nuovo').reset();
             const anno = new Date().getFullYear(); 
-            // Pseudo generatore numero (nel mondo reale servirebbe contare i preventivi globali, qui faccio una stima)
             document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`;
             document.getElementById('modal-nuovo').classList.remove('hidden');
         }
@@ -652,12 +607,10 @@
             const { data, error } = await supabaseClient.from('preventivi').insert([dati]).select();
             if (!error) {
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero}`, autore: UTENTE_CORRENTE }]);
-                chiudiModaleNuovo();
-                caricaPreventivi();
+                chiudiModaleNuovo(); caricaPreventivi();
             } else { alert("Errore salvataggio: " + error.message); }
         });
 
-        // Modifica solo importo da dentro la scheda
         function apriModaleModificaDatiBase() {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             document.getElementById('mod-importo').value = p.importo || '';
@@ -667,20 +620,15 @@
         async function salvaModificaDati() {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             const nuovoImporto = document.getElementById('mod-importo').value;
-            
             const { error } = await supabaseClient.from('preventivi').update({ importo: nuovoImporto }).eq('id', p.id);
             if (!error) {
                 p.importo = nuovoImporto;
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `Importo preventivo aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]);
                 document.getElementById('modal-modifica-dati').classList.add('hidden');
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaPreventivi(); // aggiorno lista dietro
+                aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi();
             }
         }
 
-
-        // 5. DIARIO
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera');
             const testo = inputNota.value;
@@ -695,7 +643,6 @@
             const divLog = document.getElementById('lista-cronologia');
             divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
             
-            // Filtro leggermente il diario globale per mostrare solo le cose pertinenti al preventivo per pulizia
             const { data: logs } = await supabaseClient.from('commesse_log').select('*')
                 .eq('commessa_id', comId)
                 .or('azione.ilike.%preventivo%,azione.ilike.%appunto%')
@@ -727,7 +674,6 @@
             });
             divLog.innerHTML = html;
         }
-
     </script>
 </body>
 </html>
