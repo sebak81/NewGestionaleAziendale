@@ -42,9 +42,7 @@
         </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (DASHBOARD) -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        
         <header class="p-8 pb-4 flex justify-between items-end">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Bentornato, Sebastiano 👋</h1>
@@ -57,9 +55,8 @@
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar">
             
-            <!-- 1. KPI / CONTATORI RAPIDI -->
+            <!-- KPI -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Box Preventivi -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='preventivi.html'">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl">📝</div>
@@ -68,8 +65,6 @@
                     <p class="text-3xl font-bold text-gray-900" id="kpi-preventivi">-</p>
                     <p class="text-xs text-gray-500 mt-1">Preventivi aperti / in stesura</p>
                 </div>
-
-                <!-- Box Contratti -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='contratti.html'">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl">📑</div>
@@ -78,9 +73,7 @@
                     <p class="text-3xl font-bold text-gray-900" id="kpi-contratti">-</p>
                     <p class="text-xs text-gray-500 mt-1">Contratti in lavorazione attiva</p>
                 </div>
-
-                <!-- Box Pre-Ordini -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='contratti.html'">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='ordini.html'">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xl">📦</div>
                         <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[10px] font-bold uppercase">Attesa Conf.</span>
@@ -88,8 +81,6 @@
                     <p class="text-3xl font-bold text-gray-900" id="kpi-ordini">-</p>
                     <p class="text-xs text-gray-500 mt-1">Ordini Fornitore da confermare</p>
                 </div>
-
-                <!-- Box Fatturazione -->
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='fatturazione.html'">
                     <div class="flex justify-between items-start mb-4">
                         <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">💶</div>
@@ -100,15 +91,23 @@
                 </div>
             </div>
 
-            <!-- 2. SCORCIATOIE AZIONI -->
-            <div class="bg-[#2e2a5b] rounded-2xl shadow-sm p-6 text-white grid grid-cols-1 sm:grid-cols-3 gap-4 relative overflow-hidden">
+            <!-- SCORCIATOIE (Ora sono 4) -->
+            <div class="bg-[#2e2a5b] rounded-2xl shadow-sm p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 opacity-10 text-9xl">🚀</div>
                 
+                <a href="clienti.html?action=new" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">👥</div>
+                    <div>
+                        <h4 class="font-bold text-sm">Nuovo Cliente</h4>
+                        <p class="text-[10px] text-indigo-200">Inserisci in rubrica</p>
+                    </div>
+                </a>
+
                 <a href="commesse.html" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">🏗️</div>
                     <div>
                         <h4 class="font-bold text-sm">Nuova Commessa</h4>
-                        <p class="text-xs text-indigo-200">Apri un nuovo cantiere</p>
+                        <p class="text-[10px] text-indigo-200">Apri un nuovo cantiere</p>
                     </div>
                 </a>
                 
@@ -116,7 +115,7 @@
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">📝</div>
                     <div>
                         <h4 class="font-bold text-sm">Crea Preventivo</h4>
-                        <p class="text-xs text-indigo-200">Stesura e calcoli per clienti</p>
+                        <p class="text-[10px] text-indigo-200">Stesura e calcoli</p>
                     </div>
                 </a>
 
@@ -124,14 +123,12 @@
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">💰</div>
                     <div>
                         <h4 class="font-bold text-sm">Verifica Incassi</h4>
-                        <p class="text-xs text-indigo-200">Gestione acconti pendenti</p>
+                        <p class="text-[10px] text-indigo-200">Gestione acconti pendenti</p>
                     </div>
                 </a>
             </div>
 
-            <!-- 3. LISTE RECENTI (Commesse e Attività) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
                 <!-- Ultime Commesse -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
@@ -143,7 +140,7 @@
                     </div>
                 </div>
 
-                <!-- Radar Attività Aziendale (Log Globale ERP) -->
+                <!-- Radar Attività -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
                         <h3 class="text-base font-bold text-gray-800">Radar Attività</h3>
@@ -153,55 +150,35 @@
                         <p class="text-sm text-gray-500 italic">Recupero radar aziendale...</p>
                     </div>
                 </div>
-
             </div>
 
         </div>
     </main>
 
     <script src="config.js"></script>
-
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Imposta la data odierna nell'header
         const opzioniData = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('data-odierna').innerText = new Date().toLocaleDateString('it-IT', opzioniData);
 
         async function caricaDashboard() {
-            // 1. CARICAMENTO KPI CONTATORI
-            
-            // Preventivi "In sospeso" (non accettati o rifiutati)
-            const { count: countPrev } = await supabaseClient.from('preventivi')
-                .select('*', { count: 'exact', head: true })
-                .neq('stato', 'Accettato').neq('stato', 'Rifiutato');
+            // KPI
+            const { count: countPrev } = await supabaseClient.from('preventivi').select('*', { count: 'exact', head: true }).neq('stato', 'Accettato').neq('stato', 'Rifiutato');
             document.getElementById('kpi-preventivi').innerText = countPrev || '0';
 
-            // Contratti "Attivi" (non confermati e non disdetti)
-            const { count: countContr } = await supabaseClient.from('contratti')
-                .select('*', { count: 'exact', head: true })
-                .neq('stato', 'Confermato').neq('stato', 'Disdetto');
+            const { count: countContr } = await supabaseClient.from('contratti').select('*', { count: 'exact', head: true }).neq('stato', 'Confermato').neq('stato', 'Disdetto');
             document.getElementById('kpi-contratti').innerText = countContr || '0';
 
-            // Ordini Fornitori "Attesa Conferma" (richiesti, in revisione, o da controllare - non definitivi)
-            const { count: countOrd } = await supabaseClient.from('ordini_fornitori')
-                .select('*', { count: 'exact', head: true })
-                .neq('stato', 'Ordine confermato ed inviato al Fornitore');
+            const { count: countOrd } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true }).neq('stato', 'Ordine confermato ed inviato al Fornitore');
             document.getElementById('kpi-ordini').innerText = countOrd || '0';
 
-            // Fatture/Acconti da incassare
-            const { count: countFatt } = await supabaseClient.from('fatture')
-                .select('*', { count: 'exact', head: true })
-                .neq('stato', 'Pagata');
+            const { count: countFatt } = await supabaseClient.from('fatture').select('*', { count: 'exact', head: true }).neq('stato', 'Pagata');
             document.getElementById('kpi-fatture').innerText = countFatt || '0';
 
-
-            // 2. CARICAMENTO ULTIME COMMESSE
+            // Commesse Recenti
             const divCommesse = document.getElementById('lista-commesse-recenti');
-            const { data: commesse } = await supabaseClient.from('commesse')
-                .select('*, clienti(nome_ragione_sociale)')
-                .order('created_at', { ascending: false })
-                .limit(5);
+            const { data: commesse } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('created_at', { ascending: false }).limit(5);
 
             if (commesse && commesse.length > 0) {
                 let htmlCommesse = '';
@@ -222,18 +199,11 @@
                     `;
                 });
                 divCommesse.innerHTML = htmlCommesse;
-            } else {
-                divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>';
-            }
+            } else { divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>'; }
 
-
-            // 3. CARICAMENTO RADAR (LOG GLOBALE ERP)
+            // Radar
             const divRadar = document.getElementById('lista-attivita-recenti');
-            // Query aggiornata: legge anche il nome del cliente collegato alla commessa
-            const { data: logs } = await supabaseClient.from('commesse_log')
-                .select('*, commesse(numero, clienti(nome_ragione_sociale))')
-                .order('created_at', { ascending: false })
-                .limit(15); 
+            const { data: logs } = await supabaseClient.from('commesse_log').select('*, commesse(numero, clienti(nome_ragione_sociale))').order('created_at', { ascending: false }).limit(15); 
 
             if (logs && logs.length > 0) {
                 let htmlRadar = '<div class="space-y-4 pt-1">';
@@ -247,20 +217,12 @@
                     if (log.commesse) {
                         const numCommessa = log.commesse.numero;
                         const nomeCliente = (log.commesse.clienti && log.commesse.clienti.nome_ragione_sociale) ? log.commesse.clienti.nome_ragione_sociale : '';
-                        
-                        if (nomeCliente) {
-                            commessaRif = `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span> <span class="text-gray-500">(${nomeCliente})</span>`;
-                        } else {
-                            commessaRif = `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span>`;
-                        }
+                        commessaRif = nomeCliente ? `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span> <span class="text-gray-500">(${nomeCliente})</span>` : `<span class="text-[#2e2a5b] font-bold">${numCommessa}</span>`;
                     }
-
                     const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
 
                     let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50 shrink-0"></div>';
-                    if (log.azione.includes("Appunto Manuale") || log.azione.includes("Comunicazione")) {
-                        icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
-                    }
+                    if (log.azione.includes("Appunto Manuale") || log.azione.includes("Comunicazione")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
                     if (log.file_url) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">📎</div>';
 
                     htmlRadar += `
@@ -275,12 +237,9 @@
                 });
                 htmlRadar += '</div>';
                 divRadar.innerHTML = htmlRadar;
-            } else {
-                divRadar.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata di recente.</p>';
-            }
+            } else { divRadar.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata di recente.</p>'; }
         }
 
-        // INIT
         document.addEventListener('DOMContentLoaded', caricaDashboard);
     </script>
 </body>
