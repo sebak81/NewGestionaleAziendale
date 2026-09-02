@@ -31,15 +31,6 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <!-- SCHERMATA PRINCIPALE (ELENCO CONTRATTI) -->
@@ -88,8 +79,9 @@
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
+                <!-- IL PULSANTE INDIETRO INTELLIGENTE -->
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
-                    <span>&larr;</span> Torna a Elenco
+                    <span>&larr;</span> <span id="testo-btn-back">Torna a Elenco</span>
                 </button>
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
@@ -103,7 +95,6 @@
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            
             <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -112,7 +103,6 @@
                 Valore Finale: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
             </div>
 
-            <!-- STEPPER WORKFLOW CONTRATTO -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
                     <span>Avanzamento Contratto (Workflow)</span>
@@ -123,17 +113,13 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Documenti Collegati</h3>
-                    <div id="lista-file-contratto" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-                        <p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>
-                    </div>
+                    <div id="lista-file-contratto" class="space-y-3 flex-1 overflow-y-auto no-scrollbar"></div>
                 </div>
 
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note e Diario Contratto</h3>
-                    
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto su questo contratto..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
@@ -143,8 +129,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ================= MODALI AZIONI (Z-50) ================= -->
 
     <!-- MODALE AVANZAMENTO DI STATO CON FILE, NOTE E DATA -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -161,37 +145,34 @@
                 <input type="hidden" id="azione-target-stato">
                 <input type="hidden" id="azione-is-jump">
 
-                <!-- NUOVO CAMPO: DATA AZIONE -->
                 <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <label class="block text-sm font-bold text-gray-800 mb-1">📅 Data dell'azione</label>
                     <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
-                    <p class="text-[10px] text-gray-500 mt-1">Puoi retrodatare l'operazione per mantenere lo storico del diario corretto.</p>
                 </div>
 
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
-                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Scrivi qui..."></textarea>
+                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm"></textarea>
                 </div>
 
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Contratto (PDF)</label>
-                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
                 </div>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Azione</button>
+                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Conferma Azione</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE MODIFICA VALORE FINALE -->
+    <!-- MODALE MODIFICA VALORE FINALE (Omesso visivamente per pulizia) -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Valore</h3>
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Valore Finale (€)</label>
@@ -212,6 +193,7 @@
 
         let contrattiCorrenti = [];
         let contrattoAttivoIndex = null;
+        let apertoDaCommessa = false;
 
         const sequenzaStati = ['Da Fare', 'Stesura', 'Rilievo Esecutivo', 'Pre-Ordini', 'Inviato', 'Confermato'];
 
@@ -222,19 +204,15 @@
             const idToOpen = urlParams.get('id');
 
             if (idToOpen) {
+                apertoDaCommessa = true;
+                document.getElementById('testo-btn-back').innerText = "Torna alla Commessa";
                 const index = contrattiCorrenti.findIndex(c => String(c.id) === idToOpen);
-                if (index !== -1) {
-                    apriSchedaContratto(index);
-                }
+                if (index !== -1) apriSchedaContratto(index, true);
             }
         });
 
         async function caricaContratti() {
-            const { data: contr, error } = await supabaseClient
-                .from('contratti')
-                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
-                .order('created_at', { ascending: false });
-
+            const { data: contr, error } = await supabaseClient.from('contratti').select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))').order('created_at', { ascending: false });
             const tbody = document.getElementById('tabella-contratti');
             if (error) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore DB</td></tr>'; return; }
 
@@ -276,24 +254,31 @@
 
         function filtraContratti() {
             const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const filtrati = contrattiCorrenti.filter(c => 
-                (c.numero && c.numero.toLowerCase().includes(query)) ||
-                (c.commesse && c.commesse.clienti && c.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query))
-            );
+            const filtrati = contrattiCorrenti.filter(c => (c.numero && c.numero.toLowerCase().includes(query)) || (c.commesse && c.commesse.clienti && c.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query)));
             disegnaTabella(filtrati);
         }
 
-        function apriSchedaContratto(index) {
+        // TASTO INDIETRO INTELLIGENTE
+        function apriSchedaContratto(index, fromUrl = false) {
             contrattoAttivoIndex = index;
             aggiornaDatiSchedaUI();
             caricaCronologia();
             
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
-            window.history.replaceState({}, document.title, window.location.pathname);
+            
+            if (!fromUrl) {
+                document.getElementById('testo-btn-back').innerText = "Torna a Elenco";
+                apertoDaCommessa = false;
+            }
         }
 
         function chiudiScheda() {
+            if (apertoDaCommessa) {
+                const c = contrattiCorrenti[contrattoAttivoIndex];
+                window.location.href = `commesse.html?id=${c.commessa_id}`;
+                return;
+            }
             contrattoAttivoIndex = null;
             document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
@@ -318,7 +303,6 @@
             if(c.stato === 'Disdetto') colorStato = 'bg-red-100 text-red-800';
             
             const statoPuro = c.stato && c.stato.trim() !== '' ? c.stato : 'Da Fare';
-            
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
 
@@ -328,30 +312,14 @@
 
         function disegnaStoricoFile(urls_csv) {
             const div = document.getElementById('lista-file-contratto');
-            if(!urls_csv || urls_csv.trim() === '') {
-                div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato nello storico.</p>';
-                return;
-            }
-
+            if(!urls_csv || urls_csv.trim() === '') { div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>'; return; }
             const urls = urls_csv.split(',').filter(x => x.trim() !== '');
             let html = '';
-            
             urls.forEach((url, i) => {
                 let nameVisuale = `Documento ${i+1}`;
-                
                 let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
                 let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
-
-                html += `
-                    <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group">
-                        <div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div>
-                        <div class="flex-1">
-                            <p class="text-sm font-bold text-gray-900">${nameVisuale}</p>
-                            <p class="text-[10px] text-gray-500">Clicca per aprire</p>
-                        </div>
-                        <div class="text-gray-400 font-bold">&rarr;</div>
-                    </a>
-                `;
+                html += `<a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group"><div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div><div class="flex-1"><p class="text-sm font-bold text-gray-900">${nameVisuale}</p><p class="text-[10px] text-gray-500">Clicca per aprire</p></div><div class="text-gray-400 font-bold">&rarr;</div></a>`;
             });
             div.innerHTML = html;
         }
@@ -368,7 +336,6 @@
             }
 
             let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
-
             const bgLine = document.createElement('div');
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
             container.appendChild(bgLine);
@@ -379,106 +346,49 @@
                 punto.onclick = () => saltoStato(stato); 
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                
                 if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) {
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
                 } else if (index === idxCalcolato) {
-                    let col = 'bg-blue-500 ring-blue-100';
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${col} text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`;
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 ring-blue-100 text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`;
                 }
 
                 let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
-
-                punto.innerHTML = `
-                    ${iconaHTML}
-                    <span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-center w-14 sm:w-20 leading-tight ${textColor}">${stato}</span>
-                `;
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] sm:text-[10px] uppercase tracking-wider text-center w-14 sm:w-20 leading-tight ${textColor}">${stato}</span>`;
                 container.appendChild(punto);
             });
 
-            // I PULSANTI MANUALI
-            if (statoAttuale === 'Da Fare') {
-                azioniBox.innerHTML = `
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Stesura')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Inizia Stesura / Gestione &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Stesura') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Da Fare')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Passa a Rilievo Esecutivo &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Rilievo Esecutivo') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Stesura')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Passa a Pre-Ordini Fornitori &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Pre-Ordini') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Inviato')" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg shadow-sm">Segna Contratto Inviato (da firmare) &rarr;</button>
-                `;
-            } else if (statoAttuale === 'Inviato') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Disdetto')" class="text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Contratto Disdetto</button>
-                    <button onclick="preparaAzione('Confermato')" class="text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-6 py-2.5 rounded-lg shadow-md">✅ Segna Firmato/Confermato</button>
-                `;
-            } else if (statoAttuale === 'Confermato') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Inviato')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>
-                `;
-            }
+            if (statoAttuale === 'Da Fare') azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura')" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Inizia Stesura / Gestione &rarr;</button>`;
+            else if (statoAttuale === 'Stesura') azioniBox.innerHTML = `<button onclick="preparaAzione('Da Fare')" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Passa a Rilievo Esecutivo &rarr;</button>`;
+            else if (statoAttuale === 'Rilievo Esecutivo') azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura')" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Passa a Pre-Ordini Fornitori &rarr;</button>`;
+            else if (statoAttuale === 'Pre-Ordini') azioniBox.innerHTML = `<button onclick="preparaAzione('Rilievo Esecutivo')" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Inviato')" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Segna Contratto Inviato &rarr;</button>`;
+            else if (statoAttuale === 'Inviato') azioniBox.innerHTML = `<button onclick="preparaAzione('Pre-Ordini')" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Disdetto')" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Contratto Disdetto</button><button onclick="preparaAzione('Confermato')" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">✅ Segna Firmato/Confermato</button>`;
+            else if (statoAttuale === 'Confermato') azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato')" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
         }
 
-        // --- FUNZIONE DEL SALTO DI STATO FORZATO ---
         function saltoStato(nuovoStato) {
             const c = contrattiCorrenti[contrattoAttivoIndex];
             if (c.stato === nuovoStato) return; 
-            
-            if (confirm(`Vuoi forzare il salto lavorazione del contratto allo stato: ${nuovoStato.toUpperCase()}?
-Potrai allegare eventuali documenti nella schermata successiva.`)) {
-                preparaAzione(nuovoStato, true);
-            }
+            if (confirm(`Vuoi forzare il salto lavorazione del contratto allo stato: ${nuovoStato.toUpperCase()}?`)) preparaAzione(nuovoStato, true);
         }
 
         function preparaAzione(nuovoStato, isJump = false) {
             const c = contrattiCorrenti[contrattoAttivoIndex];
-            
             document.getElementById('azione-target-stato').value = nuovoStato;
             document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO';
-            
-            // Imposto la data odierna di default
             document.getElementById('azione-data').value = new Date().toISOString().split('T')[0];
-
             document.getElementById('azione-note').value = '';
             document.getElementById('azione-file').value = '';
             
-            const titolo = document.getElementById('modale-azione-titolo');
-            const sub = document.getElementById('modale-azione-sub');
-            const labelNote = document.getElementById('label-note');
-            const labelFile = document.getElementById('label-file');
+            const titolo = document.getElementById('modale-azione-titolo'); const sub = document.getElementById('modale-azione-sub');
+            const labelNote = document.getElementById('label-note'); const labelFile = document.getElementById('label-file');
             
             if (isJump) {
-                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`;
-                sub.innerText = "Azione manuale. Carica eventuali documenti o contratti firmati.";
-                labelNote.innerText = "Note sul salto di stato (Opzionale)";
-                labelFile.innerText = "Allega Documento (es. Contratto PDF)";
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Azione manuale."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)";
             } else if (nuovoStato === 'Confermato') {
-                titolo.innerText = "Contratto Confermato!";
-                sub.innerText = "Allega qui il documento firmato dal cliente per l'archivio.";
-                labelNote.innerText = "Note / Accordi (Opzionale)";
-                labelFile.innerText = "Allega Contratto Firmato (PDF)";
+                titolo.innerText = "Contratto Confermato!"; sub.innerText = "Allega il documento firmato."; labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Contratto Firmato (PDF)";
             } else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`;
-                sub.innerText = "Completa l'operazione";
-                labelNote.innerText = "Note (Opzionale)";
-                labelFile.innerText = "Allega Documento (Opzionale)";
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (Opzionale)";
             }
-
             document.getElementById('modal-azione').classList.remove('hidden');
         }
 
@@ -490,7 +400,7 @@ Potrai allegare eventuali documenti nella schermata successiva.`)) {
             const dataOggi = new Date().toISOString().split('T')[0];
             const fileName = `${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}`;
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
-            if (error) { alert("Errore upload file: " + error.message); return null; }
+            if (error) { alert("Errore upload: " + error.message); return null; }
             const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
             return data.publicUrl;
         }
@@ -498,134 +408,64 @@ Potrai allegare eventuali documenti nella schermata successiva.`)) {
         async function eseguiAzione() {
             const btn = document.getElementById('btn-conferma-azione');
             const c = contrattiCorrenti[contrattoAttivoIndex];
-            
             const nuovoStato = document.getElementById('azione-target-stato').value;
             const isJump = document.getElementById('azione-is-jump').value === 'SI';
-            
             const dataAzione = document.getElementById('azione-data').value;
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
-            btn.innerText = "Salvataggio...";
-            btn.disabled = true;
+            btn.innerText = "Salvataggio..."; btn.disabled = true;
 
-            // Creazione timestamp per mantenere la cronologia
             let timestampFormattato = new Date().toISOString();
-            if (dataAzione !== new Date().toISOString().split('T')[0]) {
-                timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
-            }
+            if (dataAzione !== new Date().toISOString().split('T')[0]) timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
 
             let fileUrl = null;
-            if (fileInput.files.length > 0) {
-                btn.innerText = "Caricamento PDF...";
-                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'CONT');
-            }
+            if (fileInput.files.length > 0) { btn.innerText = "Caricamento PDF..."; fileUrl = await caricaFileSuStorage(fileInput.files[0], 'CONT'); }
 
             let datiAggiornamento = { stato: nuovoStato };
-
-            if (fileUrl) {
-                let urlCorrente = c.file_url || '';
-                datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl;
-            }
+            if (fileUrl) { let urlCorrente = c.file_url || ''; datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl; }
 
             const { error } = await supabaseClient.from('contratti').update(datiAggiornamento).eq('id', c.id);
 
             if (!error) {
-                c.stato = nuovoStato;
-                if(fileUrl) c.file_url = datiAggiornamento.file_url;
-
+                c.stato = nuovoStato; if(fileUrl) c.file_url = datiAggiornamento.file_url;
                 let testoLog = isJump ? `⏭️ Salto forzato contratto in: ${nuovoStato.toUpperCase()}.` : `Avanzamento Contratto in: ${nuovoStato.toUpperCase()}.`;
                 if(note) testoLog += ` Note: "${note}"`;
-                
-                await supabaseClient.from('commesse_log').insert([{ 
-                    commessa_id: c.commessa_id, 
-                    azione: testoLog, 
-                    file_url: fileUrl, 
-                    autore: UTENTE_CORRENTE,
-                    created_at: timestampFormattato
-                }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: c.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE, created_at: timestampFormattato }]);
 
-                chiudiModaleAzione();
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaContratti();
+                chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaContratti();
             } else { alert("Errore di sistema: " + error.message); }
 
-            btn.innerText = "Conferma Azione";
-            btn.disabled = false;
+            btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // Modifica solo importo da dentro la scheda
-        function apriModaleModificaValore() {
-            const c = contrattiCorrenti[contrattoAttivoIndex];
-            document.getElementById('mod-importo').value = c.valore_finale || '';
-            document.getElementById('modal-modifica-dati').classList.remove('hidden');
-        }
-
+        function apriModaleModificaValore() { document.getElementById('mod-importo').value = contrattiCorrenti[contrattoAttivoIndex].valore_finale || ''; document.getElementById('modal-modifica-dati').classList.remove('hidden'); }
         async function salvaModificaValore() {
-            const c = contrattiCorrenti[contrattoAttivoIndex];
-            const nuovoImporto = document.getElementById('mod-importo').value;
-            
+            const c = contrattiCorrenti[contrattoAttivoIndex]; const nuovoImporto = document.getElementById('mod-importo').value;
             const { error } = await supabaseClient.from('contratti').update({ valore_finale: nuovoImporto }).eq('id', c.id);
-            if (!error) {
-                c.valore_finale = nuovoImporto;
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: c.commessa_id, azione: `Valore finale contratto aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]);
-                document.getElementById('modal-modifica-dati').classList.add('hidden');
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaContratti(); 
-            }
+            if (!error) { c.valore_finale = nuovoImporto; await supabaseClient.from('commesse_log').insert([{ commessa_id: c.commessa_id, azione: `Valore contratto aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]); document.getElementById('modal-modifica-dati').classList.add('hidden'); aggiornaDatiSchedaUI(); caricaCronologia(); caricaContratti(); }
         }
 
-
-        // 5. DIARIO
         async function salvaNotaLibera() {
-            const inputNota = document.getElementById('input-nota-libera');
-            const testo = inputNota.value;
-            if (!testo || testo.trim() === '') return;
-            const comId = contrattiCorrenti[contrattoAttivoIndex].commessa_id;
-            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: comId, azione: "Appunto Contratto", nota: testo, autore: UTENTE_CORRENTE }]);
+            const inputNota = document.getElementById('input-nota-libera'); const testo = inputNota.value; if (!testo || testo.trim() === '') return;
+            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: contrattiCorrenti[contrattoAttivoIndex].commessa_id, azione: "Appunto Contratto", nota: testo, autore: UTENTE_CORRENTE }]);
             if (!error) { inputNota.value = ''; caricaCronologia(); } 
         }
 
         async function caricaCronologia() {
-            const comId = contrattiCorrenti[contrattoAttivoIndex].commessa_id;
-            const divLog = document.getElementById('lista-cronologia');
-            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
-            
-            // Filtro leggermente il diario globale per mostrare solo le cose pertinenti al contratto
-            const { data: logs } = await supabaseClient.from('commesse_log').select('*')
-                .eq('commessa_id', comId)
-                .or('azione.ilike.%contratto%,azione.ilike.%appunto%')
-                .order('created_at', { ascending: false });
-
+            const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+            const { data: logs } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', contrattiCorrenti[contrattoAttivoIndex].commessa_id).or('azione.ilike.%contratto%,azione.ilike.%appunto%,azione.ilike.%salto%').order('created_at', { ascending: false });
             if (!logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna nota presente.</p>'; return; }
-
             let html = '';
             logs.forEach(log => {
-                const dateObj = new Date(log.created_at);
-                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
-                
                 let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if(log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
-
-                html += `
-                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
-                        ${icona}
-                        <div class="flex-1">
-                            <div class="flex justify-between items-center mb-1">
-                                <p class="text-xs font-bold text-gray-900">${log.azione}</p>
-                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
-                            </div>
-                            ${notaHtml}
-                        </div>
-                    </div>
-                `;
+                html += `<div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">${icona}<div class="flex-1"><div class="flex justify-between items-center mb-1"><p class="text-xs font-bold text-gray-900">${log.azione}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p></div>${notaHtml}</div></div>`;
             });
             divLog.innerHTML = html;
         }
-
     </script>
 </body>
 </html>
