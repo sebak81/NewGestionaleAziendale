@@ -104,7 +104,6 @@
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
-            <!-- RIEPILOGO HEADER -->
             <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -125,7 +124,6 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
-                <!-- STORICO DOCUMENTI -->
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Documenti Collegati</h3>
                     <div id="lista-file-contratto" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
@@ -133,7 +131,6 @@
                     </div>
                 </div>
 
-                <!-- DIARIO -->
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note e Diario Contratto</h3>
                     
@@ -149,7 +146,7 @@
 
     <!-- ================= MODALI AZIONI (Z-50) ================= -->
 
-    <!-- MODALE AVANZAMENTO DI STATO CON FILE E NOTE -->
+    <!-- MODALE AVANZAMENTO DI STATO CON FILE, NOTE E DATA -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -163,6 +160,13 @@
             <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
                 <input type="hidden" id="azione-target-stato">
                 <input type="hidden" id="azione-is-jump">
+
+                <!-- NUOVO CAMPO: DATA AZIONE -->
+                <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-bold text-gray-800 mb-1">📅 Data dell'azione</label>
+                    <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
+                    <p class="text-[10px] text-gray-500 mt-1">Puoi retrodatare l'operazione per mantenere lo storico del diario corretto.</p>
+                </div>
 
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-note">Note (Opzionale)</label>
@@ -209,10 +213,8 @@
         let contrattiCorrenti = [];
         let contrattoAttivoIndex = null;
 
-        // Nuova logica per gli stati del Contratto (non più Da Fare, Stesura, Controllo... ecc ma specifici)
         const sequenzaStati = ['Da Fare', 'Stesura', 'Rilievo Esecutivo', 'Pre-Ordini', 'Inviato', 'Confermato'];
 
-        // IL RICEVITORE 
         document.addEventListener('DOMContentLoaded', async () => {
             await caricaContratti();
 
@@ -374,7 +376,7 @@
             sequenzaStati.forEach((stato, index) => {
                 const punto = document.createElement('div');
                 punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform';
-                punto.onclick = () => saltoStato(stato); // PALLINO CLICCABILE PER IL SALTO!
+                punto.onclick = () => saltoStato(stato); 
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
                 
@@ -394,7 +396,7 @@
                 container.appendChild(punto);
             });
 
-            // I PULSANTI MANUALI DI AVANZAMENTO
+            // I PULSANTI MANUALI
             if (statoAttuale === 'Da Fare') {
                 azioniBox.innerHTML = `
                     <div class="flex-1"></div>
@@ -449,6 +451,9 @@ Potrai allegare eventuali documenti nella schermata successiva.`)) {
             document.getElementById('azione-target-stato').value = nuovoStato;
             document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO';
             
+            // Imposto la data odierna di default
+            document.getElementById('azione-data').value = new Date().toISOString().split('T')[0];
+
             document.getElementById('azione-note').value = '';
             document.getElementById('azione-file').value = '';
             
@@ -496,11 +501,19 @@ Potrai allegare eventuali documenti nella schermata successiva.`)) {
             
             const nuovoStato = document.getElementById('azione-target-stato').value;
             const isJump = document.getElementById('azione-is-jump').value === 'SI';
+            
+            const dataAzione = document.getElementById('azione-data').value;
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
             btn.innerText = "Salvataggio...";
             btn.disabled = true;
+
+            // Creazione timestamp per mantenere la cronologia
+            let timestampFormattato = new Date().toISOString();
+            if (dataAzione !== new Date().toISOString().split('T')[0]) {
+                timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
+            }
 
             let fileUrl = null;
             if (fileInput.files.length > 0) {
@@ -528,7 +541,8 @@ Potrai allegare eventuali documenti nella schermata successiva.`)) {
                     commessa_id: c.commessa_id, 
                     azione: testoLog, 
                     file_url: fileUrl, 
-                    autore: UTENTE_CORRENTE 
+                    autore: UTENTE_CORRENTE,
+                    created_at: timestampFormattato
                 }]);
 
                 chiudiModaleAzione();
