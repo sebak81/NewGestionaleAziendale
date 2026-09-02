@@ -97,7 +97,7 @@
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
                     <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">PREV-0000/000</h2>
-                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
+                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Stesura</span>
                     <span id="scheda-badge-rev" class="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-[10px] font-bold">REV. 0</span>
                 </div>
             </div>
@@ -108,6 +108,7 @@
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
+            <!-- RIEPILOGO HEADER -->
             <div class="text-sm text-gray-600 flex items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -128,6 +129,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
+                <!-- STORICO DOCUMENTI E REVISIONI -->
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Storico Documenti (Revisioni)</h3>
                     <p class="text-[10px] text-gray-500 mb-4">I file caricati ad ogni step o revisione vengono accumulati qui.</p>
@@ -136,6 +138,7 @@
                     </div>
                 </div>
 
+                <!-- DIARIO GLOBALE (PER VEDERE LE NOTE DI REVISIONE) -->
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note di Controllo e Diario</h3>
                     <p class="text-xs text-gray-500 mb-5">Tutte le note di correzione ("Richieste di Revisione") scritte dal controllo direzionale appariranno qui.</p>
@@ -152,6 +155,7 @@
 
     <!-- ================= MODALI AZIONI (Z-50) ================= -->
 
+    <!-- MODALE AVANZAMENTO DI STATO CON FILE E NOTE -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -252,12 +256,14 @@
         let preventivoAttivoIndex = null;
         let commesseDisponibili = [];
 
+        // Workflow Preventivi
         const sequenzaStati = ['Da Fare', 'Stesura', 'Controllo', 'Inviato', 'Accettato'];
 
         document.addEventListener('DOMContentLoaded', async () => {
             await caricaCommesseTendina();
             await caricaPreventivi();
 
+            // Intercetta parametri URL per aperture automatiche
             const urlParams = new URLSearchParams(window.location.search);
             const action = urlParams.get('action');
             const commessaId = urlParams.get('commessa_id');
@@ -330,7 +336,7 @@
                     </td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Da Fare'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Stesura'}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
                 `;
                 tbody.appendChild(tr);
@@ -383,8 +389,7 @@
             if(p.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
             if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
             
-            // Fallback intelligente: se lo stato è null o vuoto, lo setta a "Da Fare"
-            const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Da Fare';
+            const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Stesura';
             
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
@@ -674,7 +679,7 @@
         }
 
 
-        // 4. CREAZIONE NUOVO PREVENTIVO E MODIFICA DATI
+        // 4. CREAZIONE NUOVO PREVENTIVO (Stato di Default: STESURA)
         function apriModaleNuovo() {
             document.getElementById('form-nuovo').reset();
             const anno = new Date().getFullYear(); 
@@ -690,17 +695,18 @@
                 commessa_id: document.getElementById('nuovo-commessa').value,
                 numero: document.getElementById('nuovo-numero').value,
                 importo: document.getElementById('nuovo-importo').value || null,
-                stato: 'Da Fare',
+                stato: 'Stesura', // ORA PARTE GIA' DA STESURA IN AUTOMATICO
                 revisione: 0
             };
             const { data, error } = await supabaseClient.from('preventivi').insert([dati]).select();
             if (!error) {
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero}`, autore: UTENTE_CORRENTE }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]);
                 chiudiModaleNuovo();
                 caricaPreventivi();
             } else { alert("Errore salvataggio: " + error.message); }
         });
 
+        // Modifica solo importo da dentro la scheda
         function apriModaleModificaDatiBase() {
             const p = preventiviCorrenti[preventivoAttivoIndex];
             document.getElementById('mod-importo').value = p.importo || '';
@@ -718,7 +724,7 @@
                 document.getElementById('modal-modifica-dati').classList.add('hidden');
                 aggiornaDatiSchedaUI();
                 caricaCronologia();
-                caricaPreventivi();
+                caricaPreventivi(); 
             }
         }
 
