@@ -221,9 +221,9 @@
         </div>
     </div>
 
-    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
+    <!-- ================= MODALI A SCOMPARSA (PULITI E UNIVOCI) ================= -->
 
-    <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
+    <!-- 1. MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -281,7 +281,7 @@
         </div>
     </div>
 
-    <!-- MODALE: GESTISCI ORDINE INNESTATO -->
+    <!-- 2. MODALE: GESTISCI ORDINE INNESTATO -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -331,7 +331,7 @@
         </div>
     </div>
 
-    <!-- MODALE: NUOVO ORDINE DA COMMESSA -->
+    <!-- 3. MODALE: NUOVO ORDINE DA COMMESSA -->
     <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -347,8 +347,8 @@
                     <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3">
                         <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 focus:ring-orange-500 border-gray-300 rounded cursor-pointer">
                         <div>
-                            <label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label>
-                            <p class="text-[10px] text-orange-600">Attiva questa spunta se stai ordinando un materiale difettoso o mancante dopo il collaudo.</p>
+                            <label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza</label>
+                            <p class="text-[10px] text-orange-600">Attiva se stai ordinando un materiale difettoso o mancante post-posa.</p>
                         </div>
                     </div>
 
@@ -369,7 +369,7 @@
         </div>
     </div>
 
-    <!-- MODALE: INSERIMENTO POSA/INTERVENTO -->
+    <!-- 4. MODALE: INSERIMENTO POSA/INTERVENTO -->
     <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -400,12 +400,11 @@
         </div>
     </div>
 
-
-    <!-- ================= MODALI BASE COMMESSA ================= -->
+    <!-- 5. MODALE: NUOVA COMMESSA -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Nuova Commessa</h3></div>
+                <div><h3 class="text-lg font-bold">Nuova Commessa</h3><p class="text-xs text-gray-500">Collega un nuovo lavoro a un cliente</p></div>
                 <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
@@ -428,6 +427,11 @@
                                 <div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                                 <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                             </div>
+                            <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50">
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                                <div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
+                            </div>
                         </div>
                     </div>
                 </form>
@@ -439,7 +443,7 @@
         </div>
     </div>
 
-    <!-- MODALE MODIFICA CON TASTO ELIMINA -->
+    <!-- 6. MODALE: MODIFICA COMMESSA (CON TASTO ELIMINA) -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -463,12 +467,11 @@
                     </div>
                 </form>
             </div>
-            
             <div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <!-- TASTO ELIMINA (SINISTRA) -->
+                <!-- TASTO ELIMINA -->
                 <button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">🗑️ Elimina Cantiere</button>
                 
-                <!-- TASTI AZIONE (DESTRA) -->
+                <!-- TASTI AZIONE -->
                 <div class="flex gap-3">
                     <button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button>
                     <button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button>
@@ -542,6 +545,7 @@
             });
         }
 
+        // 2. LOGICA VISTA A TUTTO SCHERMO E TABS
         function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
             aggiornaDatiSchedaUI();
@@ -770,7 +774,6 @@
             } else { alert("Errore salvataggio collaudo: " + error.message); }
         }
 
-
         // --- TAB ORDINI FORNITORI CON SPUNTA "SOSTITUZIONE" ---
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
@@ -835,11 +838,7 @@
             if (!error) {
                 const nomeFornitore = data[0].fornitori ? data[0].fornitori.nome_azienda : 'Fornitore';
                 const labelAssistenza = isSostituzione ? ' ⚠️ (In Sostituzione / Post-Posa)' : '';
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: com.id,
-                    azione: `Aggiunto Ordine per: ${nomeFornitore}${labelAssistenza}`,
-                    autore: UTENTE_CORRENTE
-                }]);
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Aggiunto Ordine per: ${nomeFornitore}${labelAssistenza}`, autore: UTENTE_CORRENTE }]);
 
                 chiudiModaleNuovoOrdineDaCommessa();
                 caricaOrdiniDiQuestaCommessa();
@@ -1207,46 +1206,131 @@
             divLog.innerHTML = html;
         }
 
+        // --- GESTIONE NUOVA E MODIFICA COMMESSA ---
+        function apriModaleModifica() {
+            if (commessaAttivaIndex === null) return;
+            const com = commesseCorrenti[commessaAttivaIndex];
+            document.getElementById('mod-com-id').value = com.id;
+            document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || '';
+            document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || '';
+            document.getElementById('mod-com-citta').value = com.citta_cantiere || '';
+            document.getElementById('mod-com-referente').value = com.referente || '';
+            document.getElementById('mod-com-tel-referente').value = com.telefono_referente || '';
+            document.getElementById('mod-com-email-referente').value = com.email_referente || '';
+            
+            document.getElementById('modal-modifica-commessa').classList.remove('hidden');
+        }
+
+        function chiudiModaleModifica() { document.getElementById('modal-modifica-commessa').classList.add('hidden'); }
+
+        document.getElementById('form-modifica-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('mod-com-id').value;
+            const datiAggiornati = {
+                nome_cantiere: document.getElementById('mod-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value,
+                citta_cantiere: document.getElementById('mod-com-citta').value,
+                referente: document.getElementById('mod-com-referente').value,
+                telefono_referente: document.getElementById('mod-com-tel-referente').value,
+                email_referente: document.getElementById('mod-com-email-referente').value
+            };
+
+            const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: `Dati anagrafici e operativi del cantiere aggiornati`, autore: UTENTE_CORRENTE }]);
+                chiudiModaleModifica();
+                Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati);
+                aggiornaDatiSchedaUI();
+                caricaCronologia(id);
+                caricaCommesse(); 
+            } else { alert("Errore modifica commessa: " + error.message); }
+        });
+
+        function apriModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
+            const anno = new Date().getFullYear(); 
+            document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`;
+            document.getElementById('check-copia-dati').checked = false; 
+        }
+
+        function chiudiModaleNuovaCommessa() { 
+            document.getElementById('modal-nuova-commessa').classList.add('hidden'); 
+            document.getElementById('form-nuova-commessa').reset(); 
+        }
+
+        document.getElementById('check-copia-dati').addEventListener('change', () => {
+            const isChecked = document.getElementById('check-copia-dati').checked;
+            const clienteId = document.getElementById('form-com-cliente').value;
+            if (isChecked && clienteId) {
+                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId));
+                if (cliente) {
+                    document.getElementById('form-com-indirizzo').value = cliente.indirizzo || '';
+                    document.getElementById('form-com-citta').value = cliente.citta || '';
+                    document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || '';
+                }
+            } else if (!isChecked) {
+                document.getElementById('form-com-indirizzo').value = '';
+                document.getElementById('form-com-citta').value = '';
+                document.getElementById('form-com-referente').value = '';
+            }
+        });
+
+        document.getElementById('form-com-cliente').addEventListener('change', () => {
+            if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); }
+        });
+
+        document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nuovaCommessa = {
+                cliente_id: document.getElementById('form-com-cliente').value,
+                numero: document.getElementById('form-com-numero').value,
+                nome_cantiere: document.getElementById('form-com-nome-cantiere').value,
+                indirizzo_cantiere: document.getElementById('form-com-indirizzo').value,
+                citta_cantiere: document.getElementById('form-com-citta').value,
+                referente: document.getElementById('form-com-referente').value,
+                telefono_referente: document.getElementById('form-com-tel-referente').value,
+                email_referente: document.getElementById('form-com-email-referente').value,
+                stato: 'Preventivazione', 
+                valore: null 
+            };
+            const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
+            if (!error && data) { 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]);
+                chiudiModaleNuovaCommessa(); 
+                caricaCommesse(); 
+            } else { alert("Errore salvataggio: " + error.message); }
+        });
+
         // --- GESTIONE ELIMINAZIONE COMMESSA A CASCATA ---
         async function confermaEliminazioneCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
-            
-            // Richiesta di conferma 'psicologica' prima dell'eliminazione
-            const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:\n(In futuro verrà richiesta la password)`);
+            const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
             
             if (conferma !== 'ELIMINA') {
                 if(conferma !== null) alert("Eliminazione annullata: parola di conferma errata o non inserita.");
                 return;
             }
 
-            // Procediamo con l'eliminazione a cascata manuale per essere sicuri
-            
-            // 1. Dobbiamo trovare tutti i contratti di questa commessa per eliminare i loro ordini
             const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
             if (contratti && contratti.length > 0) {
                 const contrattiIds = contratti.map(c => c.id);
-                // Elimina tutti gli ordini legati a quei contratti
                 await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds);
             }
 
-            // 2. Elimina tutte le dipendenze dirette dalla commessa
             await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id);
             await supabaseClient.from('contratti').delete().eq('commessa_id', com.id);
             await supabaseClient.from('fatture').delete().eq('commessa_id', com.id);
             await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id);
             await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
 
-            // 3. Infine eliminiamo la commessa madre
             const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
 
             if (!error) {
-                alert(`Commessa ${com.numero} e tutti i suoi dati eliminati con successo.`);
+                alert(`Commessa ${com.numero} eliminata con successo.`);
                 chiudiModaleModifica();
                 chiudiScheda();
                 caricaCommesse();
-            } else {
-                alert("Si è verificato un errore durante l'eliminazione: " + error.message);
-            }
+            } else { alert("Errore durante l'eliminazione: " + error.message); }
         }
 
         // INIT
