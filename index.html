@@ -55,79 +55,78 @@
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar">
             
-            <!-- KPI -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='preventivi.html'">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-xl">📝</div>
-                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[10px] font-bold uppercase">In sospeso</span>
+            <!-- KPI / CONTATORI -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='preventivi.html'">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-lg">📝</div>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[9px] font-bold uppercase">In sospeso</span>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900" id="kpi-preventivi">-</p>
-                    <p class="text-xs text-gray-500 mt-1">Preventivi aperti / in stesura</p>
+                    <p class="text-2xl font-bold text-gray-900" id="kpi-preventivi">-</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Preventivi aperti</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='contratti.html'">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xl">📑</div>
-                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[10px] font-bold uppercase">In Corso</span>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='contratti.html'">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg">📑</div>
+                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[9px] font-bold uppercase">In Corso</span>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900" id="kpi-contratti">-</p>
-                    <p class="text-xs text-gray-500 mt-1">Contratti in lavorazione attiva</p>
+                    <p class="text-2xl font-bold text-gray-900" id="kpi-contratti">-</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Contratti attivi</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='ordini.html'">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xl">📦</div>
-                        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[10px] font-bold uppercase">Attesa Conf.</span>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='ordini.html'">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-lg">📦</div>
+                        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[9px] font-bold uppercase">Attesa Conf.</span>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900" id="kpi-ordini">-</p>
-                    <p class="text-xs text-gray-500 mt-1">Ordini Fornitore da confermare</p>
+                    <p class="text-2xl font-bold text-gray-900" id="kpi-ordini">-</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Ordini da confermare</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='fatturazione.html'">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">💶</div>
-                        <span class="px-2 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold uppercase">Da Incassare</span>
+
+                <!-- NUOVO KPI: MERCE IN ARRIVO -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-teal-500 transition-colors cursor-pointer" onclick="window.location.href='ordini.html'">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center text-lg">🚚</div>
+                        <span class="px-2 py-1 bg-teal-100 text-teal-800 rounded text-[9px] font-bold uppercase">In Arrivo</span>
                     </div>
-                    <p class="text-3xl font-bold text-gray-900" id="kpi-fatture">-</p>
-                    <p class="text-xs text-gray-500 mt-1">Acconti richiesti non ancora saldati</p>
+                    <p class="text-2xl font-bold text-gray-900" id="kpi-in-arrivo">-</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Merce in arrivo</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='fatturazione.html'">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">💶</div>
+                        <span class="px-2 py-1 bg-red-50 text-red-600 rounded text-[9px] font-bold uppercase">Da Incassare</span>
+                    </div>
+                    <p class="text-2xl font-bold text-gray-900" id="kpi-fatture">-</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Fatture non ancora saldate</p>
                 </div>
             </div>
 
-            <!-- SCORCIATOIE (Ora sono 4) -->
+            <!-- SCORCIATOIE RAPIDE -->
             <div class="bg-[#2e2a5b] rounded-2xl shadow-sm p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative overflow-hidden">
                 <div class="absolute -right-10 -top-10 opacity-10 text-9xl">🚀</div>
                 
                 <a href="clienti.html?action=new" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">👥</div>
-                    <div>
-                        <h4 class="font-bold text-sm">Nuovo Cliente</h4>
-                        <p class="text-[10px] text-indigo-200">Inserisci in rubrica</p>
-                    </div>
+                    <div><h4 class="font-bold text-sm">Nuovo Cliente</h4><p class="text-[10px] text-indigo-200">Inserisci in rubrica</p></div>
                 </a>
-
-                <a href="commesse.html" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
+                <a href="commesse.html?action=new" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">🏗️</div>
-                    <div>
-                        <h4 class="font-bold text-sm">Nuova Commessa</h4>
-                        <p class="text-[10px] text-indigo-200">Apri un nuovo cantiere</p>
-                    </div>
+                    <div><h4 class="font-bold text-sm">Nuova Commessa</h4><p class="text-[10px] text-indigo-200">Apri un nuovo cantiere</p></div>
                 </a>
-                
                 <a href="preventivi.html" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">📝</div>
-                    <div>
-                        <h4 class="font-bold text-sm">Crea Preventivo</h4>
-                        <p class="text-[10px] text-indigo-200">Stesura e calcoli</p>
-                    </div>
+                    <div><h4 class="font-bold text-sm">Crea Preventivo</h4><p class="text-[10px] text-indigo-200">Stesura e calcoli</p></div>
                 </a>
-
                 <a href="fatturazione.html" class="bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl p-4 flex items-center gap-4 transition-colors backdrop-blur-sm z-10">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center text-xl">💰</div>
-                    <div>
-                        <h4 class="font-bold text-sm">Verifica Incassi</h4>
-                        <p class="text-[10px] text-indigo-200">Gestione acconti pendenti</p>
-                    </div>
+                    <div><h4 class="font-bold text-sm">Verifica Incassi</h4><p class="text-[10px] text-indigo-200">Gestione pagamenti</p></div>
                 </a>
             </div>
 
+            <!-- LISTE RECENTI -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Ultime Commesse -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
@@ -135,9 +134,7 @@
                         <h3 class="text-base font-bold text-gray-800">Cantieri Recenti</h3>
                         <a href="commesse.html" class="text-xs font-semibold text-[#2e2a5b] hover:underline">Vedi tutti &rarr;</a>
                     </div>
-                    <div class="flex-1 overflow-y-auto no-scrollbar space-y-3" id="lista-commesse-recenti">
-                        <p class="text-sm text-gray-500 italic">Caricamento in corso...</p>
-                    </div>
+                    <div class="flex-1 overflow-y-auto no-scrollbar space-y-3" id="lista-commesse-recenti"></div>
                 </div>
 
                 <!-- Radar Attività -->
@@ -146,9 +143,7 @@
                         <h3 class="text-base font-bold text-gray-800">Radar Attività</h3>
                         <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[10px] font-bold uppercase flex items-center gap-1"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Live</span>
                     </div>
-                    <div class="flex-1 overflow-y-auto no-scrollbar" id="lista-attivita-recenti">
-                        <p class="text-sm text-gray-500 italic">Recupero radar aziendale...</p>
-                    </div>
+                    <div class="flex-1 overflow-y-auto no-scrollbar" id="lista-attivita-recenti"></div>
                 </div>
             </div>
 
@@ -163,45 +158,62 @@
         document.getElementById('data-odierna').innerText = new Date().toLocaleDateString('it-IT', opzioniData);
 
         async function caricaDashboard() {
-            // KPI
+            // KPI: Preventivi
             const { count: countPrev } = await supabaseClient.from('preventivi').select('*', { count: 'exact', head: true }).neq('stato', 'Accettato').neq('stato', 'Rifiutato');
             document.getElementById('kpi-preventivi').innerText = countPrev || '0';
 
+            // KPI: Contratti
             const { count: countContr } = await supabaseClient.from('contratti').select('*', { count: 'exact', head: true }).neq('stato', 'Confermato').neq('stato', 'Disdetto');
             document.getElementById('kpi-contratti').innerText = countContr || '0';
 
-            const { count: countOrd } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true }).neq('stato', 'Ordine confermato ed inviato al Fornitore');
+            // KPI: Ordini in Attesa Conferma
+            const { count: countOrd } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
+                .neq('stato', 'Ordine confermato ed inviato al Fornitore')
+                .neq('stato', 'Merce Arrivata in Magazzino');
             document.getElementById('kpi-ordini').innerText = countOrd || '0';
 
+            // KPI: Merce in Arrivo (Ordine confermato, ma non arrivato)
+            const { count: countArrivo } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
+                .eq('stato', 'Ordine confermato ed inviato al Fornitore');
+            document.getElementById('kpi-in-arrivo').innerText = countArrivo || '0';
+
+            // KPI: Fatture NON Saldate (Qualsiasi tipo: Acconto o Saldo)
             const { count: countFatt } = await supabaseClient.from('fatture').select('*', { count: 'exact', head: true }).neq('stato', 'Pagata');
             document.getElementById('kpi-fatture').innerText = countFatt || '0';
 
-            // Commesse Recenti
+            // Commesse Recenti (FORMATTAZIONE AGGIORNATA)
             const divCommesse = document.getElementById('lista-commesse-recenti');
-            const { data: commesse } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('created_at', { ascending: false }).limit(5);
+            const { data: commesse } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('created_at', { ascending: false }).limit(6);
 
             if (commesse && commesse.length > 0) {
                 let htmlCommesse = '';
                 commesse.forEach(com => {
                     const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
-                    const cantiere = com.nome_cantiere || '--';
+                    const cantiere = com.nome_cantiere || 'Cantiere non specificato';
+                    
+                    let bgStato = 'bg-yellow-100 text-yellow-800';
+                    if(com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800';
+                    if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800';
+                    if(com.stato === 'Conclusa' || com.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800';
+
+                    // Il click apre direttamente la scheda della commessa passando l'ID via URL
                     htmlCommesse += `
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html?id=${com.id}'">
                             <div>
-                                <div class="flex items-center gap-2 mb-0.5">
-                                    <span class="font-bold text-gray-900 text-sm">${com.numero}</span>
-                                    <span class="px-1.5 py-0.5 bg-yellow-100 text-yellow-800 rounded text-[9px] font-bold uppercase tracking-wider">${com.stato || 'Aperta'}</span>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="font-bold text-gray-900 text-sm">${nomeCliente} - ${com.numero}</span>
+                                    <span class="px-1.5 py-0.5 ${bgStato} rounded text-[9px] font-bold uppercase tracking-wider">${com.stato || 'Aperta'}</span>
                                 </div>
-                                <p class="text-xs text-gray-500">${nomeCliente} <span class="text-gray-300">|</span> ${cantiere}</p>
+                                <p class="text-xs text-gray-500">${cantiere}</p>
                             </div>
-                            <span class="text-gray-400">&rarr;</span>
+                            <span class="text-gray-400 font-bold">&rarr;</span>
                         </div>
                     `;
                 });
                 divCommesse.innerHTML = htmlCommesse;
             } else { divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>'; }
 
-            // Radar
+            // Radar Attività
             const divRadar = document.getElementById('lista-attivita-recenti');
             const { data: logs } = await supabaseClient.from('commesse_log').select('*, commesse(numero, clienti(nome_ragione_sociale))').order('created_at', { ascending: false }).limit(15); 
 
@@ -224,6 +236,7 @@
                     let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50 shrink-0"></div>';
                     if (log.azione.includes("Appunto Manuale") || log.azione.includes("Comunicazione")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
                     if (log.file_url) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">📎</div>';
+                    if (log.azione.includes("Merce Arrivata")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-teal-100 text-teal-600 text-[10px] ring-2 ring-teal-50 shrink-0">📦</div>';
 
                     htmlRadar += `
                         <div class="flex gap-3 items-start pb-3 border-b border-gray-100 last:border-0 last:pb-0">
