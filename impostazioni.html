@@ -42,63 +42,102 @@
         </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (IMPOSTAZIONI) -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
             <h1 class="text-xl font-bold">Impostazioni & Anagrafiche ⚙️</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione fornitori, reparti e rubrica aziendale</p>
+            <p class="text-sm text-gray-500 mt-1">Configurazioni globali e personalizzazione del gestionale</p>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar max-w-7xl w-full">
+        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar max-w-7xl w-full">
             
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- SEZIONE FORNITORI (Larga 2 colonne su 3) -->
-                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-6">
-                    <div class="flex justify-between items-center border-b border-gray-100 pb-4">
-                        <div>
-                            <h2 class="text-lg font-bold text-gray-900">Rubrica Fornitori & Reparti</h2>
-                            <p class="text-xs text-gray-500">Gestisci i partner commerciali e i relativi referenti interni</p>
-                        </div>
-                        <button onclick="apriModaleFornitore()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-                            <span>+</span> Nuovo Fornitore
-                        </button>
+            <!-- VISTA: MENU PRINCIPALE DEI PULSANTONI -->
+            <div id="vista-menu" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 block">
+                
+                <!-- CARD FORNITORI -->
+                <button onclick="apriPannello('fornitori')" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-start gap-4 hover:border-[#2e2a5b] hover:shadow-md transition-all text-left group">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-2xl group-hover:scale-110 transition-transform shrink-0">🤝</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Rubrica Fornitori</h3>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Gestisci i partner commerciali, le loro categorie e i referenti interni.</p>
                     </div>
+                </button>
 
-                    <!-- Tabella Elenco Fornitori -->
+                <!-- CARD SEDI AZIENDALI -->
+                <button onclick="apriPannello('sedi')" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-start gap-4 hover:border-blue-500 hover:shadow-md transition-all text-left group">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl group-hover:scale-110 transition-transform shrink-0">🏢</div>
+                    <div>
+                        <h3 class="font-bold text-gray-900 text-lg">Sedi Operative</h3>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Aggiungi o rimuovi le sedi aziendali (es. Signoressa, Castagnole).</p>
+                    </div>
+                </button>
+
+                <!-- CARD FUTURA (DISABILITATA) -->
+                <div class="bg-gray-50 rounded-2xl border border-dashed border-gray-300 p-6 flex items-start gap-4 opacity-70">
+                    <div class="w-12 h-12 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 text-2xl shrink-0">🔐</div>
+                    <div>
+                        <h3 class="font-bold text-gray-600 text-lg">Sicurezza & Accessi</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-relaxed">Prossimamente: gestione password, PIN utente e restrizioni.</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- VISTA: PANNELLO FORNITORI -->
+            <div id="pannello-fornitori" class="hidden flex-col h-full space-y-6 animate-fade-in">
+                
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-10">
+                    <div class="flex items-center gap-4">
+                        <button onclick="tornaAlMenu()" class="text-gray-500 hover:text-[#2e2a5b] font-medium flex items-center gap-2 transition-colors">
+                            <span>&larr;</span> Indietro
+                        </button>
+                        <div class="h-6 w-px bg-gray-300"></div>
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🤝 Rubrica Fornitori & Reparti</h2>
+                    </div>
+                    <button onclick="apriModaleFornitore()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                        <span>+</span> Nuovo Fornitore
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-4 py-3">Azienda / Sede</th>
-                                    <th class="px-4 py-3">Categorie</th>
-                                    <th class="px-4 py-3">Contatti Generali & Referenti</th>
-                                    <th class="px-4 py-3 text-center w-28">Azioni</th>
+                                    <th class="px-6 py-4">Azienda / Sede</th>
+                                    <th class="px-6 py-4">Categorie</th>
+                                    <th class="px-6 py-4">Contatti Generali & Referenti</th>
+                                    <th class="px-6 py-4 text-center w-28">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody id="tabella-fornitori" class="divide-y divide-gray-100">
-                                <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento fornitori...</td></tr>
+                                <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Caricamento fornitori...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- BOX SEDI AZIENDALI (Larga 1 colonna su 3) -->
-                <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4 mb-4">
-                        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 text-xl">🏢</div>
-                        <div>
-                            <h2 class="text-base font-bold text-gray-800">Sedi di Gestione</h2>
-                            <p class="text-xs text-gray-500">Es. Signoressa, Castagnole...</p>
-                        </div>
+            <!-- VISTA: PANNELLO SEDI -->
+            <div id="pannello-sedi" class="hidden flex-col h-full space-y-6 max-w-2xl animate-fade-in">
+                
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-10">
+                    <div class="flex items-center gap-4">
+                        <button onclick="tornaAlMenu()" class="text-gray-500 hover:text-[#2e2a5b] font-medium flex items-center gap-2 transition-colors">
+                            <span>&larr;</span> Indietro
+                        </button>
+                        <div class="h-6 w-px bg-gray-300"></div>
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">🏢 Sedi di Gestione</h2>
                     </div>
-                    
-                    <form id="form-nuova-sede" class="flex gap-2 mb-6">
-                        <input type="text" id="input-sede" required placeholder="Aggiungi sede..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button type="submit" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm">+</button>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+                    <form id="form-nuova-sede" class="flex gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <input type="text" id="input-sede" required placeholder="Aggiungi una nuova sede aziendale..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button type="submit" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm">Aggiungi</button>
                     </form>
 
-                    <div class="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden flex-1 overflow-y-auto no-scrollbar max-h-96">
-                        <ul id="lista-sedi" class="divide-y divide-gray-200 text-sm">
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex-1 overflow-y-auto no-scrollbar shadow-inner">
+                        <ul id="lista-sedi" class="divide-y divide-gray-100 text-sm">
                             <li class="px-4 py-3 text-gray-500 text-center italic">Caricamento sedi...</li>
                         </ul>
                     </div>
@@ -112,7 +151,6 @@
     <div id="modal-fornitore" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col my-auto">
             
-            <!-- Intestazione Modale -->
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900" id="modale-titolo">Scheda Fornitore</h3>
@@ -121,40 +159,22 @@
                 <button type="button" onclick="chiudiModaleFornitore()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
-            <!-- Corpo Modale -->
             <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
                 <form id="form-fornitore" class="space-y-6">
                     <input type="hidden" id="fornitore-id">
 
-                    <!-- Dati Anagrafici Generali -->
                     <div class="space-y-4">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">1. Informazioni Aziendali</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label>
-                                <input type="text" id="f-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi SRL">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede</label>
-                                <input type="text" id="f-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Via Roma 10">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-gray-600 mb-1">Città</label>
-                                <input type="text" id="f-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Milano (MI)">
-                            </div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label><input type="text" id="f-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Infissi SRL"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede</label><input type="text" id="f-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Via Roma 10"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Città</label><input type="text" id="f-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Milano (MI)"></div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Tel. Azienda</label>
-                                    <input type="text" id="f-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="02 ...">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Email Azienda</label>
-                                    <input type="email" id="f-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="info@...">
-                                </div>
+                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Tel. Azienda</label><input type="text" id="f-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="02 ..."></div>
+                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Email Azienda</label><input type="email" id="f-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="info@..."></div>
                             </div>
                         </div>
 
-                        <!-- Categorie Multiple -->
                         <div class="pt-2">
                             <label class="block text-xs font-semibold text-gray-600 mb-2">Categorie Merceologiche Trattate</label>
                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-gray-50 p-3 border border-gray-200 rounded-lg max-h-36 overflow-y-auto" id="container-categorie-checkbox">
@@ -183,7 +203,6 @@
                         </div>
                     </div>
 
-                    <!-- Sotto-Tabella Referenti Dinamici -->
                     <div class="space-y-3 pt-4 border-t border-gray-100">
                         <div class="flex justify-between items-center">
                             <div>
@@ -207,7 +226,6 @@
                                     </tr>
                                 </thead>
                                 <tbody id="tabella-referenti-dinamica" class="divide-y divide-gray-100 bg-white">
-                                    <!-- Righe dinamiche iniettate via JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -215,13 +233,18 @@
                 </form>
             </div>
 
-            <!-- Footer Modale -->
             <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleFornitore()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="submit" form="form-fornitore" id="btn-salva-fornitore-def" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Fornitore</button>
             </div>
         </div>
     </div>
+
+    <style>
+        /* Semplice classe per l'animazione di entrata dei pannelli */
+        .animate-fade-in { animation: fadeIn 0.2s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 
     <script src="config.js"></script>
 
@@ -230,10 +253,38 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             caricaFornitori();
-            caricaSedi(); // Richiamo il caricamento delle sedi all'avvio
+            caricaSedi(); 
         });
 
-        // ------------------ GESTIONE SEDI AZIENDALI ------------------
+        // --- SISTEMA DI NAVIGAZIONE A PANNELLI ---
+        function apriPannello(idPannello) {
+            // Nasconde il menu principale
+            document.getElementById('vista-menu').classList.remove('grid');
+            document.getElementById('vista-menu').classList.add('hidden');
+            
+            // Nasconde tutti i pannelli e mostra solo quello richiesto
+            document.getElementById('pannello-fornitori').classList.add('hidden');
+            document.getElementById('pannello-sedi').classList.add('hidden');
+            
+            document.getElementById(`pannello-${idPannello}`).classList.remove('hidden');
+            document.getElementById(`pannello-${idPannello}`).classList.add('flex');
+        }
+
+        function tornaAlMenu() {
+            // Nasconde tutti i pannelli
+            document.getElementById('pannello-fornitori').classList.add('hidden');
+            document.getElementById('pannello-sedi').classList.add('hidden');
+            
+            document.getElementById('pannello-fornitori').classList.remove('flex');
+            document.getElementById('pannello-sedi').classList.remove('flex');
+
+            // Mostra il menu principale
+            document.getElementById('vista-menu').classList.remove('hidden');
+            document.getElementById('vista-menu').classList.add('grid');
+        }
+
+
+        // --- GESTIONE SEDI AZIENDALI ---
         async function caricaSedi() {
             const { data: sedi, error } = await supabaseClient.from('sedi_aziendali').select('*').order('nome');
             const lista = document.getElementById('lista-sedi');
@@ -244,9 +295,11 @@
             let html = '';
             sedi.forEach(sede => {
                 html += `
-                    <li class="px-4 py-3 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
-                        <span class="font-bold text-gray-800">${sede.nome}</span>
-                        <button onclick="eliminaSede(${sede.id})" class="text-red-400 hover:text-red-600 font-bold px-2 py-1 bg-red-50 rounded text-xs">Elimina</button>
+                    <li class="px-5 py-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors group">
+                        <span class="font-bold text-gray-800 text-sm flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 block"></span> ${sede.nome}
+                        </span>
+                        <button onclick="eliminaSede(${sede.id})" class="text-red-400 hover:text-white hover:bg-red-500 font-bold px-3 py-1.5 bg-red-50 rounded-lg text-xs transition-colors shadow-sm opacity-50 group-hover:opacity-100">Elimina</button>
                     </li>
                 `;
             });
@@ -267,13 +320,13 @@
         });
 
         async function eliminaSede(id) {
-            if(!confirm("Sicuro di voler eliminare questa sede? (Non modificherà i cantieri che la usano già)")) return;
+            if(!confirm("Sicuro di voler eliminare questa sede?")) return;
             const { error } = await supabaseClient.from('sedi_aziendali').delete().eq('id', id);
             if (!error) caricaSedi();
             else alert("Impossibile eliminare: " + error.message);
         }
 
-        // ------------------ GESTIONE FORNITORI ------------------
+        // --- GESTIONE FORNITORI ---
         async function caricaFornitori() {
             const { data: fornitori, error } = await supabaseClient
                 .from('fornitori')
@@ -282,42 +335,35 @@
 
             const tbody = document.getElementById('tabella-fornitori');
 
-            if (error) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-red-500">Errore DB.</td></tr>';
-                return;
-            }
-
-            if (!fornitori || fornitori.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Nessun fornitore registrato.</td></tr>';
-                return;
-            }
+            if (error) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore DB.</td></tr>'; return; }
+            if (!fornitori || fornitori.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessun fornitore registrato.</td></tr>'; return; }
 
             let html = '';
             fornitori.forEach(f => {
                 let categorieList = f.categoria ? (f.categoria.includes(',') ? f.categoria.split(',') : [f.categoria]) : [];
                 let categorieBadgeHtml = '';
                 categorieList.forEach(cat => {
-                    categorieBadgeHtml += `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1">${cat.trim()}</span>`;
+                    categorieBadgeHtml += `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1 border border-indigo-100">${cat.trim()}</span>`;
                 });
 
                 const indirizzoCitta = [f.indirizzo, f.citta].filter(Boolean).join(' - ') || 'Indirizzo non specificato';
                 const contattiGen = `
-                    <div class="font-bold text-gray-900 text-sm mb-1">${f.nome_azienda}</div>
+                    <div class="font-bold text-[#2e2a5b] text-sm mb-1">${f.nome_azienda}</div>
                     <div class="text-xs text-gray-600">📞 ${f.telefono || 'N/D'} &bull; ✉️ ${f.email || 'N/D'}</div>
                     <div class="text-[11px] text-gray-400 mt-0.5">📍 ${indirizzoCitta}</div>
                 `;
 
                 let referentiHtml = '';
                 if (f.fornitori_referenti && f.fornitori_referenti.length > 0) {
-                    referentiHtml = '<div class="mt-3 space-y-1.5 border-t border-gray-100 pt-2"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Referenti & Reparti:</p>';
+                    referentiHtml = '<div class="mt-3 space-y-1.5 border-t border-gray-100 pt-2"><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Referenti Specializzati:</p>';
                     f.fornitori_referenti.forEach(ref => {
                         referentiHtml += `
-                            <div class="bg-slate-50 p-2 rounded-lg border border-gray-100 text-xs flex justify-between items-center">
-                                <div>
+                            <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200 text-xs">
+                                <div class="flex justify-between items-center mb-1">
                                     <span class="font-bold text-gray-800">${ref.nome_referente}</span> 
-                                    <span class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-semibold text-[10px] ml-1">${ref.mansione_reparto || 'Generico'}</span>
-                                    <div class="text-gray-500 text-[11px] mt-0.5">📞 ${ref.telefono || '--'} &bull; ✉️ ${ref.email || '--'}</div>
+                                    <span class="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-semibold text-[9px]">${ref.mansione_reparto || 'Generico'}</span>
                                 </div>
+                                <div class="text-gray-500 text-[10px]">📞 ${ref.telefono || '--'} &bull; ✉️ ${ref.email || '--'}</div>
                             </div>
                         `;
                     });
@@ -328,19 +374,19 @@
 
                 html += `
                     <tr class="hover:bg-gray-50 transition-colors align-top">
-                        <td class="px-4 py-4 w-1/4">
+                        <td class="px-6 py-4 w-1/4">
                             <div class="font-bold text-gray-900 text-base">${f.nome_azienda}</div>
-                            <div class="text-xs text-gray-400 mt-0.5">ID: #${f.id}</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">ID: #${f.id}</div>
                         </td>
-                        <td class="px-4 py-4 w-1/4 max-w-xs">${categorieBadgeHtml || '--'}</td>
-                        <td class="px-4 py-4 w-2/5">
+                        <td class="px-6 py-4 w-1/4 max-w-xs">${categorieBadgeHtml || '--'}</td>
+                        <td class="px-6 py-4 w-2/5">
                             ${contattiGen}
                             ${referentiHtml}
                         </td>
-                        <td class="px-4 py-4 text-center align-middle">
-                            <div class="flex items-center justify-center gap-2">
-                                <button onclick="apriModaleFornitore(${f.id})" class="p-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition-colors" title="Modifica">✏️</button>
-                                <button onclick="eliminaFornitore(${f.id})" class="p-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-semibold transition-colors" title="Elimina">🗑️</button>
+                        <td class="px-6 py-4 text-center align-middle">
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-2">
+                                <button onclick="apriModaleFornitore(${f.id})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] border border-gray-200 shadow-sm rounded-lg text-xs font-semibold transition-colors">✏️ Modifica</button>
+                                <button onclick="eliminaFornitore(${f.id})" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-xs font-semibold transition-colors">🗑️</button>
                             </div>
                         </td>
                     </tr>
@@ -406,7 +452,7 @@
         document.getElementById('form-fornitore').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-salva-fornitore-def');
-            btn.innerText = "Salvataggio...";
+            btn.innerText = "Salvataggio in corso...";
             btn.disabled = true;
 
             const idEsistente = document.getElementById('fornitore-id').value;
@@ -431,7 +477,7 @@
                 await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', idEsistente);
             } else {
                 const { data: nuovoF, error: errF } = await supabaseClient.from('fornitori').insert([datiFornitore]).select();
-                if (errF) { alert("Errore: " + errF.message); btn.innerText = "Salva Fornitore"; btn.disabled = false; return; }
+                if (errF) { alert("Errore salvataggio azienda: " + errF.message); btn.innerText = "Salva Fornitore"; btn.disabled = false; return; }
                 fornitoreId = nuovoF[0].id;
             }
 
@@ -463,9 +509,13 @@
 
         async function eliminaFornitore(id) {
             if (!confirm("Sei sicuro di voler eliminare questo fornitore e tutti i suoi referenti associati?")) return;
+
             const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
-            if (!error) caricaFornitori();
-            else alert("Errore eliminazione: " + error.message);
+            if (!error) {
+                caricaFornitori();
+            } else {
+                alert("Errore eliminazione: " + error.message);
+            }
         }
     </script>
 </body>
