@@ -56,7 +56,7 @@
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-fatture">Caricamento in corso...</p>
                 </div>
                 <button onclick="apriModaleNuovo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-                    <span>+</span> Nuova Richiesta
+                    <span>+</span> Nuova Fattura
                 </button>
             </div>
 
@@ -193,29 +193,40 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVA RICHIESTA FATTURA/ACCONTO -->
+    <!-- MODALE CREAZIONE NUOVA FATTURA CON LOGICA A CASCATA (CLIENTE -> COMMESSA) -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900">Nuova Richiesta Fatturazione</h3>
-                    <p class="text-xs text-gray-500">Crea un acconto o un saldo da richiedere al cliente</p>
+                    <h3 class="text-lg font-bold text-gray-900">Nuova Fattura / Acconto</h3>
+                    <p class="text-xs text-gray-500">Crea una richiesta di pagamento da inviare al cliente</p>
                 </div>
                 <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
+                    
+                    <!-- 1. SELEZIONE CLIENTE -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
-                        <select id="nuovo-commessa" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            <option value="">Caricamento commesse...</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+                        <select id="nuovo-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">Caricamento clienti...</option>
                         </select>
                     </div>
+
+                    <!-- 2. SELEZIONE COMMESSA (FILTRATA) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
+                        <select id="nuovo-commessa" required disabled class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">-- Seleziona prima un cliente --</option>
+                        </select>
+                    </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento / Numero *</label>
-                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none" placeholder="Es. Acconto 30% o Fatt. 15">
+                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Acconto 30% o Fatt. 15">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Importo Richiesto (€) *</label>
@@ -227,7 +238,7 @@
             
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
                 <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Genera Richiesta</button>
+                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Genera Fattura</button>
             </div>
         </div>
     </div>
@@ -267,24 +278,25 @@
 
         let fattureCorrenti = [];
         let fatturaAttivaIndex = null;
-        let commesseDisponibili = [];
-        let apertoDaCommessa = false; // FLAG INTELLIGENTE
+        let apertoDaCommessa = false; 
+
+        // Nuove variabili per la selezione a cascata
+        let clientiGlobali = [];
+        let commesseGlobali = [];
 
         const sequenzaStati = ['Da Emettere', 'Emessa / Inviata', 'Pagata'];
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await caricaCommesseTendina();
+            await inizializzaDatiNuovaFattura();
             await caricaFatture();
 
-            // Intercetta parametri URL per aperture automatiche
             const urlParams = new URLSearchParams(window.location.search);
             const action = urlParams.get('action');
             const commessaId = urlParams.get('commessa_id');
             const idToOpen = urlParams.get('id');
 
             if (action === 'new') {
-                apriModaleNuovo();
-                if(commessaId) { document.getElementById('nuovo-commessa').value = commessaId; }
+                apriModaleNuovo(commessaId);
             }
 
             if (idToOpen) {
@@ -295,15 +307,15 @@
             }
         });
 
-        // 1. CARICAMENTO DATI E TABELLA
-        async function caricaCommesseTendina() {
-            const { data } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere').order('created_at', { ascending: false });
-            if (data) {
-                commesseDisponibili = data;
-                const sel = document.getElementById('nuovo-commessa');
-                sel.innerHTML = '<option value="">-- Seleziona Commessa --</option>';
-                data.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.numero} - ${c.nome_cantiere || ''}</option>`);
-            }
+        // 1. CARICAMENTO DATI PER IL FORM "NUOVO" E PER LA TABELLA
+        async function inizializzaDatiNuovaFattura() {
+            // Carica tutti i clienti
+            const { data: clienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale').order('nome_ragione_sociale');
+            if (clienti) clientiGlobali = clienti;
+
+            // Carica tutte le commesse con il relativo cliente_id
+            const { data: commesse } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id').order('created_at', { ascending: false });
+            if (commesse) commesseGlobali = commesse;
         }
 
         async function caricaFatture() {
@@ -334,7 +346,7 @@
                 const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
                 const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2)}` : '--';
 
-                let colorStato = 'bg-yellow-100 text-yellow-800'; // Default Da Fare
+                let colorStato = 'bg-yellow-100 text-yellow-800'; 
                 if(f.stato === 'Emessa / Inviata' || f.stato === 'Inviata' || f.stato === 'Emessa') { f.stato = 'Emessa / Inviata'; colorStato = 'bg-blue-100 text-blue-700'; }
                 if(f.stato === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
 
@@ -496,7 +508,7 @@
             if (statoPuro === nuovoStato) return; 
             
             if (confirm(`Vuoi forzare lo stato fatturazione a: ${nuovoStato.toUpperCase()}?`)) {
-                preparaAzione(nuovoStato, true); // true = è un salto!
+                preparaAzione(nuovoStato, true);
             }
         }
 
@@ -601,10 +613,64 @@
             btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVA FATTURA/ACCONTO E MODIFICA
-        function apriModaleNuovo() {
+        // 4. CREAZIONE NUOVA FATTURA (CON SELEZIONE CASCATA)
+        function apriModaleNuovo(commessaPreselezionata = null) {
             document.getElementById('form-nuovo').reset();
+
+            // 1. Popola la tendina clienti
+            const selCliente = document.getElementById('nuovo-cliente');
+            selCliente.innerHTML = '<option value="">-- Seleziona Cliente --</option>';
+            clientiGlobali.forEach(c => selCliente.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`);
+
+            // 2. Resetta e disabilita la tendina commesse
+            const selCommessa = document.getElementById('nuovo-commessa');
+            selCommessa.innerHTML = '<option value="">-- Seleziona prima un cliente --</option>';
+            selCommessa.disabled = true;
+            selCommessa.classList.add('bg-gray-50');
+            selCommessa.classList.remove('bg-white');
+
             document.getElementById('modal-nuovo').classList.remove('hidden');
+
+            // Se arrivo dal link di una commessa specifica (auto-compilazione)
+            if (commessaPreselezionata) {
+                const comTrovata = commesseGlobali.find(c => String(c.id) === String(commessaPreselezionata));
+                if (comTrovata) {
+                    selCliente.value = comTrovata.cliente_id;
+                    filtraCommessePerCliente();
+                    selCommessa.value = comTrovata.id;
+                }
+            }
+        }
+
+        // Funzione attivata 'onchange' sul menu a tendina Clienti
+        function filtraCommessePerCliente() {
+            const clienteId = document.getElementById('nuovo-cliente').value;
+            const selCommessa = document.getElementById('nuovo-commessa');
+            
+            selCommessa.innerHTML = '<option value="">-- Seleziona Commessa / Cantiere --</option>';
+            
+            if (!clienteId) {
+                selCommessa.disabled = true;
+                selCommessa.classList.add('bg-gray-50');
+                selCommessa.classList.remove('bg-white');
+                return;
+            }
+
+            selCommessa.disabled = false;
+            selCommessa.classList.remove('bg-gray-50');
+            selCommessa.classList.add('bg-white');
+
+            // Filtro le commesse globali in base al cliente scelto
+            const commesseFiltrate = commesseGlobali.filter(c => String(c.cliente_id) === String(clienteId));
+            
+            if (commesseFiltrate.length === 0) {
+                selCommessa.innerHTML = '<option value="">Nessuna commessa attiva per questo cliente</option>';
+                selCommessa.disabled = true;
+            } else {
+                commesseFiltrate.forEach(c => {
+                    selCommessa.innerHTML += `<option value="${c.id}">${c.numero} - ${c.nome_cantiere || ''}</option>`;
+                });
+            }
         }
 
         function chiudiModaleNuovo() { 
@@ -616,7 +682,7 @@
             e.preventDefault();
             const dati = {
                 commessa_id: document.getElementById('nuovo-commessa').value,
-                numero: document.getElementById('nuovo-numero').value, // Può essere 'Acconto 1' o 'Fatt 12'
+                numero: document.getElementById('nuovo-numero').value, 
                 importo: document.getElementById('nuovo-importo').value,
                 stato: 'Da Emettere'
             };
