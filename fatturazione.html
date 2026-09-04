@@ -31,15 +31,6 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <!-- SCHERMATA PRINCIPALE (ELENCO) -->
@@ -63,19 +54,19 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca" onkeyup="filtraFatture()" placeholder="Cerca per numero fattura, commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="filtraFatture()" placeholder="Cerca per cliente, commessa o numero fattura..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <!-- NUOVO ORDINE COLONNE COME RICHIESTO -->
                             <tr>
-                                <!-- NUOVO ORDINE DELLE COLONNE -->
                                 <th class="px-6 py-4">Cliente</th>
                                 <th class="px-6 py-4">Commessa / Cantiere</th>
                                 <th class="px-6 py-4">Riferimento / N°</th>
-                                <th class="px-6 py-4">Data</th>
+                                <th class="px-6 py-4">Data Generazione</th>
                                 <th class="px-6 py-4">Importo</th>
                                 <th class="px-6 py-4">Stato Pagamento</th>
                             </tr>
@@ -115,6 +106,10 @@
                 <span id="scheda-sottotitolo-cliente">Cliente</span>
                 <span class="text-gray-400">&bull;</span> 
                 Importo Richiesto: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
+                
+                <!-- NUOVO BADGE: CONDIZIONE PAGAMENTO -->
+                <span class="text-gray-400 ml-4">&bull;</span> 
+                Condizione: <span id="scheda-sottotitolo-condizione" class="font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">N/D</span>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -129,19 +124,14 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
                     <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Documenti e Ricevute</h3>
-                    <p class="text-[10px] text-gray-500 mb-4">I file della fattura di cortesia e le contabili dei bonifici si accumulano qui.</p>
-                    <div id="lista-file-fattura" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-                        <p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>
-                    </div>
+                    <div id="lista-file-fattura" class="space-y-3 flex-1 overflow-y-auto no-scrollbar"></div>
                 </div>
 
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note Amministrative</h3>
-                    <p class="text-xs text-gray-500 mb-5">Solleciti di pagamento o comunicazioni con il cliente riguardo questa fattura.</p>
-                    
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi una nota su questo incasso..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
+                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
                     <div id="lista-cronologia" class="space-y-4 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
@@ -189,7 +179,7 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVA FATTURA (CASCATA CLIENTI -> COMMESSE) -->
+    <!-- MODALE CREAZIONE NUOVA FATTURA CON LOGICA A CASCATA -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -197,27 +187,38 @@
                     <h3 class="text-lg font-bold text-gray-900">Nuova Fattura / Acconto</h3>
                     <p class="text-xs text-gray-500">Crea una richiesta di pagamento da inviare al cliente</p>
                 </div>
-                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
                         <select id="nuovo-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                             <option value="">Caricamento clienti...</option>
                         </select>
                     </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
                         <select id="nuovo-commessa" required disabled class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                             <option value="">-- Seleziona prima un cliente --</option>
                         </select>
                     </div>
+
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-[#2e2a5b] mb-1">Condizione di Pagamento</label>
+                        <select id="nuovo-pagamento" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">Nessuna (Da definire)</option>
+                            <!-- Verranno caricate dal database (Impostazioni) -->
+                        </select>
+                    </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento / Numero *</label>
-                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Acconto 30% o Fatt. 15">
+                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Acconto o Fatt. 15">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Importo Richiesto (€) *</label>
@@ -228,31 +229,39 @@
             </div>
             
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
-                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Genera Richiesta</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Richiesta</button>
             </div>
         </div>
     </div>
 
-    <!-- MODALE MODIFICA DATI BASE (IMPORTO) -->
+    <!-- MODALE MODIFICA DATI BASE E ELIMINA -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Modifica Riferimento</label>
-                    <input type="text" id="mod-numero" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-gray-800 outline-none">
+                
+                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg mb-2">
+                    <label class="block text-sm font-bold text-[#2e2a5b] mb-1">Modifica Condizione Pagamento</label>
+                    <select id="mod-pagamento" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none"></select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Modifica Importo (€)</label>
-                    <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento</label>
+                        <input type="text" id="mod-numero" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-gray-800 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
+                    </div>
                 </div>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-white rounded-b-2xl">
-                <button type="button" onclick="confermaEliminazioneFattura()" class="text-sm font-bold text-red-600 hover:text-red-800 transition-colors flex items-center gap-1">🗑️ Elimina</button>
+                <button type="button" onclick="confermaEliminazioneFattura()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Definitivamente</button>
                 <div class="flex gap-2">
                     <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
                     <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
@@ -273,11 +282,13 @@
 
         let clientiGlobali = [];
         let commesseGlobali = [];
+        let pagamentiGlobali = []; // Array per le Condizioni di Pagamento
 
         const sequenzaStati = ['Da Emettere', 'Emessa / Inviata', 'Pagata'];
 
         document.addEventListener('DOMContentLoaded', async () => {
             await inizializzaDatiNuovaFattura();
+            await caricaPagamentiTendine(); // Carica da Impostazioni
             await caricaFatture();
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -303,6 +314,23 @@
 
             const { data: commesse } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id').order('created_at', { ascending: false });
             if (commesse) commesseGlobali = commesse;
+        }
+
+        async function caricaPagamentiTendine() {
+            const { data } = await supabaseClient.from('condizioni_pagamento').select('nome').order('nome');
+            const selNuovo = document.getElementById('nuovo-pagamento');
+            const selMod = document.getElementById('mod-pagamento');
+            
+            selNuovo.innerHTML = '<option value="">Nessuna (Da definire)</option>';
+            selMod.innerHTML = '<option value="">Nessuna (Da definire)</option>';
+
+            if (data) {
+                pagamentiGlobali = data;
+                data.forEach(p => {
+                    selNuovo.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
+                    selMod.innerHTML += `<option value="${p.nome}">${p.nome}</option>`;
+                });
+            }
         }
 
         async function caricaFatture() {
@@ -332,13 +360,15 @@
                 const cantiere = f.commesse ? `${f.commesse.numero} ${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
                 const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
                 const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2)}` : '--';
+                
+                // Formatta la data
                 const dataCreazione = f.created_at ? new Date(f.created_at).toLocaleDateString('it-IT') : '--';
 
                 let colorStato = 'bg-yellow-100 text-yellow-800'; 
                 if(f.stato === 'Emessa / Inviata' || f.stato === 'Inviata' || f.stato === 'Emessa') { f.stato = 'Emessa / Inviata'; colorStato = 'bg-blue-100 text-blue-700'; }
                 if(f.stato === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
 
-                // NUOVO ORDINE DELLE COLONNE
+                // ORDINE LOGICO AGGIORNATO (Cliente per primo, con Data)
                 tr.innerHTML = `
                     <td class="px-6 py-4 text-gray-900 font-bold">${cliente}</td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
@@ -397,6 +427,9 @@
             document.getElementById('scheda-sottotitolo-commessa').innerText = cantiere;
             document.getElementById('scheda-sottotitolo-cliente').innerText = cliente;
             document.getElementById('scheda-sottotitolo-valore').innerText = importo;
+
+            // Mostro Condizione Pagamento
+            document.getElementById('scheda-sottotitolo-condizione').innerText = f.condizione_pagamento || 'N/D';
 
             let statoPuro = f.stato || 'Da Emettere';
             if(statoPuro === 'Inviata' || statoPuro === 'Emessa') statoPuro = 'Emessa / Inviata';
@@ -600,7 +633,7 @@
             btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVA FATTURA E MODIFICA
+        // 4. CREAZIONE NUOVA FATTURA (CON CASCATA E PAGAMENTI)
         function apriModaleNuovo(commessaPreselezionata = null) {
             document.getElementById('form-nuovo').reset();
 
@@ -666,6 +699,7 @@
                 commessa_id: document.getElementById('nuovo-commessa').value,
                 numero: document.getElementById('nuovo-numero').value, 
                 importo: document.getElementById('nuovo-importo').value,
+                condizione_pagamento: document.getElementById('nuovo-pagamento').value || null,
                 stato: 'Da Emettere'
             };
             const { error } = await supabaseClient.from('fatture').insert([dati]);
@@ -680,6 +714,7 @@
             const f = fattureCorrenti[fatturaAttivaIndex];
             document.getElementById('mod-numero').value = f.numero || '';
             document.getElementById('mod-importo').value = f.importo || '';
+            document.getElementById('mod-pagamento').value = f.condizione_pagamento || '';
             document.getElementById('modal-modifica-dati').classList.remove('hidden');
         }
 
@@ -687,11 +722,13 @@
             const f = fattureCorrenti[fatturaAttivaIndex];
             const nuovoNumero = document.getElementById('mod-numero').value;
             const nuovoImporto = document.getElementById('mod-importo').value;
+            const nuovoPagamento = document.getElementById('mod-pagamento').value || null;
             
-            const { error } = await supabaseClient.from('fatture').update({ numero: nuovoNumero, importo: nuovoImporto }).eq('id', f.id);
+            const { error } = await supabaseClient.from('fatture').update({ numero: nuovoNumero, importo: nuovoImporto, condizione_pagamento: nuovoPagamento }).eq('id', f.id);
             if (!error) {
                 f.numero = nuovoNumero;
                 f.importo = nuovoImporto;
+                f.condizione_pagamento = nuovoPagamento;
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: `Fatturazione corretta in: ${nuovoNumero} (€ ${nuovoImporto})`, autore: UTENTE_CORRENTE }]);
                 document.getElementById('modal-modifica-dati').classList.add('hidden');
                 aggiornaDatiSchedaUI();
@@ -712,6 +749,7 @@
             } else { alert("Impossibile eliminare: " + error.message); }
         }
 
+        // 5. DIARIO
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera');
             const testo = inputNota.value;
