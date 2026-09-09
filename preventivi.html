@@ -31,8 +31,6 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        
-        <!-- QUESTO ERA IL BLOCCO MANCANTE CHE CAUSAVA IL CRASH -->
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
@@ -98,7 +96,7 @@
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
                     <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">PREV-0000/000</h2>
-                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Stesura</span>
+                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
                     <span id="scheda-badge-rev" class="px-2 py-1 bg-gray-200 text-gray-700 rounded-full text-[10px] font-bold">REV. 0</span>
                 </div>
             </div>
@@ -143,7 +141,7 @@
         </div>
     </div>
 
-    <!-- ================= MODALI ================= -->
+    <!-- ================= MODALI AZIONI ================= -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -172,7 +170,7 @@
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Preventivo (PDF)</label>
                     <p class="text-[10px] text-gray-500 mb-3">Verrà automaticamente rinominato con il numero di <strong class="text-[#2e2a5b]" id="label-rev-numero">Revisione</strong>.</p>
-                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 cursor-pointer">
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                 </div>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
@@ -182,11 +180,11 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVO PREVENTIVO -->
+    <!-- MODALE CREAZIONE NUOVO PREVENTIVO (PULITO E LOGICO) -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <div><h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3></div>
+                <div><h3 class="text-lg font-bold text-gray-900">Avvia Pratica di Preventivazione</h3></div>
                 <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
@@ -205,11 +203,12 @@
                             <input type="number" step="0.01" id="nuovo-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         </div>
                     </div>
+                    <!-- L'allegato qui non c'è più, perché la pratica nasce come "Da Fare" -->
                 </form>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
                 <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
-                <button type="submit" form="form-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Preventivo</button>
+                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Prendi in Carico</button>
             </div>
         </div>
     </div>
@@ -245,7 +244,6 @@
 
         const sequenzaStati = ['Da Fare', 'Stesura', 'Controllo', 'Inviato', 'Accettato'];
 
-        // Funzione per la formattazione degli Euro
         function formattaEuro(numero) {
             if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
             const numFloat = parseFloat(numero);
@@ -266,7 +264,11 @@
 
             if (action === 'new') {
                 apriModaleNuovo();
-                if(commessaId) { document.getElementById('nuovo-commessa').value = commessaId; }
+                if(commessaId) { 
+                    setTimeout(() => {
+                        document.getElementById('nuovo-commessa').value = commessaId; 
+                    }, 100);
+                }
             }
 
             if (idToOpen) {
@@ -277,7 +279,6 @@
             }
         });
 
-        // 1. CARICAMENTO DATI
         async function caricaCommesseTendina() {
             const { data } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere').order('created_at', { ascending: false });
             if (data) {
@@ -327,7 +328,7 @@
                     </td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Stesura'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Da Fare'}</span></td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
                 `;
                 tbody.appendChild(tr);
@@ -340,7 +341,6 @@
             disegnaTabella(filtrati);
         }
 
-        // 2. SCHEDA E PULSANTE INDIETRO INTELLIGENTE
         function apriSchedaPreventivo(index, fromUrl = false) {
             preventivoAttivoIndex = index;
             aggiornaDatiSchedaUI();
@@ -386,7 +386,7 @@
             if(p.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
             if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
             
-            const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Stesura';
+            const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Da Fare';
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
 
@@ -417,11 +417,13 @@
 
             if (statoAttuale === 'Rifiutato') {
                 container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ PREVENTIVO RIFIUTATO</div>`;
-                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura per modificarlo</button>`;
                 return;
             }
 
             let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
+            if (idxCalcolato === -1) idxCalcolato = 0; // fallback su Da Fare
+
             const bgLine = document.createElement('div');
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
             container.appendChild(bgLine);
@@ -445,11 +447,38 @@
                 container.appendChild(punto);
             });
 
-            if (statoAttuale === 'Da Fare') azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>`;
-            else if (statoAttuale === 'Stesura') azioniBox.innerHTML = `<button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo &rarr;</button>`;
-            else if (statoAttuale === 'Controllo') azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 px-5 py-2.5 rounded-lg transition-colors">⚠️ Boccia (Torna in Stesura)</button><div class="flex-1"></div><button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>`;
-            else if (statoAttuale === 'Inviato') azioniBox.innerHTML = `<button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button><div class="flex-1"></div><button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button><button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato</button>`;
-            else if (statoAttuale === 'Accettato') azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
+            // LA NUOVA LOGICA DEI PULSANTI
+            if (statoAttuale === 'Da Fare') {
+                azioniBox.innerHTML = `
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>
+                `;
+            }
+            else if (statoAttuale === 'Stesura') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Da Fare</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo Direzione &rarr;</button>
+                `;
+            }
+            else if (statoAttuale === 'Controllo') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Controllo', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">🔄 Inserisci Revisione</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>
+                `;
+            }
+            else if (statoAttuale === 'Inviato') {
+                azioniBox.innerHTML = `
+                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button>
+                    <div class="flex-1"></div>
+                    <button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button>
+                    <button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato</button>
+                `;
+            }
+            else if (statoAttuale === 'Accettato') {
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
+            }
         }
 
         function saltoStato(nuovoStato) {
@@ -474,15 +503,42 @@
             const boxFile = document.getElementById('box-file');
             
             if (isJump) {
-                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden');
-            } else if (isRevision) {
-                titolo.innerText = "Richiedi Revisione Tecnica"; sub.innerText = "Il preventivo tornerà in Stesura."; labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; boxFile.classList.add('hidden'); 
-            } else if (nuovoStato === 'Controllo') {
-                titolo.innerText = "Invia per Approvazione"; sub.innerText = "Sottoponi il PDF calcolato al Controllo"; labelNote.innerText = "Note per il controllo"; labelFile.innerText = "Allega Documento Preventivo (PDF)"; boxFile.classList.remove('hidden');
-            } else if (nuovoStato === 'Accettato') {
-                titolo.innerText = "Preventivo Accettato!"; sub.innerText = "Genererà in automatico il Contratto."; labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden');
-            } else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden');
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; 
+                sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; 
+                labelNote.innerText = "Note (Opzionale)"; 
+                labelFile.innerText = "Allega Documento (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+            } 
+            else if (isRevision) {
+                // LA NUOVA LOGICA REVISIONE (LOOP)
+                titolo.innerText = "Inserisci Nuova Revisione"; 
+                sub.innerText = "Carica la nuova versione corretta del preventivo."; 
+                labelNote.innerHTML = 'Quali correzioni sono state fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; 
+                labelFile.innerText = "Allega Preventivo Revisionato (PDF)";
+                boxFile.classList.remove('hidden'); 
+                document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione ? p.revisione + 1 : 1}`;
+            } 
+            else if (nuovoStato === 'Controllo') {
+                titolo.innerText = "Invia per Approvazione"; 
+                sub.innerText = "Sottoponi la prima stesura al Controllo della Direzione"; 
+                labelNote.innerText = "Note per il controllo (Opzionale)"; 
+                labelFile.innerText = "Allega Documento Preventivo Originale (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+                document.getElementById('label-rev-numero').innerText = `Revisione 0`;
+            } 
+            else if (nuovoStato === 'Accettato') {
+                titolo.innerText = "Preventivo Accettato!"; 
+                sub.innerText = "Genererà in automatico il Contratto."; 
+                labelNote.innerText = "Note / Accordi (Opzionale)"; 
+                labelFile.innerText = "Allega Preventivo Firmato (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+            } 
+            else {
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; 
+                sub.innerText = "Completa l'operazione"; 
+                labelNote.innerText = "Note (Opzionale)"; 
+                labelFile.innerText = "Allega Documento (Opzionale)"; 
+                boxFile.classList.remove('hidden'); 
             }
             document.getElementById('modal-azione').classList.remove('hidden');
         }
@@ -510,22 +566,27 @@
             const note = document.getElementById('azione-note').value;
             const fileInput = document.getElementById('azione-file');
 
-            if (isRevision && (!note || note.trim() === '')) { alert("DEVI inserire le note!"); return; }
+            if (isRevision && (!note || note.trim() === '')) { alert("DEVI inserire le note di revisione!"); return; }
 
             btn.innerText = "Salvataggio..."; btn.disabled = true;
 
             let timestampFormattato = new Date().toISOString();
             if (dataAzione !== new Date().toISOString().split('T')[0]) timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
 
-            let fileUrl = null;
-            if (!isRevision && fileInput.files.length > 0) {
-                btn.innerText = "Caricamento PDF...";
-                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'PREV', p.revisione || 0);
-            }
-
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
-            if (isRevision) { nuovaRev += 1; datiAggiornamento.revisione = nuovaRev; }
+            
+            // Se è una revisione, incrementiamo subito il numero
+            if (isRevision) { 
+                nuovaRev += 1; 
+                datiAggiornamento.revisione = nuovaRev; 
+            }
+
+            let fileUrl = null;
+            if (fileInput.files.length > 0) {
+                btn.innerText = "Caricamento PDF...";
+                fileUrl = await caricaFileSuStorage(fileInput.files[0], 'PREV', nuovaRev);
+            }
 
             if (fileUrl) {
                 let urlCorrente = p.file_url || '';
@@ -536,7 +597,8 @@
 
             if (!error) {
                 p.stato = nuovoStato; if(isRevision) p.revisione = nuovaRev; if(fileUrl) p.file_url = datiAggiornamento.file_url;
-                let testoLog = isRevision ? `⚠️ RICHIESTA REVISIONE (Rev. ${nuovaRev}).` : (isJump ? `⏭️ Salto forzato preventivo in: ${nuovoStato.toUpperCase()}.` : `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}.`);
+                
+                let testoLog = isRevision ? `⚠️ INSERITA REVISIONE PREVENTIVO (Rev. ${nuovaRev}).` : (isJump ? `⏭️ Salto forzato preventivo in: ${nuovoStato.toUpperCase()}.` : `Avanzamento Preventivo in: ${nuovoStato.toUpperCase()}.`);
                 if(note) testoLog += ` Note: "${note}"`;
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE, created_at: timestampFormattato }]);
 
@@ -569,19 +631,27 @@
 
         document.getElementById('form-nuovo').addEventListener('submit', async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btn-salva-nuovo');
+            btn.innerText = "Creazione...";
+            btn.disabled = true;
+
             const dati = { 
                 commessa_id: document.getElementById('nuovo-commessa').value, 
                 numero: document.getElementById('nuovo-numero').value, 
                 importo: document.getElementById('nuovo-importo').value || null, 
-                stato: 'Stesura', 
-                revisione: 0 
+                stato: 'Da Fare', // ORA NASCE CORRETTAMENTE COME DA FARE
+                revisione: 0
             };
+
             const { data, error } = await supabaseClient.from('preventivi').insert([dati]).select();
             if (!error) { 
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]); 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Presa in carico pratica di preventivazione: ${dati.numero} (Stato: Da Fare)`, autore: UTENTE_CORRENTE }]); 
                 chiudiModaleNuovo(); 
                 caricaPreventivi(); 
             } else { alert("Errore salvataggio: " + error.message); }
+
+            btn.innerText = "Prendi in Carico";
+            btn.disabled = false;
         });
 
         function apriModaleModificaDatiBase() { 
@@ -621,6 +691,8 @@
                 const dateObj = new Date(log.created_at); 
                 const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>` : '';
+                
                 let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if(log.azione.includes('REVISIONE') || log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
                 html += `
@@ -632,6 +704,7 @@
                                 <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
                             </div>
                             ${notaHtml}
+                            ${fileHtml}
                         </div>
                     </div>
                 `;
