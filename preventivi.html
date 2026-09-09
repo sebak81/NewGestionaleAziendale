@@ -31,6 +31,17 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
+        
+        <!-- QUESTO ERA IL BLOCCO MANCANTE CHE CAUSAVA IL CRASH -->
+        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
+                <div>
+                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
+                    <p class="text-xs text-gray-500 uppercase">Owner</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -81,7 +92,6 @@
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
-                <!-- IL PULSANTE INDIETRO INTELLIGENTE -->
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
                     <span>&larr;</span> <span id="testo-btn-back">Torna a Elenco</span>
                 </button>
@@ -106,7 +116,6 @@
                 Valore Attuale: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
             </div>
 
-            <!-- STEPPER WORKFLOW -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
                     <span>Avanzamento e Controllo (Workflow)</span>
@@ -173,42 +182,52 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVO PREVENTIVO E MODIFICA IMPORTO (Omessi visivamente per pulizia, ma nel codice ci sono) -->
+    <!-- MODALE CREAZIONE NUOVO PREVENTIVO -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <div><h3 class="text-lg font-bold text-gray-900">Nuovo Preventivo</h3></div>
-                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Commessa di Riferimento *</label><select id="nuovo-commessa" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></select></div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa di Riferimento *</label>
+                        <select id="nuovo-commessa" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></select>
+                    </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Preventivo *</label><input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold outline-none"></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Importo Stimato (€)</label><input type="number" step="0.01" id="nuovo-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero Preventivo *</label>
+                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-bold outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Importo Stimato (€)</label>
+                            <input type="number" step="0.01" id="nuovo-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        </div>
                     </div>
                 </form>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
-                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
-                <button type="submit" form="form-nuovo" class="bg-[#2e2a5b] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Preventivo</button>
+                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="submit" form="form-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Preventivo</button>
             </div>
         </div>
     </div>
 
+    <!-- MODALE MODIFICA DATI BASE -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Importo Attuale (€)</label>
                 <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
-                <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
             </div>
         </div>
     </div>
@@ -222,9 +241,19 @@
         let preventiviCorrenti = [];
         let preventivoAttivoIndex = null;
         let commesseDisponibili = [];
-        let apertoDaCommessa = false; // FLAG INTELLIGENTE
+        let apertoDaCommessa = false; 
 
         const sequenzaStati = ['Da Fare', 'Stesura', 'Controllo', 'Inviato', 'Accettato'];
+
+        // Funzione per la formattazione degli Euro
+        function formattaEuro(numero) {
+            if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
+            const numFloat = parseFloat(numero);
+            const parti = numFloat.toFixed(2).split('.');
+            const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
+            const decimali = parti[1];
+            return `€ ${interi},${decimali}`;
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             await caricaCommesseTendina();
@@ -281,7 +310,7 @@
                 
                 const cantiere = p.commesse ? `${p.commesse.numero} ${p.commesse.nome_cantiere ? '('+p.commesse.nome_cantiere+')' : ''}` : '--';
                 const cliente = (p.commesse && p.commesse.clienti) ? p.commesse.clienti.nome_ragione_sociale : '--';
-                const importo = p.importo ? `€ ${parseFloat(p.importo).toFixed(2)}` : '--';
+                const importo = p.importo ? formattaEuro(p.importo) : '--';
                 const rev = p.revisione || 0;
 
                 let colorStato = 'bg-gray-100 text-gray-600';
@@ -292,7 +321,10 @@
                 if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
 
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">${p.numero} <span class="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span></td>
+                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">
+                        ${p.numero} 
+                        <span class="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
+                    </td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
                     <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Stesura'}</span></td>
@@ -317,7 +349,6 @@
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
             document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
             
-            // Se ho cliccato manualmente dalla lista, resetto il flag e il testo
             if (!fromUrl) {
                 document.getElementById('testo-btn-back').innerText = "Torna a Elenco";
                 apertoDaCommessa = false;
@@ -342,7 +373,7 @@
             
             const cantiere = p.commesse ? `${p.commesse.numero} ${p.commesse.nome_cantiere ? '('+p.commesse.nome_cantiere+')' : ''}` : '--';
             const cliente = (p.commesse && p.commesse.clienti) ? p.commesse.clienti.nome_ragione_sociale : '--';
-            const importo = p.importo ? `€ ${parseFloat(p.importo).toFixed(2)}` : '0,00 €';
+            const importo = p.importo ? formattaEuro(p.importo) : '€ 0,00';
             
             document.getElementById('scheda-sottotitolo-commessa').innerText = cantiere;
             document.getElementById('scheda-sottotitolo-cliente').innerText = cliente;
@@ -443,15 +474,15 @@
             const boxFile = document.getElementById('box-file');
             
             if (isJump) {
-                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden');
             } else if (isRevision) {
                 titolo.innerText = "Richiedi Revisione Tecnica"; sub.innerText = "Il preventivo tornerà in Stesura."; labelNote.innerHTML = 'Quali correzioni devono essere fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; boxFile.classList.add('hidden'); 
             } else if (nuovoStato === 'Controllo') {
-                titolo.innerText = "Invia per Approvazione"; sub.innerText = "Sottoponi il PDF calcolato al Controllo"; labelNote.innerText = "Note per il controllo"; labelFile.innerText = "Allega Documento Preventivo (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = "Invia per Approvazione"; sub.innerText = "Sottoponi il PDF calcolato al Controllo"; labelNote.innerText = "Note per il controllo"; labelFile.innerText = "Allega Documento Preventivo (PDF)"; boxFile.classList.remove('hidden');
             } else if (nuovoStato === 'Accettato') {
-                titolo.innerText = "Preventivo Accettato!"; sub.innerText = "Genererà in automatico il Contratto."; labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = "Preventivo Accettato!"; sub.innerText = "Genererà in automatico il Contratto."; labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden');
             } else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); document.getElementById('label-rev-numero').innerText = `Revisione ${p.revisione||0}`;
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden');
             }
             document.getElementById('modal-azione').classList.remove('hidden');
         }
@@ -523,37 +554,87 @@
             btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVO E DIARIO... (Codice identico invariato)
-        function apriModaleNuovo() { document.getElementById('form-nuovo').reset(); const anno = new Date().getFullYear(); document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`; document.getElementById('modal-nuovo').classList.remove('hidden'); }
-        function chiudiModaleNuovo() { document.getElementById('modal-nuovo').classList.add('hidden'); window.history.replaceState({}, document.title, window.location.pathname); }
+        // 4. CREAZIONE NUOVO PREVENTIVO
+        function apriModaleNuovo() { 
+            document.getElementById('form-nuovo').reset(); 
+            const anno = new Date().getFullYear(); 
+            document.getElementById('nuovo-numero').value = `PREV-${anno}/${(preventiviCorrenti.length + 1).toString().padStart(3, '0')}`; 
+            document.getElementById('modal-nuovo').classList.remove('hidden'); 
+        }
+
+        function chiudiModaleNuovo() { 
+            document.getElementById('modal-nuovo').classList.add('hidden'); 
+            window.history.replaceState({}, document.title, window.location.pathname); 
+        }
+
         document.getElementById('form-nuovo').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const dati = { commessa_id: document.getElementById('nuovo-commessa').value, numero: document.getElementById('nuovo-numero').value, importo: document.getElementById('nuovo-importo').value || null, stato: 'Stesura', revisione: 0 };
+            const dati = { 
+                commessa_id: document.getElementById('nuovo-commessa').value, 
+                numero: document.getElementById('nuovo-numero').value, 
+                importo: document.getElementById('nuovo-importo').value || null, 
+                stato: 'Stesura', 
+                revisione: 0 
+            };
             const { data, error } = await supabaseClient.from('preventivi').insert([dati]).select();
-            if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovo(); caricaPreventivi(); } 
+            if (!error) { 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: `Avviata pratica di preventivazione: ${dati.numero} (In Stesura)`, autore: UTENTE_CORRENTE }]); 
+                chiudiModaleNuovo(); 
+                caricaPreventivi(); 
+            } else { alert("Errore salvataggio: " + error.message); }
         });
-        function apriModaleModificaDatiBase() { document.getElementById('mod-importo').value = preventiviCorrenti[preventivoAttivoIndex].importo || ''; document.getElementById('modal-modifica-dati').classList.remove('hidden'); }
-        async function salvaModificaDati() {
-            const p = preventiviCorrenti[preventivoAttivoIndex]; const nuovoImporto = document.getElementById('mod-importo').value;
-            const { error } = await supabaseClient.from('preventivi').update({ importo: nuovoImporto }).eq('id', p.id);
-            if (!error) { p.importo = nuovoImporto; await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `Importo preventivo aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]); document.getElementById('modal-modifica-dati').classList.add('hidden'); aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi(); }
+
+        function apriModaleModificaDatiBase() { 
+            document.getElementById('mod-importo').value = preventiviCorrenti[preventivoAttivoIndex].importo || ''; 
+            document.getElementById('modal-modifica-dati').classList.remove('hidden'); 
         }
+
+        async function salvaModificaDati() {
+            const p = preventiviCorrenti[preventivoAttivoIndex]; 
+            const nuovoImporto = document.getElementById('mod-importo').value;
+            const { error } = await supabaseClient.from('preventivi').update({ importo: nuovoImporto }).eq('id', p.id);
+            if (!error) { 
+                p.importo = nuovoImporto; 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `Importo preventivo aggiornato a: € ${nuovoImporto}`, autore: UTENTE_CORRENTE }]); 
+                document.getElementById('modal-modifica-dati').classList.add('hidden'); 
+                aggiornaDatiSchedaUI(); 
+                caricaCronologia(); 
+                caricaPreventivi(); 
+            }
+        }
+
         async function salvaNotaLibera() {
-            const inputNota = document.getElementById('input-nota-libera'); const testo = inputNota.value; if (!testo || testo.trim() === '') return;
+            const inputNota = document.getElementById('input-nota-libera'); 
+            const testo = inputNota.value; 
+            if (!testo || testo.trim() === '') return;
             const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: preventiviCorrenti[preventivoAttivoIndex].commessa_id, azione: "Appunto Libero", nota: testo, autore: UTENTE_CORRENTE }]);
             if (!error) { inputNota.value = ''; caricaCronologia(); } 
         }
+
         async function caricaCronologia() {
-            const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
+            const divLog = document.getElementById('lista-cronologia'); 
+            divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
             const { data: logs } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', preventiviCorrenti[preventivoAttivoIndex].commessa_id).or('azione.ilike.%preventivo%,azione.ilike.%appunto%,azione.ilike.%salto%').order('created_at', { ascending: false });
             if (!logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna nota presente.</p>'; return; }
             let html = '';
             logs.forEach(log => {
-                const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                const dateObj = new Date(log.created_at); 
+                const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
                 let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if(log.azione.includes('REVISIONE') || log.azione.includes('Salto')) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">⚠️</div>';
-                html += `<div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">${icona}<div class="flex-1"><div class="flex justify-between items-center mb-1"><p class="text-xs font-bold text-gray-900">${log.azione}</p><p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p></div>${notaHtml}</div></div>`;
+                html += `
+                    <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
+                        ${icona}
+                        <div class="flex-1">
+                            <div class="flex justify-between items-center mb-1">
+                                <p class="text-xs font-bold text-gray-900">${log.azione}</p>
+                                <p class="text-[9px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat}</p>
+                            </div>
+                            ${notaHtml}
+                        </div>
+                    </div>
+                `;
             });
             divLog.innerHTML = html;
         }
