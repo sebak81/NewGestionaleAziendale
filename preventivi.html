@@ -169,7 +169,7 @@
 
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento Preventivo (PDF)</label>
-                    <p class="text-[10px] text-gray-500 mb-3">Verrà rinominato in automatico accodando: <strong class="text-[#2e2a5b] bg-indigo-50 px-1 rounded" id="label-rev-numero">_rev-0</strong></p>
+                    <p class="text-[10px] text-gray-500 mb-3">Verrà salvato pulito accodando: <strong class="text-[#2e2a5b] bg-indigo-50 px-1 rounded" id="label-rev-numero">_rev-0</strong></p>
                     <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                 </div>
             </div>
@@ -393,7 +393,7 @@
             disegnaStoricoFile(p.file_url);
         }
 
-        // INTELLIGENZA VISIVA DELLO STORICO CON NOMI ORIGINALI E PULIZIA TIMESTAMP
+        // MOSTRA IL NOME PULITO E ORDINATO NELLO STORICO
         function disegnaStoricoFile(urls_csv) {
             const div = document.getElementById('lista-file-revisioni');
             if(!urls_csv || urls_csv.trim() === '') { div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>'; return; }
@@ -402,21 +402,19 @@
             let html = '';
             
             urls.forEach((url, i) => {
-                // Estraggo l'ultimo pezzetto dell'url (il nome vero del file nel database)
                 let fileNameFull = decodeURIComponent(url.split('/').pop());
                 
-                // Rimuovo il codice numerico anti-duplicato che il sistema accoda prima del .pdf
-                // per mostrare all'utente solo il nome pulito (es: _12345.pdf -> .pdf)
-                let visualName = fileNameFull.replace(/_\d{5}(\.[a-zA-Z0-9]+)$/, '$1');
+                // Rimuoviamo il suffisso di unicità e il timestamp per mostrare un nome pulito e leggibile
+                let pulito = fileNameFull.replace(/_(rev-\d+|ok|firmato|doc)_[a-z0-9]{4}(\.[a-zA-Z0-9]+)$/i, '$2');
+                let visualName = pulito; 
                 
                 let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
                 let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
 
-                // Colori speciali per Approvati o Firmati
-                if (visualName.toLowerCase().includes('_ok')) {
+                if (fileNameFull.toLowerCase().includes('_ok')) {
                     colorBox = 'bg-blue-50 border-blue-200';
                     iconaColor = 'text-blue-600';
-                } else if (visualName.toLowerCase().includes('_firmato')) {
+                } else if (fileNameFull.toLowerCase().includes('_firmato')) {
                     colorBox = 'bg-indigo-50 border-indigo-200';
                     iconaColor = 'text-indigo-600';
                 }
@@ -425,7 +423,7 @@
                     <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group">
                         <div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div>
                         <div class="flex-1">
-                            <p class="text-sm font-bold text-gray-900">${visualName}</p>
+                            <p class="text-sm font-bold text-gray-900">${fileNameFull.split('_')[0]} ... (${visualName.includes('_ok') ? 'Approvato' : visualName.includes('rev-') ? 'Revisione' : 'Documento'})</p>
                             <p class="text-[10px] text-gray-500">Clicca per aprire il PDF</p>
                         </div>
                         <div class="text-gray-400 font-bold">&rarr;</div>
@@ -442,12 +440,12 @@
 
             if (statoAttuale === 'Rifiutato') {
                 container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ PREVENTIVO RIFIUTATO</div>`;
-                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura per modificarlo</button>`;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Stesura', false)" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Riporta in Stesura</button>`;
                 return;
             }
 
             let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
-            if (idxCalcolato === -1) idxCalcolato = 0; // fallback su Da Fare
+            if (idxCalcolato === -1) idxCalcolato = 0;
 
             const bgLine = document.createElement('div');
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
@@ -472,34 +470,17 @@
                 container.appendChild(punto);
             });
 
-            // LA LOGICA DEI PULSANTI
             if (statoAttuale === 'Da Fare') {
-                azioniBox.innerHTML = `
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>
-                `;
+                azioniBox.innerHTML = `<div class="flex-1"></div><button onclick="preparaAzione('Stesura', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">Avvia Stesura &rarr;</button>`;
             }
             else if (statoAttuale === 'Stesura') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Da Fare</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo Direzione &rarr;</button>
-                `;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Da Fare', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Da Fare</button><div class="flex-1"></div><button onclick="preparaAzione('Controllo', false)" class="text-sm font-bold text-white bg-purple-600 px-6 py-2.5 rounded-lg shadow-md animate-pulse">Invia a Controllo Direzione &rarr;</button>`;
             }
             else if (statoAttuale === 'Controllo') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Controllo', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">🔄 Inserisci Revisione</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>
-                `;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Controllo', true)" class="text-sm font-bold text-orange-600 bg-orange-50 border border-orange-200 hover:bg-orange-100 px-5 py-2.5 rounded-lg transition-colors flex items-center gap-2">🔄 Inserisci Revisione</button><div class="flex-1"></div><button onclick="preparaAzione('Inviato', false)" class="text-sm font-bold text-white bg-blue-600 px-6 py-2.5 rounded-lg shadow-sm">✅ Approva e Segna Inviato &rarr;</button>`;
             }
             else if (statoAttuale === 'Inviato') {
-                azioniBox.innerHTML = `
-                    <button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button>
-                    <div class="flex-1"></div>
-                    <button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button>
-                    <button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato</button>
-                `;
+                azioniBox.innerHTML = `<button onclick="preparaAzione('Controllo', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Torna a Controllo</button><div class="flex-1"></div><button onclick="preparaAzione('Rifiutato', false)" class="text-sm font-bold text-red-600 bg-red-50 border border-red-200 px-6 py-2.5 rounded-lg mr-3">❌ Segna Rifiutato</button><button onclick="preparaAzione('Accettato', false)" class="text-sm font-bold text-white bg-emerald-600 px-6 py-2.5 rounded-lg shadow-md">💰 Segna Accettato</button>`;
             }
             else if (statoAttuale === 'Accettato') {
                 azioniBox.innerHTML = `<button onclick="preparaAzione('Inviato', false)" class="text-sm font-medium text-gray-600 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Inviato</button>`;
@@ -530,62 +511,42 @@
             
             if (isJump) {
                 titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; 
-                sub.innerText = "Azione manuale. Puoi retrodatare e caricare documenti."; 
-                labelNote.innerText = "Note (Opzionale)"; 
-                labelFile.innerText = "Allega Documento (PDF)"; 
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_rev-${p.revisione||0}`;
+                sub.innerText = "Azione manuale."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_rev-${p.revisione||0}`;
             } 
             else if (isRevision) {
                 titolo.innerText = "Inserisci Nuova Revisione"; 
-                sub.innerText = "Carica la nuova versione corretta del preventivo."; 
+                sub.innerText = "Carica la nuova versione corretta."; 
                 labelNote.innerHTML = 'Quali correzioni sono state fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; 
                 labelFile.innerText = "Allega Preventivo Revisionato (PDF)";
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_rev-${p.revisione ? p.revisione + 1 : 1}`;
+                boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_rev-${p.revisione ? p.revisione + 1 : 1}`;
             } 
             else if (nuovoStato === 'Controllo') {
                 titolo.innerText = "Invia per Approvazione"; 
-                sub.innerText = "Sottoponi la prima stesura al Controllo della Direzione"; 
-                labelNote.innerText = "Note per il controllo (Opzionale)"; 
-                labelFile.innerText = "Allega Documento Preventivo Originale (PDF)"; 
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_rev-0`;
+                sub.innerText = "Sottoponi la prima stesura al Controllo"; 
+                labelNote.innerText = "Note per il controllo (Opzionale)"; labelFile.innerText = "Allega Documento Preventivo Originale (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_rev-0`;
             } 
             else if (nuovoStato === 'Inviato') {
                 titolo.innerText = "Approva e Segna Inviato"; 
                 sub.innerText = "Il preventivo è confermato e pronto per il cliente."; 
-                labelNote.innerText = "Note (Opzionale)"; 
-                labelFile.innerText = "Allega Preventivo Approvato (PDF)"; 
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_ok`;
+                labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Preventivo Approvato (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_ok`;
             }
             else if (nuovoStato === 'Accettato') {
                 titolo.innerText = "Preventivo Accettato!"; 
                 sub.innerText = "Genererà in automatico il Contratto."; 
-                labelNote.innerText = "Note / Accordi (Opzionale)"; 
-                labelFile.innerText = "Allega Preventivo Firmato (PDF)"; 
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_firmato`;
+                labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_firmato`;
             } 
             else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; 
-                sub.innerText = "Completa l'operazione"; 
-                labelNote.innerText = "Note (Opzionale)"; 
-                labelFile.innerText = "Allega Documento (Opzionale)"; 
-                boxFile.classList.remove('hidden'); 
-                labelRevNumero.innerText = `_doc`;
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (Opzionale)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `_doc`;
             }
             document.getElementById('modal-azione').classList.remove('hidden');
         }
 
         function chiudiModaleAzione() { document.getElementById('modal-azione').classList.add('hidden'); }
 
-        // NUOVA FUNZIONE INTELLIGENTE PER RINOMINARE I FILE MANTENENDO IL NOME ORIGINALE
+        // FUNZIONE DI CARICAMENTO CON NOME PULITO E SUFFISSO PULITO
         async function caricaFileSuStorage(file, suffisso) {
             if (!file) return null;
 
-            // 1. Estraggo estensione e nome di base
             const lastDotIndex = file.name.lastIndexOf('.');
             let baseName = file.name;
             let extension = '';
@@ -594,18 +555,16 @@
                 extension = file.name.substring(lastDotIndex);
             }
 
-            // 2. Tolgo i caratteri pericolosi, ma mantengo gli spazi che sono utili
+            // Pulizia caratteri speciali indesiderati ma mantenendo spazi e trattini
             baseName = baseName.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
-
-            // 3. INTELLIGENZA: Se l'utente per sbaglio aveva già chiamato il file "_rev-1" o "_ok", glielo tolgo 
-            // per evitare orrori del tipo "Mario_rev-1_rev-2.pdf"
+            // Rimuoviamo eventuali suffissi precedenti se l'utente ricarica lo stesso file modificato
             baseName = baseName.replace(/_(rev-\d+|ok|firmato|doc)$/i, '');
 
-            // 4. Aggiungo il MIO suffisso di stato e un micro-codice numerico per evitare che due file omonimi di clienti diversi crashino il database
-            const safeTimestamp = Date.now().toString().slice(-5);
+            // Codice casuale corto (4 caratteri) per garantire unicità tecnica su Supabase senza sporcare la vista
+            const randomHash = Math.random().toString(36).substring(2, 6);
             let fileSuffix = suffisso ? `_${suffisso}` : '';
             
-            const fileName = `${baseName}${fileSuffix}_${safeTimestamp}${extension}`;
+            const fileName = `${baseName}${fileSuffix}_${randomHash}${extension}`;
 
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
             if (error) { alert("Errore upload file: " + error.message); return null; }
@@ -634,7 +593,6 @@
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
             
-            // Se è una revisione, incrementiamo subito il numero per usarlo come suffisso
             if (isRevision) { 
                 nuovaRev += 1; 
                 datiAggiornamento.revisione = nuovaRev; 
@@ -644,7 +602,6 @@
             if (fileInput.files.length > 0) {
                 btn.innerText = "Caricamento PDF...";
                 
-                // Determina il suffisso da accodare al nome file originale
                 let fileSuffix = '';
                 if (isRevision) fileSuffix = `rev-${nuovaRev}`;
                 else if (nuovoStato === 'Controllo') fileSuffix = `rev-0`;
@@ -683,7 +640,6 @@
             btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVO PREVENTIVO
         function apriModaleNuovo() { 
             document.getElementById('form-nuovo').reset(); 
             const anno = new Date().getFullYear(); 
