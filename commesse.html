@@ -137,7 +137,6 @@
             <!-- CONTENUTO TAB 1: RIEPILOGO E DIARIO GLOBALE -->
             <div id="tab-content-riepilogo" class="block space-y-6">
                 <div class="grid grid-cols-2 gap-6">
-                    <!-- KPI INCASSATO E VALORE REALE CONTRATTO -->
                     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
                         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato Reale (Fatture Pagate)</p>
                         <p class="text-3xl font-bold text-emerald-600" id="scheda-incassato">€ 0,00</p>
@@ -367,7 +366,6 @@
         </div>
     </div>
 
-
     <!-- ================= MODALI BASE COMMESSA ================= -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -432,12 +430,10 @@
                 <form id="form-modifica-commessa" class="space-y-4">
                     <input type="hidden" id="mod-com-id"> 
                     <div class="pt-2 space-y-4">
-                        
                         <div class="mb-4">
                             <label class="block text-xs font-bold text-[#2e2a5b] mb-1">Sede di Gestione</label>
                             <select id="mod-com-sede" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></select>
                         </div>
-
                         <div><label class="block text-xs font-medium text-gray-500 mb-1">Nome Cantiere</label><input type="text" id="mod-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div>
@@ -481,7 +477,6 @@
         
         let commessaAttivaIndex = null; 
 
-        // FUNZIONE FORMATTAZIONE VALUTA ITALIANA (con apostrofo)
         function formattaEuro(numero) {
             if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
             const numFloat = parseFloat(numero);
@@ -517,7 +512,6 @@
             }
         });
 
-        // 1. CARICAMENTO DATI BASE 
         async function popolaTendinaClienti() {
             const { data: clienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta').order('nome_ragione_sociale');
             if (clienti) {
@@ -546,18 +540,23 @@
         }
 
         async function caricaCommesse() {
-            const { data: commesse, error } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('created_at', { ascending: false });
-            const tbody = document.getElementById('tabella-commesse');
-            if (error) { tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-red-500">Errore DB</td></tr>'; return; }
+            // Join con i preventivi per conoscere immediatamente lo stato di approvazione
+            const { data: commesse, error } = await supabaseClient
+                .from('commesse')
+                .select('*, clienti(nome_ragione_sociale), preventivi(id, stato)')
+                .order('created_at', { ascending: false });
 
-            commesseCorrenti = commesse; 
-            totaleCommesse = commesse.length; 
-            document.getElementById('conteggio-commesse').innerText = `${commesse.length} commesse in corso`;
+            const tbody = document.getElementById('tabella-commesse');
+            if (error) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore DB</td></tr>'; return; }
+
+            commesseCorrenti = commesse || []; 
+            totaleCommesse = commesseCorrenti.length; 
+            document.getElementById('conteggio-commesse').innerText = `${commesseCorrenti.length} commesse in corso`;
             tbody.innerHTML = ''; 
 
-            if (commesse.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessuna commessa</td></tr>'; return; }
+            if (commesseCorrenti.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessuna commessa</td></tr>'; return; }
 
-            commesse.forEach((com, index) => {
+            commesseCorrenti.forEach((com, index) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
                 tr.addEventListener('click', () => apriSchedaCommessa(index)); 
@@ -566,7 +565,13 @@
                 const cantiere = com.nome_cantiere || '--';
                 const sedeTesto = com.sede_gestione ? `<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">${com.sede_gestione}</div>` : '';
                 
-                let bgStato = 'bg-gray-100 text-gray-600';
+                const haPrevAccettato = com.preventivi && com.preventivi.some(p => p.stato === 'Accettato');
+
+                // BADGE STATO COMMESSA: Scritta nera su sfondo verde se il preventivo è accettato
+                let bgStato = 'bg-gray-100 text-gray-700';
+                if (haPrevAccettato) {
+                    bgStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
+                }
                 if(com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
                 if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
 
@@ -574,15 +579,20 @@
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${com.stato || 'Preventivazione'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivazione'}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
         // 2. LOGICA VISTA A TUTTO SCHERMO
-        function apriSchedaCommessa(index) {
+        async function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
+            
+            // Rinfresca i preventivi della commessa corrente per avere lo stato aggiornato in tempo reale
+            const { data: freshPrevs } = await supabaseClient.from('preventivi').select('id, stato').eq('commessa_id', commesseCorrenti[index].id);
+            if (freshPrevs) commesseCorrenti[index].preventivi = freshPrevs;
+
             aggiornaDatiSchedaUI();
             cambiaTab('riepilogo'); 
             caricaCronologia(commesseCorrenti[index].id);
@@ -634,20 +644,16 @@
             let totaleIncassato = 0;
             if(fatture) { fatture.forEach(f => { if(f.stato === 'Pagata' && f.importo) totaleIncassato += parseFloat(f.importo); }); }
             
-            // Applica la formattazione a "Incassato Reale"
             document.getElementById('scheda-incassato').innerText = formattaEuro(totaleIncassato);
 
             const { data: contratti } = await supabaseClient.from('contratti').select('valore_finale, stato').eq('commessa_id', com.id).neq('stato', 'Disdetto');
             let totaleContratti = 0;
             if(contratti) { contratti.forEach(c => { if(c.valore_finale) totaleContratti += parseFloat(c.valore_finale); }); }
             
-            // Applica la formattazione al "Valore Totale Lavoro"
             document.getElementById('scheda-residuo').innerText = formattaEuro(totaleContratti);
             document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
         }
 
-
-        // --- FUNZIONI CARICAMENTO TABS E LINK MAGICI ---
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -671,7 +677,7 @@
                 if(prev.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
                 if(prev.stato === 'Controllo') colorStato = 'bg-purple-100 text-purple-800';
                 if(prev.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
-                if(prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
+                if(prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
                 if(prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
 
                 html += `
@@ -680,7 +686,7 @@
                             <div class="flex items-center gap-3 mb-1">
                                 <span class="font-bold text-[#2e2a5b] group-hover:underline">${prev.numero}</span>
                                 <span class="px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
-                                <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${prev.stato || 'Da Fare'}</span>
+                                <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] uppercase tracking-wider">${prev.stato || 'Da Fare'}</span>
                             </div>
                             <p class="text-xs text-gray-500">Creato il: ${dataIta} &bull; Importo: <strong class="text-gray-900">${importo}</strong></p>
                         </div>
@@ -779,10 +785,14 @@
             if (com.sede_gestione) { bdgSede.innerText = com.sede_gestione; bdgSede.classList.remove('hidden'); } 
             else { bdgSede.classList.add('hidden'); }
 
+            const haPrevAccettato = com.preventivi && com.preventivi.some(p => p.stato === 'Accettato');
+
             let colorStato = 'bg-yellow-100 text-yellow-800';
+            if (haPrevAccettato) colorStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
             if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
             if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
             if(com.stato === 'Conclusa' || com.stato === 'Saldo') colorStato = 'bg-emerald-100 text-emerald-800';
+            
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
             document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivazione';
 
@@ -792,10 +802,10 @@
             document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
             document.getElementById('scheda-sottotitolo-valore').innerText = "Calcolo in corso..."; 
 
-            disegnaStepper(com.stato || 'Preventivazione');
+            disegnaStepper(com.stato || 'Preventivazione', haPrevAccettato);
         }
 
-        function disegnaStepper(statoAttuale) {
+        function disegnaStepper(statoAttuale, haPrevAccettato = false) {
             const container = document.getElementById('stepper-container');
             const azioniBox = document.getElementById('stepper-azioni');
             container.innerHTML = ''; azioniBox.innerHTML = '';
@@ -826,21 +836,39 @@
                 if (index === 7 && etichettaOverride) labelVisuale = etichettaOverride;
 
                 let iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                
-                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) {
-                    iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-xs sm:text-sm">✓</div>`;
-                } else if (index === idxCalcolato) {
-                    const coloreBg = coloreOverride || 'bg-blue-500';
-                    const coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
-                    let mark = index + 1;
-                    if(etichettaOverride === 'ASSISTENZA') mark = '⚠️';
-                    if(etichettaOverride === 'CONTESTAZ.') mark = '🛑';
-                    iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${coloreBg} text-white font-bold text-xs sm:text-sm shadow-lg ring-4 ${coloreRing}">${mark}</div>`;
-                }
+                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length - 1) ? 'text-gray-900 font-bold' : 'text-gray-400';
 
-                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
-                if(index === idxCalcolato && coloreOverride === 'bg-orange-500') textColor = 'text-orange-600 font-bold';
-                if(index === idxCalcolato && coloreOverride === 'bg-red-600') textColor = 'text-red-600 font-bold';
+                // INTELLIGENZA: Se siamo ancora in Preventivazione ma il preventivo è già stato ACCETTATO
+                if (statoAttuale === 'Preventivazione' && haPrevAccettato) {
+                    if (index === 0) {
+                        // Pallino Preventivazione: GIÀ VERDE
+                        iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-xs sm:text-sm font-bold">✓</div>`;
+                        textColor = 'text-emerald-700 font-bold';
+                    } else if (index === 1) {
+                        // Pallino Rilievo Esecutive: BLU LAMPEGGIANTE
+                        iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-lg ring-4 ring-blue-200 animate-pulse">2</div>`;
+                        textColor = 'text-blue-700 font-bold animate-pulse';
+                    } else {
+                        iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
+                        textColor = 'text-gray-400';
+                    }
+                } else {
+                    // Flusso standard ordinario
+                    if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length - 1 && index === idxCalcolato)) {
+                        iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-xs sm:text-sm">✓</div>`;
+                    } else if (index === idxCalcolato) {
+                        // Diventa BLU FISSO (non lampeggiante) appena clicchi su Passa a Rilievo Esecutive
+                        const coloreBg = coloreOverride || 'bg-blue-500';
+                        const coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
+                        let mark = index + 1;
+                        if(etichettaOverride === 'ASSISTENZA') mark = '⚠️';
+                        if(etichettaOverride === 'CONTESTAZ.') mark = '🛑';
+                        iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center ${coloreBg} text-white font-bold text-xs sm:text-sm shadow-lg ring-4 ${coloreRing}">${mark}</div>`;
+                    }
+
+                    if(index === idxCalcolato && coloreOverride === 'bg-orange-500') textColor = 'text-orange-600 font-bold';
+                    if(index === idxCalcolato && coloreOverride === 'bg-red-600') textColor = 'text-red-600 font-bold';
+                }
 
                 punto.innerHTML = `
                     ${iconaHTML}
@@ -871,11 +899,6 @@
 
         async function cambiaStatoDB(nuovoStato, isSalto = false) {
             const com = commesseCorrenti[commessaAttivaIndex];
-            
-            if (!isSalto && com.stato === 'Preventivazione' && nuovoStato === 'Rilievo Esecutive') {
-                const { data: prevs } = await supabaseClient.from('preventivi').select('id').eq('commessa_id', com.id);
-                if (!prevs || prevs.length === 0) { document.getElementById('modal-avviso-preventivo').classList.remove('hidden'); return; }
-            }
 
             if (nuovoStato === 'In Consegna') {
                 const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato, contratti!inner(commessa_id)').eq('contratti.commessa_id', com.id);
