@@ -157,6 +157,11 @@
                 <input type="hidden" id="azione-is-revision">
                 <input type="hidden" id="azione-is-jump">
 
+                <!-- AVVISO LAMPEGGIANTE ROSSO PER PREVENTIVO FIRMATO -->
+                <div id="box-avviso-firmato" class="hidden p-4 bg-red-50 border-2 border-red-500 text-red-700 rounded-xl text-center font-bold text-sm shadow-sm animate-pulse flex items-center justify-center gap-2">
+                    <span class="text-lg">⚠️</span> Inserisci la scansione del preventivo firmato!
+                </div>
+
                 <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <label class="block text-sm font-bold text-gray-800 mb-1">📅 Data dell'azione</label>
                     <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
@@ -393,7 +398,6 @@
             disegnaStoricoFile(p.file_url);
         }
 
-        // MOSTRA IL NOME PULITO STRUTTURATO COME RICHIESTO
         function disegnaStoricoFile(urls_csv) {
             const div = document.getElementById('lista-file-revisioni');
             if(!urls_csv || urls_csv.trim() === '') { div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato.</p>'; return; }
@@ -403,8 +407,6 @@
             
             urls.forEach((url, i) => {
                 let fileNameFull = decodeURIComponent(url.split('/').pop());
-                
-                // Rimuoviamo il codice casuale finale (es. _a4b2) per mostrare il nome pulito
                 let visualName = fileNameFull.replace(/_[a-z0-9]{4}(\.[a-zA-Z0-9]+)$/i, '$1');
                 
                 let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200';
@@ -501,6 +503,9 @@
             document.getElementById('azione-note').value = '';
             document.getElementById('azione-file').value = '';
             
+            const avvisoFirmato = document.getElementById('box-avviso-firmato');
+            avvisoFirmato.classList.add('hidden'); // Nascondi di default
+
             const titolo = document.getElementById('modale-azione-titolo');
             const sub = document.getElementById('modale-azione-sub');
             const labelNote = document.getElementById('label-note');
@@ -510,39 +515,59 @@
             
             if (isJump) {
                 titolo.innerText = `⏭️ Salto Forzato a: ${nuovoStato.toUpperCase()}`; 
-                sub.innerText = "Azione manuale."; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_REV${p.revisione||0}_DATA_nome.pdf`;
+                sub.innerText = "Azione manuale."; 
+                labelNote.innerText = "Note (Opzionale)"; 
+                labelFile.innerText = "Allega Documento (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_REV${p.revisione||0}_DATA_nome.pdf`;
             } 
             else if (isRevision) {
                 titolo.innerText = "Inserisci Nuova Revisione"; 
                 sub.innerText = "Carica la nuova versione corretta."; 
                 labelNote.innerHTML = 'Quali correzioni sono state fatte? <span class="text-red-500 font-bold">(OBBLIGATORIO)</span>'; 
                 labelFile.innerText = "Allega Preventivo Revisionato (PDF)";
-                boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_REV${p.revisione ? p.revisione + 1 : 1}_DATA_nome.pdf`;
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_REV${p.revisione ? p.revisione + 1 : 1}_DATA_nome.pdf`;
             } 
             else if (nuovoStato === 'Controllo') {
                 titolo.innerText = "Invia per Approvazione"; 
                 sub.innerText = "Sottoponi la prima stesura al Controllo"; 
-                labelNote.innerText = "Note per il controllo (Opzionale)"; labelFile.innerText = "Allega Documento Preventivo Originale (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_REV0_DATA_nome.pdf`;
+                labelNote.innerText = "Note per il controllo (Opzionale)"; 
+                labelFile.innerText = "Allega Documento Preventivo Originale (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_REV0_DATA_nome.pdf`;
             } 
             else if (nuovoStato === 'Inviato') {
                 titolo.innerText = "Approva e Segna Inviato"; 
                 sub.innerText = "Il preventivo è confermato e pronto per il cliente."; 
-                labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Preventivo Approvato (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_APPROVATO_DATA_nome.pdf`;
+                labelNote.innerText = "Note (Opzionale)"; 
+                labelFile.innerText = "Allega Preventivo Approvato (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_APPROVATO_DATA_nome.pdf`;
             }
             else if (nuovoStato === 'Accettato') {
                 titolo.innerText = "Preventivo Accettato!"; 
                 sub.innerText = "Genererà in automatico il Contratto."; 
-                labelNote.innerText = "Note / Accordi (Opzionale)"; labelFile.innerText = "Allega Preventivo Firmato (PDF)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_FIRMATO_DATA_nome.pdf`;
+                labelNote.innerText = "Note / Accordi (Opzionale)"; 
+                labelFile.innerText = "Allega Preventivo Firmato (PDF)"; 
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_FIRMATO_DATA_nome.pdf`;
+                // ATTIVAZIONE SCRITTA LAMPEGGIANTE ROSSA
+                avvisoFirmato.classList.remove('hidden');
             } 
             else {
-                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Completa l'operazione"; labelNote.innerText = "Note (Opzionale)"; labelFile.innerText = "Allega Documento (Opzionale)"; boxFile.classList.remove('hidden'); labelRevNumero.innerText = `PREV_DOC_DATA_nome.pdf`;
+                titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; 
+                sub.innerText = "Completa l'operazione"; 
+                labelNote.innerText = "Note (Opzionale)"; 
+                labelFile.innerText = "Allega Documento (Opzionale)"; 
+                boxFile.classList.remove('hidden'); 
+                labelRevNumero.innerText = `PREV_DOC_DATA_nome.pdf`;
             }
             document.getElementById('modal-azione').classList.remove('hidden');
         }
 
         function chiudiModaleAzione() { document.getElementById('modal-azione').classList.add('hidden'); }
 
-        // COSTRUZIONE DEL NOME FILE SECONDO LO SCHEMA RICHIESTO
         async function caricaFileSuStorage(file, suffisso) {
             if (!file) return null;
 
@@ -554,15 +579,12 @@
                 extension = file.name.substring(lastDotIndex);
             }
 
-            // Pulizia del nome originale caricato dall'utente
             baseName = baseName.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
-            // Rimuoviamo eventuali vecchi suffissi se l'utente ricarica lo stesso file
             baseName = baseName.replace(/_?(REV\d+|APPROVATO|FIRMATO|DOC)_?\d{4}-\d{2}-\d{2}_?/i, '');
 
             const dataOggi = new Date().toISOString().split('T')[0];
             const randomHash = Math.random().toString(36).substring(2, 6);
             
-            // FORMATO RICHIESTO: PREV_REV0_2026-09-09_NomeFile_hash.pdf
             const fileName = `PREV_${suffisso}_${dataOggi}_${baseName}_${randomHash}${extension}`;
 
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
