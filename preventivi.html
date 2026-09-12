@@ -458,13 +458,13 @@
                 punto.onclick = () => saltoStato(stato); 
                 
                 let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
+                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length - 1 && index === idxCalcolato)) iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`;
                 else if (index === idxCalcolato) {
                     let col = stato === 'Controllo' ? 'bg-purple-500 ring-purple-100' : 'bg-blue-500 ring-blue-100';
                     iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${col} text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`;
                 }
 
-                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
+                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length - 1) ? 'text-gray-900 font-bold' : 'text-gray-400';
                 if(index === idxCalcolato && stato === 'Controllo') textColor = 'text-purple-700 font-bold';
 
                 punto.innerHTML = `${iconaHTML}<span class="text-[9px] sm:text-xs uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>`;
@@ -504,7 +504,7 @@
             document.getElementById('azione-file').value = '';
             
             const avvisoFirmato = document.getElementById('box-avviso-firmato');
-            avvisoFirmato.classList.add('hidden'); // Nascondi di default
+            avvisoFirmato.classList.add('hidden');
 
             const titolo = document.getElementById('modale-azione-titolo');
             const sub = document.getElementById('modale-azione-sub');
@@ -552,7 +552,6 @@
                 labelFile.innerText = "Allega Preventivo Firmato (PDF)"; 
                 boxFile.classList.remove('hidden'); 
                 labelRevNumero.innerText = `PREV_FIRMATO_DATA_nome.pdf`;
-                // ATTIVAZIONE SCRITTA LAMPEGGIANTE ROSSA
                 avvisoFirmato.classList.remove('hidden');
             } 
             else {
