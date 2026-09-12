@@ -128,6 +128,7 @@
             <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
                 <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
                 <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
+                <button onclick="cambiaTab('rilievi')" id="tab-btn-rilievi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Rilievi Misure</button>
                 <button onclick="cambiaTab('contratti')" id="tab-btn-contratti" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Contratti</button>
                 <button onclick="cambiaTab('ordini')" id="tab-btn-ordini" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Ordini Fornitori</button>
                 <button onclick="cambiaTab('posa')" id="tab-btn-posa" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Posa & Interventi</button>
@@ -165,6 +166,69 @@
                     <button onclick="creaPreventivoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Preventivo</button>
                 </div>
                 <div id="lista-preventivi-commessa" class="space-y-3"></div>
+            </div>
+
+            <!-- CONTENUTO TAB RILIEVI MISURE -->
+            <div id="tab-content-rilievi" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
+                        <span>Avanzamento Rilievo Misure Esecutive</span>
+                        <span id="rilievo-badge-stato" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
+                    </h3>
+
+                    <!-- MINI STEPPER 2 STATI -->
+                    <div class="relative flex justify-between items-center w-full max-w-md mx-auto mb-8 px-6" id="stepper-rilievo-container">
+                        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-1">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>
+                        </div>
+                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-2">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>
+                            <span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-4 pt-4 border-t border-gray-100" id="azioni-rilievo-container">
+                        <!-- Generato dinamicamente -->
+                    </div>
+                </div>
+
+                <!-- BOX DETTAGLIO RILIEVO ED ALLEGATI -->
+                <div id="box-scheda-rilievo-dati" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+                        <h4 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 flex items-center justify-between">
+                            <span>Dati Sopralluogo</span>
+                            <button onclick="apriModaleRilievo(true)" class="text-xs text-blue-600 hover:underline font-bold">✏️ Modifica</button>
+                        </h4>
+                        <div class="space-y-3 text-xs">
+                            <div>
+                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Data Rilievo</span>
+                                <span class="font-bold text-gray-800 text-sm" id="rilievo-view-data">--</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Tecnico Incaricato</span>
+                                <span class="font-bold text-[#2e2a5b] text-sm" id="rilievo-view-tecnico">--</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Note Tecniche / Misure</span>
+                                <p class="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 mt-1 italic leading-relaxed" id="rilievo-view-note">Nessuna nota inserita.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                            <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                <span>📐</span> Allegati, Scansioni Misure e Foto
+                            </h4>
+                            <button onclick="apriModaleRilievo(true)" class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-bold transition-colors">+ Aggiungi File</button>
+                        </div>
+                        <div id="rilievo-lista-allegati" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+                            <p class="text-sm text-gray-400 italic">Nessun documento caricato per questo rilievo.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- CONTENUTO TAB CONTRATTI -->
@@ -223,6 +287,50 @@
     </div>
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
+
+    <!-- MODALE: REGISTRA / MODIFICA RILIEVO MISURE -->
+    <div id="modal-rilievo-misure" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Rilievo Misure Eseguito</h3>
+                    <p class="text-xs text-gray-500">Inserisci data, tecnico incaricato, misure e documentazione</p>
+                </div>
+                <button type="button" onclick="chiudiModaleRilievo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
+                <form id="form-rilievo-misure" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">📅 Data del Rilievo *</label>
+                            <input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico che ha rilevato *</label>
+                            <input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Sebastiano">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche, Misure e Particolari</label>
+                        <textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Annotazioni su imbotte, falso telaio, quote soglia, vincoli di cantiere..."></textarea>
+                    </div>
+
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto (PDF / Immagini)</label>
+                        <p class="text-[10px] text-gray-500 mb-2">Scansione foglio misure o foto dettagliate del cantiere.</p>
+                        <input type="file" id="rilievo-input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleRilievo()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
+                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva e Conferma Rilievo</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
@@ -366,7 +474,7 @@
         </div>
     </div>
 
-    <!-- ================= MODALI BASE COMMESSA ================= -->
+    <!-- MODALE: BASE COMMESSA NUOVA -->
     <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -420,6 +528,7 @@
         </div>
     </div>
 
+    <!-- MODALE: MODIFICA COMMESSA -->
     <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -469,6 +578,7 @@
         let ordiniCommessaCache = [];
         let sediGlobali = []; 
         let totaleCommesse = 0; 
+        let rilievoAttivo = null; // Memorizza i dati del rilievo misure
         
         const sequenzaStati = [
             'Preventivazione', 'Rilievo Esecutive', 'Contratto', 'Acconto', 
@@ -540,7 +650,6 @@
         }
 
         async function caricaCommesse() {
-            // Join con i preventivi per conoscere immediatamente lo stato di approvazione
             const { data: commesse, error } = await supabaseClient
                 .from('commesse')
                 .select('*, clienti(nome_ragione_sociale), preventivi(id, stato)')
@@ -567,13 +676,10 @@
                 
                 const haPrevAccettato = com.preventivi && com.preventivi.some(p => p.stato === 'Accettato');
 
-                // BADGE STATO COMMESSA: Scritta nera su sfondo verde se il preventivo è accettato
                 let bgStato = 'bg-gray-100 text-gray-700';
-                if (haPrevAccettato) {
-                    bgStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
-                }
-                if(com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-                if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
+                if (haPrevAccettato) bgStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
+                if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
+                if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
 
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
@@ -585,11 +691,9 @@
             });
         }
 
-        // 2. LOGICA VISTA A TUTTO SCHERMO
         async function apriSchedaCommessa(index) {
             commessaAttivaIndex = index;
             
-            // Rinfresca i preventivi della commessa corrente per avere lo stato aggiornato in tempo reale
             const { data: freshPrevs } = await supabaseClient.from('preventivi').select('id, stato').eq('commessa_id', commesseCorrenti[index].id);
             if (freshPrevs) commesseCorrenti[index].preventivi = freshPrevs;
 
@@ -608,7 +712,7 @@
         }
 
         function cambiaTab(tabName) {
-            const tabs = ['riepilogo', 'preventivi', 'contratti', 'ordini', 'posa', 'fatture'];
+            const tabs = ['riepilogo', 'preventivi', 'rilievi', 'contratti', 'ordini', 'posa', 'fatture'];
             tabs.forEach(t => {
                 document.getElementById(`tab-btn-${t}`).className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
                 document.getElementById(`tab-content-${t}`).className = "hidden";
@@ -617,6 +721,7 @@
             
             if (tabName === 'riepilogo') { document.getElementById('tab-content-riepilogo').className = "block space-y-6"; calcolaValoriEconomici(); } 
             else if (tabName === 'preventivi') { document.getElementById('tab-content-preventivi').className = "block space-y-4"; caricaPreventiviDiQuestaCommessa(); } 
+            else if (tabName === 'rilievi') { document.getElementById('tab-content-rilievi').className = "block space-y-6"; caricaRilieviDiQuestaCommessa(); }
             else if (tabName === 'contratti') { document.getElementById('tab-content-contratti').className = "block space-y-4"; caricaContrattiDiQuestaCommessa(); } 
             else if (tabName === 'ordini') { document.getElementById('tab-content-ordini').className = "block space-y-4"; caricaOrdiniDiQuestaCommessa(); } 
             else if (tabName === 'posa') { document.getElementById('tab-content-posa').className = "block space-y-4"; caricaPosaInterventi(); } 
@@ -654,6 +759,196 @@
             document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
         }
 
+        // ================= GESTIONE RILIEVI MISURE =================
+        async function caricaRilieviDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            
+            const { data: rilievi, error } = await supabaseClient
+                .from('rilievi_misure')
+                .select('*')
+                .eq('commessa_id', com.id)
+                .order('created_at', { ascending: false });
+
+            rilievoAttivo = (rilievi && rilievi.length > 0) ? rilievi[0] : null;
+
+            const statoRilievo = rilievoAttivo ? (rilievoAttivo.stato || 'Da Fare') : 'Da Fare';
+            const badgeStato = document.getElementById('rilievo-badge-stato');
+            const step1 = document.getElementById('step-rilievo-1');
+            const step2 = document.getElementById('step-rilievo-2');
+            const containerAzioni = document.getElementById('azioni-rilievo-container');
+            const boxScheda = document.getElementById('box-scheda-rilievo-dati');
+
+            if (statoRilievo === 'Rilievo Eseguito') {
+                badgeStato.innerText = 'Rilievo Eseguito';
+                badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
+
+                step1.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div><span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span>`;
+                step2.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div><span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span>`;
+
+                containerAzioni.innerHTML = `
+                    <button onclick="riportaRilievoADaFare()" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Da Fare</button>
+                    <div class="flex-1"></div>
+                    <button onclick="apriModaleRilievo(true)" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-5 py-2.5 rounded-lg shadow-sm">✏️ Modifica Dati / Aggiungi File</button>
+                `;
+
+                // Compilazione scheda riassuntiva
+                document.getElementById('rilievo-view-data').innerText = rilievoAttivo.data_rilievo ? new Date(rilievoAttivo.data_rilievo).toLocaleDateString('it-IT') : '--';
+                document.getElementById('rilievo-view-tecnico').innerText = rilievoAttivo.tecnico || '--';
+                document.getElementById('rilievo-view-note').innerText = rilievoAttivo.note || 'Nessuna nota inserita.';
+
+                disegnaAllegatiRilievo(rilievoAttivo.file_url);
+                boxScheda.classList.remove('hidden');
+            } else {
+                badgeStato.innerText = 'Da Fare';
+                badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
+
+                step1.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div><span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>`;
+                step2.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div><span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>`;
+
+                containerAzioni.innerHTML = `
+                    <button onclick="apriModaleRilievo(false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-8 py-2.5 rounded-lg shadow-md transition-all flex items-center gap-2">
+                        <span>📐</span> Registra Rilievo Eseguito &rarr;
+                    </button>
+                `;
+
+                boxScheda.classList.add('hidden');
+            }
+        }
+
+        function disegnaAllegatiRilievo(urls_csv) {
+            const container = document.getElementById('rilievo-lista-allegati');
+            if (!urls_csv || urls_csv.trim() === '') {
+                container.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Nessun file o scansione caricata per questo rilievo.</p>';
+                return;
+            }
+
+            const urls = urls_csv.split(',').filter(x => x.trim() !== '');
+            let html = '';
+
+            urls.forEach((url, i) => {
+                let fileName = decodeURIComponent(url.split('/').pop());
+                let cleanName = fileName.replace(/_[a-z0-9]{4}(\.[a-zA-Z0-9]+)$/i, '$1');
+
+                html += `
+                    <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 hover:bg-blue-50/50 hover:border-blue-200 border-gray-200 transition-all group">
+                        <div class="text-xl text-blue-600 group-hover:scale-110 transition-transform">📄</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-gray-900 truncate">${cleanName}</p>
+                            <p class="text-[10px] text-gray-400">Clicca per visualizzare o scaricare</p>
+                        </div>
+                        <div class="text-gray-400 font-bold">&rarr;</div>
+                    </a>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function apriModaleRilievo(isModifica = false) {
+            document.getElementById('form-rilievo-misure').reset();
+            const inputData = document.getElementById('rilievo-input-data');
+            const inputTecnico = document.getElementById('rilievo-input-tecnico');
+            const inputNote = document.getElementById('rilievo-input-note');
+            const modalTitolo = document.getElementById('modal-rilievo-titolo');
+
+            if (isModifica && rilievoAttivo) {
+                modalTitolo.innerText = "Modifica Dati Rilievo Misure";
+                inputData.value = rilievoAttivo.data_rilievo || new Date().toISOString().split('T')[0];
+                inputTecnico.value = rilievoAttivo.tecnico || UTENTE_CORRENTE;
+                inputNote.value = rilievoAttivo.note || '';
+            } else {
+                modalTitolo.innerText = "Registra Rilievo Misure Eseguito";
+                inputData.value = new Date().toISOString().split('T')[0];
+                inputTecnico.value = UTENTE_CORRENTE;
+                inputNote.value = '';
+            }
+
+            document.getElementById('modal-rilievo-misure').classList.remove('hidden');
+        }
+
+        function chiudiModaleRilievo() {
+            document.getElementById('modal-rilievo-misure').classList.add('hidden');
+        }
+
+        document.getElementById('form-rilievo-misure').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const btn = document.getElementById('btn-salva-rilievo');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const dataRilievo = document.getElementById('rilievo-input-data').value;
+            const tecnico = document.getElementById('rilievo-input-tecnico').value.trim();
+            const note = document.getElementById('rilievo-input-note').value.trim();
+            const fileInput = document.getElementById('rilievo-input-file');
+
+            let nuovoFileUrl = null;
+            if (fileInput.files.length > 0) {
+                btn.innerText = "Caricamento file...";
+                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO');
+            }
+
+            let fileUrlFinale = rilievoAttivo ? (rilievoAttivo.file_url || '') : '';
+            if (nuovoFileUrl) {
+                fileUrlFinale = fileUrlFinale ? `${fileUrlFinale},${nuovoFileUrl}` : nuovoFileUrl;
+            }
+
+            const payload = {
+                commessa_id: com.id,
+                stato: 'Rilievo Eseguito',
+                data_rilievo: dataRilievo,
+                tecnico: tecnico,
+                note: note || null,
+                file_url: fileUrlFinale || null
+            };
+
+            let error = null;
+            if (rilievoAttivo && rilievoAttivo.id) {
+                const res = await supabaseClient.from('rilievi_misure').update(payload).eq('id', rilievoAttivo.id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('rilievi_misure').insert([payload]);
+                error = res.error;
+            }
+
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `📐 Rilievo misure eseguito da ${tecnico}`,
+                    nota: note || null,
+                    file_url: nuovoFileUrl,
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                chiudiModaleRilievo();
+                await caricaRilieviDiQuestaCommessa();
+                await caricaCronologia(com.id);
+            } else {
+                alert("Errore salvataggio rilievo misure: " + error.message);
+            }
+
+            btn.innerText = "Salva e Conferma Rilievo";
+            btn.disabled = false;
+        });
+
+        async function riportaRilievoADaFare() {
+            if (!confirm("Vuoi riportare lo stato del rilievo a 'Da Fare'?")) return;
+            if (!rilievoAttivo) return;
+            const com = commesseCorrenti[commessaAttivaIndex];
+
+            const { error } = await supabaseClient.from('rilievi_misure').update({ stato: 'Da Fare' }).eq('id', rilievoAttivo.id);
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `Stato rilievo misure riportato a: DA FARE`,
+                    autore: UTENTE_CORRENTE
+                }]);
+                await caricaRilieviDiQuestaCommessa();
+                await caricaCronologia(com.id);
+            }
+        }
+
+        // ================= PREVENTIVI, CONTRATTI E FATTURE =================
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -838,14 +1133,11 @@
                 let iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
                 let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length - 1) ? 'text-gray-900 font-bold' : 'text-gray-400';
 
-                // INTELLIGENZA: Se siamo ancora in Preventivazione ma il preventivo è già stato ACCETTATO
                 if (statoAttuale === 'Preventivazione' && haPrevAccettato) {
                     if (index === 0) {
-                        // Pallino Preventivazione: GIÀ VERDE
                         iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-xs sm:text-sm font-bold">✓</div>`;
                         textColor = 'text-emerald-700 font-bold';
                     } else if (index === 1) {
-                        // Pallino Rilievo Esecutive: BLU LAMPEGGIANTE
                         iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-blue-600 text-white font-bold text-xs sm:text-sm shadow-lg ring-4 ring-blue-200 animate-pulse">2</div>`;
                         textColor = 'text-blue-700 font-bold animate-pulse';
                     } else {
@@ -853,11 +1145,9 @@
                         textColor = 'text-gray-400';
                     }
                 } else {
-                    // Flusso standard ordinario
                     if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length - 1 && index === idxCalcolato)) {
                         iconaHTML = `<div class="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-xs sm:text-sm">✓</div>`;
                     } else if (index === idxCalcolato) {
-                        // Diventa BLU FISSO (non lampeggiante) appena clicchi su Passa a Rilievo Esecutive
                         const coloreBg = coloreOverride || 'bg-blue-500';
                         const coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
                         let mark = index + 1;
@@ -916,7 +1206,6 @@
             }
         }
 
-        // --- GESTIONE NUOVO MODALE: ESITO COLLAUDO ---
         function apriModaleCollaudo() { document.getElementById('collaudo-note').value = ''; document.querySelectorAll('input[name="esito_strada"]').forEach(radio => radio.checked = false); document.getElementById('modal-esito-collaudo').classList.remove('hidden'); }
         function chiudiModaleCollaudo() { document.getElementById('modal-esito-collaudo').classList.add('hidden'); }
         async function salvaEsitoCollaudo() {
@@ -937,7 +1226,6 @@
             } else { alert("Errore salvataggio collaudo: " + error.message); }
         }
 
-        // --- TAB ORDINI FORNITORI CON SPUNTA "SOSTITUZIONE" ---
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
             if (fornitori) { const select = document.getElementById('form-ord-new-fornitore'); select.innerHTML = '<option value="">-- Seleziona --</option>'; fornitori.forEach(f => select.innerHTML += `<option value="${f.id}">${f.nome_azienda}</option>`); }
@@ -994,12 +1282,26 @@
             tbody.innerHTML = html;
         }
 
-        // --- GESTIONE ORDINE INNESTATO ---
         const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore', 'Merce Arrivata in Magazzino'];
         let statoPendenteOrdine = '';
         async function caricaFileSuStorage(file, prefisso) {
-            if (!file) return null; const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, ''); const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
-            await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false }); const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName); return data.publicUrl;
+            if (!file) return null;
+            const lastDotIndex = file.name.lastIndexOf('.');
+            let baseName = file.name;
+            let extension = '';
+            if (lastDotIndex !== -1) {
+                baseName = file.name.substring(0, lastDotIndex);
+                extension = file.name.substring(lastDotIndex);
+            }
+            baseName = baseName.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
+            const dataOggi = new Date().toISOString().split('T')[0];
+            const randomHash = Math.random().toString(36).substring(2, 6);
+            const fileName = `${prefisso}_${dataOggi}_${baseName}_${randomHash}${extension}`;
+
+            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) { alert("Errore upload file: " + error.message); return null; }
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
         }
 
         function apriModaleGestioneOrdine(indexMemoria) {
@@ -1096,6 +1398,7 @@
                 const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>` : '';
                 let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
                 if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                if (log.azione.includes('Rilievo')) icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-blue-100 text-blue-700 text-xs ring-4 ring-blue-50">📐</div>';
                 html += `<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">${icona}<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">${log.azione}</p><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat} ${autoreText}</p></div>${notaHtml}${fileHtml}</div></div>`;
             }); divLog.innerHTML = html;
         }
@@ -1127,11 +1430,11 @@
             if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
         });
         async function confermaEliminazioneCommessa() {
-            const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
+            const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, rilievi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
             if (conferma !== 'ELIMINA') { if(conferma !== null) alert("Eliminazione annullata."); return; }
             const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
             if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
-            await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
+            await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
             const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
             if (!error) { alert(`Commessa ${com.numero} eliminata con successo.`); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
         }
