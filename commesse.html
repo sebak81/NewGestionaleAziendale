@@ -605,6 +605,7 @@
             const idToOpen = urlParams.get('id');
             const action = urlParams.get('action');
             const clienteId = urlParams.get('cliente_id');
+            const tabToOpen = urlParams.get('tab');
 
             if (action === 'new') {
                 apriModaleNuovaCommessa();
@@ -618,7 +619,13 @@
 
             if (idToOpen) {
                 const index = commesseCorrenti.findIndex(c => String(c.id) === idToOpen);
-                if (index !== -1) apriSchedaCommessa(index);
+                if (index !== -1) {
+                    await apriSchedaCommessa(index);
+                    // Se specificata una tab da aprire direttamente, aprila!
+                    if (tabToOpen) {
+                        cambiaTab(tabToOpen);
+                    }
+                }
             }
         });
 
