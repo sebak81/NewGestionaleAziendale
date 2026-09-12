@@ -42,45 +42,45 @@
         </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (ELENCO) -->
+    <!-- VISTA: ELENCO CLIENTI -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4">
-            <h1 class="text-xl font-bold">Rubrica Clienti 👥</h1>
-            <p class="text-sm text-gray-500 mt-1">Anagrafica completa e dati di fatturazione</p>
+            <h1 class="text-xl font-bold">Anagrafica Clienti 👥</h1>
+            <p class="text-sm text-gray-500 mt-1">Gestione anagrafiche, storico cantieri e situazione contabile</p>
         </header>
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
             <div class="mb-6 flex justify-between items-end">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Clienti</h2>
+                    <h2 class="text-3xl font-bold tracking-tight">Rubrica Clienti</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-clienti">Caricamento in corso...</p>
                 </div>
-                <button onclick="apriModaleNuovo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                <button onclick="apriModaleCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
                     <span>+</span> Nuovo Cliente
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca" onkeyup="filtraClienti()" placeholder="Cerca per nome, P.IVA o email..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="filtraClienti()" placeholder="Cerca cliente per ragione sociale, città, telefono o P.IVA..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
-                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                             <tr>
-                                <th class="px-6 py-4">Ragione Sociale / Nome</th>
-                                <th class="px-6 py-4">Contatti</th>
-                                <th class="px-6 py-4">Città / Indirizzo</th>
-                                <th class="px-6 py-4">P.IVA / Cod.Fiscale</th>
-                                <th class="px-6 py-4 text-center">Azioni</th>
+                                <th class="px-6 py-4">Cliente / Ragione Sociale</th>
+                                <th class="px-6 py-4">Sede / Indirizzo</th>
+                                <th class="px-6 py-4">Contatti Principali</th>
+                                <th class="px-6 py-4 text-center">Cantieri</th>
+                                <th class="px-6 py-4 text-right">Lavori a Contratto</th>
+                                <th class="px-6 py-4 text-right">Incassato Reale</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-clienti" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Caricamento clienti...</td></tr>
+                            <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Caricamento clienti...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -88,158 +88,188 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO CLIENTE (VISTA A TUTTO SCHERMO) -->
+    <!-- VISTA: SCHEDA DETTAGLIO CLIENTE -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
-                <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
+                <button onclick="chiudiSchedaCliente()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
                     <span>&larr;</span> Torna a Clienti
                 </button>
                 <div class="h-6 w-px bg-gray-300"></div>
-                <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo-cliente">Nome Cliente</h2>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-nome-cliente">Nome Cliente</h2>
+                    <span id="scheda-id-cliente" class="px-2.5 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-bold">ID #0</span>
+                </div>
             </div>
-            <button onclick="apriModaleModificaDalDettaglio()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
-                ✏️ Modifica Dati
-            </button>
+            <div class="flex items-center gap-3">
+                <button onclick="creaNuovaCommessaPerCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm">
+                    <span>+</span> Apri Nuovo Cantiere
+                </button>
+                <button onclick="apriModaleCliente(clienteAttivoIndex)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
+                    ✏️ Modifica Anagrafica
+                </button>
+            </div>
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- BOX RECAPITI -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-sm font-bold text-[#2e2a5b] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Recapiti e Indirizzo</h3>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex"><span class="text-gray-500 w-24">Indirizzo:</span> <span class="font-medium text-gray-900" id="scheda-indirizzo"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Città:</span> <span class="font-medium text-gray-900" id="scheda-citta"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Telefono:</span> <span class="font-medium text-gray-900" id="scheda-telefono"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Email:</span> <span class="font-medium text-gray-900" id="scheda-email"></span></div>
-                    </div>
+            <!-- KPI ECONOMICI GLOBALI DEL CLIENTE -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-emerald-200 p-6 flex flex-col justify-center bg-emerald-50/20">
+                    <p class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">Totale Contratti Approvati</p>
+                    <p class="text-3xl font-bold text-gray-900" id="scheda-tot-contratti">€ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Valore contrattuale complessivo lavori</p>
                 </div>
-
-                <!-- BOX FISCALE -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-sm font-bold text-[#2e2a5b] uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Dati Fatturazione</h3>
-                    <div class="space-y-3 text-sm">
-                        <div class="flex"><span class="text-gray-500 w-24">Partita IVA:</span> <span class="font-medium text-gray-900" id="scheda-piva"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Cod. Fiscale:</span> <span class="font-medium text-gray-900" id="scheda-cf"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Cod. SDI:</span> <span class="font-medium text-gray-900" id="scheda-sdi"></span></div>
-                        <div class="flex"><span class="text-gray-500 w-24">Indirizzo PEC:</span> <span class="font-medium text-gray-900" id="scheda-pec"></span></div>
-                    </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato Reale (Fatture Saldate)</p>
+                    <p class="text-3xl font-bold text-emerald-600" id="scheda-tot-incassato">€ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Totale somme effettivamente ricevute</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Residuo da Incassare</p>
+                    <p class="text-3xl font-bold text-indigo-900" id="scheda-tot-residuo">€ 0,00</p>
+                    <p class="text-xs text-gray-500 mt-1">Differenza tra contratti e incassi</p>
                 </div>
             </div>
 
-            <!-- STORICO COMMESSE CLIENTE -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
-                    <h3 class="text-base font-bold text-gray-800">Storico Cantieri / Commesse</h3>
-                    <!-- TASTO NUOVA COMMESSA PER QUESTO CLIENTE -->
-                    <button onclick="creaCommessaPerCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5">
-                        <span>+</span> Nuova Commessa
-                    </button>
+            <!-- ANAGRAFICA E CANTIERI -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- BOX DATI ANAGRAFICI -->
+                <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
+                    <h3 class="text-base font-bold text-gray-800 border-b border-gray-100 pb-3 flex items-center gap-2">
+                        <span>🏢</span> Informazioni Anagrafiche
+                    </h3>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">Indirizzo e Sede</span>
+                            <span class="font-bold text-gray-800 text-sm" id="dett-indirizzo">--</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <div>
+                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Città</span>
+                                <span class="font-bold text-gray-800" id="dett-citta">--</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">CAP</span>
+                                <span class="font-bold text-gray-800" id="dett-cap">--</span>
+                            </div>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100">
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">P.IVA / Codice Fiscale</span>
+                            <span class="font-bold text-gray-800 font-mono text-xs" id="dett-piva">--</span>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100">
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">Telefono</span>
+                            <span class="font-bold text-gray-800 text-sm" id="dett-telefono">--</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">Email</span>
+                            <span class="font-bold text-indigo-700" id="dett-email">--</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">PEC / Codice SDI</span>
+                            <span class="font-bold text-gray-800" id="dett-pec-sdi">--</span>
+                        </div>
+                        <div class="pt-2 border-t border-gray-100">
+                            <span class="text-gray-400 font-semibold block uppercase text-[10px]">Note Commerciali</span>
+                            <p class="text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100 mt-1 italic text-[11px]" id="dett-note">Nessuna nota presente.</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                            <tr>
-                                <th class="px-4 py-3">N. Commessa</th>
-                                <th class="px-4 py-3">Nome Cantiere</th>
-                                <th class="px-4 py-3">Stato</th>
-                                <th class="px-4 py-3">Data Creazione</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-commesse-cliente" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento commesse...</td></tr>
-                        </tbody>
-                    </table>
+
+                <!-- BOX CANTIERI / COMMESSE DEL CLIENTE -->
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
+                    <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                                <span>🏗️</span> Cantieri & Commesse Collegate
+                            </h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Seleziona un cantiere per accedere al suo fascicolo operativo</p>
+                        </div>
+                    </div>
+
+                    <div id="lista-commesse-cliente" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
+                        <p class="text-sm text-gray-500 italic py-4 text-center">Caricamento commesse...</p>
+                    </div>
                 </div>
+
             </div>
 
         </div>
     </div>
 
-    <!-- ================= MODALE GESTIONE CLIENTE FORM ================= -->
-    <div id="modal-cliente" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+    <!-- ================= MODALE CREAZIONE / MODIFICA CLIENTE ================= -->
+    <div id="modal-cliente" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col my-auto">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900" id="modale-titolo">Nuovo Cliente</h3>
-                    <p class="text-xs text-gray-500">Inserisci i dati anagrafici e fiscali</p>
+                    <h3 class="text-lg font-bold text-gray-900" id="modal-cliente-titolo">Scheda Cliente</h3>
+                    <p class="text-xs text-gray-500">Inserisci i dati anagrafici e fiscali del cliente</p>
                 </div>
                 <button type="button" onclick="chiudiModaleCliente()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
-            <div class="p-6 space-y-6 overflow-y-auto no-scrollbar">
-                <form id="form-cliente" class="space-y-6">
-                    <input type="hidden" id="cli-id">
-                    
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-cliente" class="space-y-4">
+                    <input type="hidden" id="form-cli-id">
+
                     <div>
-                        <h4 class="text-xs font-bold text-[#2e2a5b] uppercase tracking-wider mb-3 border-b border-gray-100 pb-1">Dati Generali</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="md:col-span-2">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Nome / Ragione Sociale *</label>
-                                <input type="text" id="cli-nome" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold text-gray-900">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Telefono</label>
-                                <input type="text" id="cli-telefono" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Email Ufficiale</label>
-                                <input type="email" id="cli-email" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            </div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nome o Ragione Sociale *</label>
+                        <input type="text" id="form-cli-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Rossi Mario oppure Edilizia Veneta Srl">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Codice Fiscale / Partita IVA</label>
+                            <input type="text" id="form-cli-piva" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. 01234567890 o RSSMRA...">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Codice SDI / PEC</label>
+                            <input type="text" id="form-cli-pec" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. M5UXCR1 oppure pec@...">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-3">
+                        <div class="col-span-12 sm:col-span-6">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede / Residenza</label>
+                            <input type="text" id="form-cli-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Via Roma 12">
+                        </div>
+                        <div class="col-span-8 sm:col-span-4">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Città</label>
+                            <input type="text" id="form-cli-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Treviso (TV)">
+                        </div>
+                        <div class="col-span-4 sm:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">CAP</label>
+                            <input type="text" id="form-cli-cap" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="31100">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Telefono Principale</label>
+                            <input type="text" id="form-cli-tel" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. 333 1234567">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Email Principale</label>
+                            <input type="email" id="form-cli-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="cliente@dominio.it">
                         </div>
                     </div>
 
                     <div>
-                        <h4 class="text-xs font-bold text-[#2e2a5b] uppercase tracking-wider mb-3 border-b border-gray-100 pb-1">Sede e Indirizzo</h4>
-                        <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12 md:col-span-12">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo (Via/Piazza, Civico)</label>
-                                <input type="text" id="cli-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            </div>
-                            <div class="col-span-12 md:col-span-6">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Città</label>
-                                <input type="text" id="cli-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            </div>
-                            <div class="col-span-6 md:col-span-3">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">CAP</label>
-                                <input type="text" id="cli-cap" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
-                            </div>
-                            <div class="col-span-6 md:col-span-3">
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Provincia</label>
-                                <input type="text" id="cli-provincia" maxlength="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none uppercase text-center" placeholder="MI">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 border-b border-gray-200 pb-1">Dati Fatturazione Elettronica</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Partita IVA</label>
-                                <input type="text" id="cli-piva" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Codice Fiscale</label>
-                                <input type="text" id="cli-cf" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-medium uppercase">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Indirizzo PEC</label>
-                                <input type="email" id="cli-pec" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none text-blue-700">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-700 mb-1">Codice Destinatario (SDI)</label>
-                                <input type="text" id="cli-sdi" maxlength="7" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none font-bold tracking-widest text-center uppercase" placeholder="XXXXXXX">
-                            </div>
-                        </div>
+                        <label class="block text-xs font-semibold text-gray-600 mb-1">Note / Riferimenti Aggiuntivi</label>
+                        <textarea id="form-cli-note" rows="2" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Accordi commerciali, modalità preferita di contatto..."></textarea>
                     </div>
                 </form>
             </div>
-            
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
-                <button type="button" onclick="chiudiModaleCliente()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-cliente" id="btn-salva-cliente" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Salva Cliente</button>
+
+            <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50 rounded-b-2xl">
+                <button type="button" id="btn-elimina-cliente" onclick="confermaEliminazioneCliente()" class="hidden text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Cliente</button>
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" onclick="chiudiModaleCliente()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Annulla</button>
+                    <button type="submit" form="form-cliente" id="btn-salva-cli" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Cliente</button>
+                </div>
             </div>
         </div>
     </div>
@@ -249,59 +279,117 @@
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let clientiCache = [];
-        let clienteAttivoId = null;
+        let clientiCorrenti = [];
+        let clienteAttivoIndex = null;
 
-        // CHECK REDIRECT DALLA DASHBOARD
-        document.addEventListener('DOMContentLoaded', () => {
-            caricaClienti();
-            // Se l'URL contiene ?action=new apre subito il modale nuovo
-            if (new URLSearchParams(window.location.search).get('action') === 'new') {
-                apriModaleNuovo();
+        function formattaEuro(numero) {
+            if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
+            const numFloat = parseFloat(numero);
+            const parti = numFloat.toFixed(2).split('.');
+            const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
+            const decimali = parti[1];
+            return `€ ${interi},${decimali}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await caricaClienti();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            const idToOpen = urlParams.get('id');
+
+            if (action === 'new') apriModaleCliente();
+
+            if (idToOpen) {
+                const idx = clientiCorrenti.findIndex(c => String(c.id) === String(idToOpen));
+                if (idx !== -1) apriSchedaCliente(idx);
             }
         });
 
+        // 1. CARICAMENTO ELENCO CLIENTI CON TOTALI ECONOMICI
         async function caricaClienti() {
-            const { data: clienti, error } = await supabaseClient.from('clienti').select('*').order('nome_ragione_sociale', { ascending: true });
+            // Estrazione clienti con join annidati per commesse, contratti e fatture
+            const { data: clienti, error } = await supabaseClient
+                .from('clienti')
+                .select(`
+                    *,
+                    commesse (
+                        id,
+                        numero,
+                        nome_cantiere,
+                        sede_gestione,
+                        stato,
+                        preventivi (id, stato),
+                        contratti (id, valore_finale, stato),
+                        fatture (id, importo, stato)
+                    )
+                `)
+                .order('nome_ragione_sociale', { ascending: true });
+
             const tbody = document.getElementById('tabella-clienti');
-            const conteggio = document.getElementById('conteggio-clienti');
-
-            if (error) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore caricamento dati dal server.</td></tr>'; return; }
-
-            clientiCache = clienti || [];
-            conteggio.innerText = `${clientiCache.length} clienti registrati`;
-            disegnaTabella(clientiCache);
-        }
-
-        function disegnaTabella(arrayClienti) {
-            const tbody = document.getElementById('tabella-clienti');
-            tbody.innerHTML = '';
-
-            if (arrayClienti.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessun cliente trovato.</td></tr>';
+            if (error) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Errore caricamento database.</td></tr>';
                 return;
             }
 
-            arrayClienti.forEach(c => {
-                const telefono = c.telefono ? `📞 ${c.telefono}` : '';
-                const email = c.email ? `✉️ ${c.email}` : '';
-                const contattiHtml = [telefono, email].filter(Boolean).join('<br>') || '<span class="text-gray-300 italic">Nessun recapito</span>';
-                const piva_cf = [c.partita_iva, c.codice_fiscale].filter(Boolean).join(' / ') || '--';
-                const indirizzoCompleto = [c.indirizzo, c.citta, c.provincia].filter(Boolean).join(', ') || '--';
+            clientiCorrenti = clienti || [];
+            document.getElementById('conteggio-clienti').innerText = `${clientiCorrenti.length} clienti registrati`;
+            disegnaTabellaClienti(clientiCorrenti);
+        }
 
+        function disegnaTabellaClienti(lista) {
+            const tbody = document.getElementById('tabella-clienti');
+            tbody.innerHTML = '';
+
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nessun cliente presente in rubrica.</td></tr>';
+                return;
+            }
+
+            lista.forEach((cli, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.onclick = () => apriSchedaCliente(c.id);
-                
+                tr.onclick = () => apriSchedaCliente(idx);
+
+                const sede = [cli.indirizzo, cli.citta].filter(Boolean).join(' - ') || '--';
+                const contatti = [cli.telefono ? `📞 ${cli.telefono}` : '', cli.email ? `✉️ ${cli.email}` : ''].filter(Boolean).join(' &bull; ') || '--';
+
+                const commesse = cli.commesse || [];
+                const totCantieri = commesse.length;
+
+                // Calcoli economici reali
+                let totaleContratti = 0;
+                let totaleIncassato = 0;
+
+                commesse.forEach(com => {
+                    if (com.contratti) {
+                        com.contratti.forEach(con => {
+                            if (con.stato !== 'Disdetto' && con.valore_finale) {
+                                totaleContratti += parseFloat(con.valore_finale);
+                            }
+                        });
+                    }
+                    if (com.fatture) {
+                        com.fatture.forEach(fat => {
+                            if (fat.stato === 'Pagata' && fat.importo) {
+                                totaleIncassato += parseFloat(fat.importo);
+                            }
+                        });
+                    }
+                });
+
                 tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-gray-900">${c.nome_ragione_sociale}</td>
-                    <td class="px-6 py-4 text-xs text-gray-600">${contattiHtml}</td>
-                    <td class="px-6 py-4 text-xs text-gray-600">${indirizzoCompleto}</td>
-                    <td class="px-6 py-4 text-xs font-medium text-gray-700 uppercase">${piva_cf}</td>
-                    <td class="px-6 py-4 text-center whitespace-nowrap">
-                        <button onclick="event.stopPropagation(); apriModaleModifica(${c.id})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors shadow-sm mr-1">✏️ Modifica</button>
-                        <button onclick="event.stopPropagation(); eliminaCliente(${c.id})" class="px-2 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded text-xs font-bold transition-colors shadow-sm">🗑️</button>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-gray-900 text-base">${cli.nome_ragione_sociale}</div>
+                        <div class="text-[11px] text-gray-400 mt-0.5">CF/P.IVA: ${cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || '--'}</div>
                     </td>
+                    <td class="px-6 py-4 text-gray-600 text-xs">${sede}</td>
+                    <td class="px-6 py-4 text-gray-600 text-xs">${contatti}</td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 font-bold rounded-full text-xs">${totCantieri}</span>
+                    </td>
+                    <td class="px-6 py-4 text-right font-bold text-gray-900">${formattaEuro(totaleContratti)}</td>
+                    <td class="px-6 py-4 text-right font-bold text-emerald-600">${formattaEuro(totaleIncassato)}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -309,157 +397,223 @@
 
         function filtraClienti() {
             const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const clientiFiltrati = clientiCache.filter(c => 
+            const filtrati = clientiCorrenti.filter(c => 
                 (c.nome_ragione_sociale && c.nome_ragione_sociale.toLowerCase().includes(query)) ||
-                (c.partita_iva && c.partita_iva.toLowerCase().includes(query)) ||
-                (c.email && c.email.toLowerCase().includes(query))
+                (c.citta && c.citta.toLowerCase().includes(query)) ||
+                (c.telefono && c.telefono.toLowerCase().includes(query)) ||
+                (c.codice_fiscale_piva && c.codice_fiscale_piva.toLowerCase().includes(query))
             );
-            disegnaTabella(clientiFiltrati);
+            disegnaTabellaClienti(filtrati);
         }
 
-        async function apriSchedaCliente(id) {
-            clienteAttivoId = id;
-            const c = clientiCache.find(x => x.id == id);
-            if(!c) return;
+        // 2. SCHEDA DETTAGLIO CLIENTE E STORICO CANTIERI
+        function apriSchedaCliente(index) {
+            clienteAttivoIndex = index;
+            const cli = clientiCorrenti[index];
 
-            document.getElementById('scheda-titolo-cliente').innerText = c.nome_ragione_sociale;
-            
-            document.getElementById('scheda-indirizzo').innerText = c.indirizzo || '--';
-            document.getElementById('scheda-citta').innerText = [c.cap, c.citta, c.provincia].filter(Boolean).join(' ') || '--';
-            document.getElementById('scheda-telefono').innerText = c.telefono || '--';
-            document.getElementById('scheda-email').innerText = c.email || '--';
+            document.getElementById('scheda-nome-cliente').innerText = cli.nome_ragione_sociale;
+            document.getElementById('scheda-id-cliente').innerText = `ID #${cli.id}`;
 
-            document.getElementById('scheda-piva').innerText = c.partita_iva || '--';
-            document.getElementById('scheda-cf').innerText = c.codice_fiscale || '--';
-            document.getElementById('scheda-sdi').innerText = c.codice_sdi || '--';
-            document.getElementById('scheda-pec').innerText = c.pec || '--';
+            document.getElementById('dett-indirizzo').innerText = cli.indirizzo || '--';
+            document.getElementById('dett-citta').innerText = cli.citta || '--';
+            document.getElementById('dett-cap').innerText = cli.cap || '--';
+            document.getElementById('dett-piva').innerText = cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || '--';
+            document.getElementById('dett-telefono').innerText = cli.telefono || '--';
+            document.getElementById('dett-email').innerText = cli.email || '--';
+            document.getElementById('dett-pec-sdi').innerText = cli.pec_sdi || cli.pec || '--';
+            document.getElementById('dett-note').innerText = cli.note || 'Nessuna nota presente.';
 
-            const tbodyCommesse = document.getElementById('lista-commesse-cliente');
-            tbodyCommesse.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Ricerca storico in corso...</td></tr>';
-            
-            const { data: commesse } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, stato, created_at').eq('cliente_id', id).order('created_at', { ascending: false });
+            // Calcolo e visualizzazione KPI economici
+            let totaleContratti = 0;
+            let totaleIncassato = 0;
+            const commesse = cli.commesse || [];
 
-            if(commesse && commesse.length > 0) {
-                let htmlCom = '';
-                commesse.forEach(com => {
-                    const dataIta = new Date(com.created_at).toLocaleDateString('it-IT');
-                    htmlCom += `
-                        <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location.href='commesse.html?id=${com.id}'">
-                            <td class="px-4 py-3 font-bold text-[#2e2a5b] hover:underline">${com.numero}</td>
-                            <td class="px-4 py-3 text-gray-600">${com.nome_cantiere || '--'}</td>
-                            <td class="px-4 py-3"><span class="px-2 py-1 bg-gray-100 rounded-full text-[10px] font-bold uppercase">${com.stato}</span></td>
-                            <td class="px-4 py-3 text-xs text-gray-500">${dataIta}</td>
-                        </tr>
-                    `;
-                });
-                tbodyCommesse.innerHTML = htmlCom;
-            } else {
-                tbodyCommesse.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Nessuna commessa registrata per questo cliente.</td></tr>';
+            commesse.forEach(com => {
+                if (com.contratti) {
+                    com.contratti.forEach(con => {
+                        if (con.stato !== 'Disdetto' && con.valore_finale) totaleContratti += parseFloat(con.valore_finale);
+                    });
+                }
+                if (com.fatture) {
+                    com.fatture.forEach(fat => {
+                        if (fat.stato === 'Pagata' && fat.importo) totaleIncassato += parseFloat(fat.importo);
+                    });
+                }
+            });
+
+            const residuo = Math.max(0, totaleContratti - totaleIncassato);
+            document.getElementById('scheda-tot-contratti').innerText = formattaEuro(totaleContratti);
+            document.getElementById('scheda-tot-incassato').innerText = formattaEuro(totaleIncassato);
+            document.getElementById('scheda-tot-residuo').innerText = formattaEuro(residuo);
+
+            // Generazione elenco cantieri con badge verde su preventivo approvato
+            disegnaListaCommesseCliente(commesse);
+
+            document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
+            document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
+        }
+
+        function chiudiSchedaCliente() {
+            clienteAttivoIndex = null;
+            document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
+            document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
+        }
+
+        function disegnaListaCommesseCliente(commesse) {
+            const container = document.getElementById('lista-commesse-cliente');
+            container.innerHTML = '';
+
+            if (!commesse || commesse.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center">
+                        <p class="text-sm text-gray-500 mb-2">Nessun cantiere registrato per questo cliente.</p>
+                        <button onclick="creaNuovaCommessaPerCliente()" class="text-xs font-bold text-[#2e2a5b] hover:underline">+ Apri la prima commessa</button>
+                    </div>
+                `;
+                return;
             }
 
-            document.getElementById('vista-elenco').classList.add('hidden');
-            document.getElementById('vista-scheda').classList.remove('hidden');
-            document.getElementById('vista-scheda').classList.add('flex');
+            commesse.forEach(c => {
+                // Calcolo contratti e incassi del singolo cantiere
+                let valoreCantiere = 0;
+                let incassatoCantiere = 0;
+
+                if (c.contratti) {
+                    c.contratti.forEach(con => {
+                        if (con.stato !== 'Disdetto' && con.valore_finale) valoreCantiere += parseFloat(con.valore_finale);
+                    });
+                }
+                if (c.fatture) {
+                    c.fatture.forEach(fat => {
+                        if (fat.stato === 'Pagata' && fat.importo) incassatoCantiere += parseFloat(fat.importo);
+                    });
+                }
+
+                // Allineamento stato commessa: verde con scritta scura se il preventivo è accettato
+                const haPrevAccettato = c.preventivi && c.preventivi.some(p => p.stato === 'Accettato');
+                let bgStato = 'bg-gray-100 text-gray-700';
+                if (haPrevAccettato) {
+                    bgStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
+                }
+                if (c.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
+                if (c.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
+                if (c.stato === 'Conclusa' || c.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
+
+                const sede = c.sede_gestione ? `<span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[9px] font-bold uppercase">${c.sede_gestione}</span>` : '';
+
+                const div = document.createElement('div');
+                div.onclick = () => window.location.href = `commesse.html?id=${c.id}`;
+                div.className = 'p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] hover:shadow-md transition-all cursor-pointer group flex justify-between items-center';
+
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-[#2e2a5b] text-base group-hover:underline">${c.numero}</span>
+                            ${sede}
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider ${bgStato}">${c.stato || 'Preventivazione'}</span>
+                        </div>
+                        <p class="text-xs font-medium text-gray-800">${c.nome_cantiere || 'Cantiere Principale'}</p>
+                        <p class="text-[11px] text-gray-500">Contratto: <strong class="text-gray-900">${formattaEuro(valoreCantiere)}</strong> &bull; Incassato: <strong class="text-emerald-600">${formattaEuro(incassatoCantiere)}</strong></p>
+                    </div>
+                    <div class="text-gray-400 font-bold group-hover:translate-x-1 transition-transform ml-4">&rarr;</div>
+                `;
+                container.appendChild(div);
+            });
         }
 
-        function chiudiScheda() {
-            clienteAttivoId = null;
-            document.getElementById('vista-scheda').classList.add('hidden');
-            document.getElementById('vista-scheda').classList.remove('flex');
-            document.getElementById('vista-elenco').classList.remove('hidden');
+        function creaNuovaCommessaPerCliente() {
+            if (clienteAttivoIndex === null) return;
+            const cli = clientiCorrenti[clienteAttivoIndex];
+            window.location.href = `commesse.html?action=new&cliente_id=${cli.id}`;
         }
 
-        // Funzione per rimandare alla pagina commesse con il cliente preselezionato
-        function creaCommessaPerCliente() {
-            if (clienteAttivoId) {
-                window.location.href = `commesse.html?action=new&cliente_id=${clienteAttivoId}`;
-            }
-        }
-
-        function apriModaleNuovo() {
+        // 3. MODALE NUOVO / MODIFICA CLIENTE
+        function apriModaleCliente(index = null) {
             document.getElementById('form-cliente').reset();
-            document.getElementById('cli-id').value = '';
-            document.getElementById('modale-titolo').innerText = "Nuovo Cliente";
-            document.getElementById('modal-cliente').classList.remove('hidden');
-        }
+            document.getElementById('form-cli-id').value = '';
 
-        function apriModaleModifica(id) {
-            const c = clientiCache.find(x => x.id == id);
-            if (!c) return;
-            document.getElementById('modale-titolo').innerText = "Modifica Cliente";
-            document.getElementById('cli-id').value = c.id;
-            document.getElementById('cli-nome').value = c.nome_ragione_sociale || '';
-            document.getElementById('cli-telefono').value = c.telefono || '';
-            document.getElementById('cli-email').value = c.email || '';
-            document.getElementById('cli-indirizzo').value = c.indirizzo || '';
-            document.getElementById('cli-citta').value = c.citta || '';
-            document.getElementById('cli-cap').value = c.cap || '';
-            document.getElementById('cli-provincia').value = c.provincia || '';
-            document.getElementById('cli-piva').value = c.partita_iva || '';
-            document.getElementById('cli-cf').value = c.codice_fiscale || '';
-            document.getElementById('cli-pec').value = c.pec || '';
-            document.getElementById('cli-sdi').value = c.codice_sdi || '';
-            
-            document.getElementById('modal-cliente').classList.remove('hidden');
-        }
+            const btnElimina = document.getElementById('btn-elimina-cliente');
 
-        function apriModaleModificaDalDettaglio() {
-            if(clienteAttivoId) apriModaleModifica(clienteAttivoId);
+            if (index !== null) {
+                const cli = clientiCorrenti[index];
+                document.getElementById('modal-cliente-titolo').innerText = "Modifica Cliente";
+                document.getElementById('form-cli-id').value = cli.id;
+                document.getElementById('form-cli-nome').value = cli.nome_ragione_sociale || '';
+                document.getElementById('form-cli-piva').value = cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || '';
+                document.getElementById('form-cli-pec').value = cli.pec_sdi || cli.pec || '';
+                document.getElementById('form-cli-indirizzo').value = cli.indirizzo || '';
+                document.getElementById('form-cli-citta').value = cli.citta || '';
+                document.getElementById('form-cli-cap').value = cli.cap || '';
+                document.getElementById('form-cli-tel').value = cli.telefono || '';
+                document.getElementById('form-cli-email').value = cli.email || '';
+                document.getElementById('form-cli-note').value = cli.note || '';
+                btnElimina.classList.remove('hidden');
+            } else {
+                document.getElementById('modal-cliente-titolo').innerText = "Nuovo Cliente";
+                btnElimina.classList.add('hidden');
+            }
+
+            document.getElementById('modal-cliente').classList.remove('hidden');
         }
 
         function chiudiModaleCliente() {
             document.getElementById('modal-cliente').classList.add('hidden');
-            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         document.getElementById('form-cliente').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btn-salva-cliente');
+            const btn = document.getElementById('btn-salva-cli');
             btn.innerText = "Salvataggio...";
             btn.disabled = true;
 
-            const id = document.getElementById('cli-id').value;
-            
-            const datiCliente = {
-                nome_ragione_sociale: document.getElementById('cli-nome').value,
-                telefono: document.getElementById('cli-telefono').value || null,
-                email: document.getElementById('cli-email').value || null,
-                indirizzo: document.getElementById('cli-indirizzo').value || null,
-                citta: document.getElementById('cli-citta').value || null,
-                cap: document.getElementById('cli-cap').value || null,
-                provincia: document.getElementById('cli-provincia').value.toUpperCase() || null,
-                partita_iva: document.getElementById('cli-piva').value || null,
-                codice_fiscale: document.getElementById('cli-cf').value.toUpperCase() || null,
-                pec: document.getElementById('cli-pec').value || null,
-                codice_sdi: document.getElementById('cli-sdi').value.toUpperCase() || null
+            const id = document.getElementById('form-cli-id').value;
+            const dati = {
+                nome_ragione_sociale: document.getElementById('form-cli-nome').value.trim(),
+                codice_fiscale_piva: document.getElementById('form-cli-piva').value.trim(),
+                pec_sdi: document.getElementById('form-cli-pec').value.trim(),
+                indirizzo: document.getElementById('form-cli-indirizzo').value.trim(),
+                citta: document.getElementById('form-cli-citta').value.trim(),
+                cap: document.getElementById('form-cli-cap').value.trim(),
+                telefono: document.getElementById('form-cli-tel').value.trim(),
+                email: document.getElementById('form-cli-email').value.trim(),
+                note: document.getElementById('form-cli-note').value.trim()
             };
 
-            let error;
+            let error = null;
             if (id) {
-                const res = await supabaseClient.from('clienti').update(datiCliente).eq('id', id);
+                const res = await supabaseClient.from('clienti').update(dati).eq('id', id);
                 error = res.error;
             } else {
-                const res = await supabaseClient.from('clienti').insert([datiCliente]);
+                const res = await supabaseClient.from('clienti').insert([dati]);
                 error = res.error;
             }
 
             if (!error) {
                 chiudiModaleCliente();
                 await caricaClienti();
-                if(id && clienteAttivoId == id) apriSchedaCliente(id);
+                if (id && clienteAttivoIndex !== null) {
+                    apriSchedaCliente(clienteAttivoIndex);
+                }
             } else {
-                alert("Errore salvataggio: " + error.message);
+                alert("Errore salvataggio cliente: " + error.message);
             }
 
             btn.innerText = "Salva Cliente";
             btn.disabled = false;
         });
 
-        async function eliminaCliente(id) {
-            if(!confirm("ATTENZIONE: Sei sicuro di voler eliminare questo cliente? L'operazione è irreversibile e potrebbe fallire se ci sono commesse o preventivi legati a lui.")) return;
-            const { error } = await supabaseClient.from('clienti').delete().eq('id', id);
-            if (!error) { caricaClienti(); } 
-            else { alert("Impossibile eliminare il cliente. Probabilmente ha già delle commesse aperte. \n\nDettaglio: " + error.message); }
+        async function confermaEliminazioneCliente() {
+            const cli = clientiCorrenti[clienteAttivoIndex];
+            if (!confirm(`Sei sicuro di voler eliminare definitivamente il cliente "${cli.nome_ragione_sociale}"?\nL'operazione non sarà reversibile.`)) return;
+
+            const { error } = await supabaseClient.from('clienti').delete().eq('id', cli.id);
+            if (!error) {
+                chiudiModaleCliente();
+                chiudiSchedaCliente();
+                await caricaClienti();
+            } else {
+                alert("Impossibile eliminare il cliente. Verifica che non vi siano commesse o documenti vincolati:\n" + error.message);
+            }
         }
     </script>
 </body>
