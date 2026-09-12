@@ -651,9 +651,27 @@
                     const numeroContratto = p.numero.replace('PREV-', 'CONT-');
                     const { data: cEsistenti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', p.commessa_id);
                     if (!cEsistenti || cEsistenti.length === 0) {
-                        await supabaseClient.from('contratti').insert([{ commessa_id: p.commessa_id, preventivo_id: p.id, numero: numeroContratto, stato: 'Da Fare', valore_finale: p.importo, file_url: fileUrl, created_at: timestampFormattato }]);
-                        await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🪄 Contratto Esecutivo ${numeroContratto} generato.`, autore: 'Sistema Auto', created_at: timestampFormattato }]);
+                        await supabaseClient.from('contratti').insert([{ 
+                            commessa_id: p.commessa_id, 
+                            preventivo_id: p.id, 
+                            numero: numeroContratto, 
+                            stato: 'Da Fare', 
+                            valore_finale: p.importo, 
+                            file_url: fileUrl, 
+                            created_at: timestampFormattato 
+                        }]);
+                        await supabaseClient.from('commesse_log').insert([{ 
+                            commessa_id: p.commessa_id, 
+                            azione: `🪄 Contratto Esecutivo ${numeroContratto} generato.`, 
+                            autore: 'Sistema Auto', 
+                            created_at: timestampFormattato 
+                        }]);
                     }
+
+                    // SALTO AUTOMATICO AL PASSAGGIO SUCCESSIVO
+                    chiudiModaleAzione();
+                    window.location.href = `commesse.html?id=${p.commessa_id}&tab=rilievi`;
+                    return;
                 }
                 chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaPreventivi();
             } else { alert("Errore di sistema: " + error.message); }
