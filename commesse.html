@@ -927,9 +927,22 @@
                     autore: UTENTE_CORRENTE
                 }]);
 
+                // AVANZAMENTO AUTOMATICO A CONTRATTO
+                if (com.stato === 'Preventivazione' || com.stato === 'Rilievo Esecutive') {
+                    await supabaseClient.from('commesse').update({ stato: 'Contratto' }).eq('id', com.id);
+                    com.stato = 'Contratto';
+                    aggiornaDatiSchedaUI();
+                    caricaCommesse();
+                }
+
                 chiudiModaleRilievo();
                 await caricaRilieviDiQuestaCommessa();
                 await caricaCronologia(com.id);
+
+                // Passa automaticamente alla tab successiva: Contratti!
+                setTimeout(() => {
+                    cambiaTab('contratti');
+                }, 250);
             } else {
                 alert("Errore salvataggio rilievo misure: " + error.message);
             }
