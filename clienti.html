@@ -222,7 +222,7 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Codice Fiscale / Partita IVA</label>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Codice Fiscale / Partita IVA (Facoltativo)</label>
                             <input type="text" id="form-cli-piva" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. 01234567890 o RSSMRA...">
                         </div>
                         <div>
@@ -306,9 +306,7 @@
             }
         });
 
-        // 1. CARICAMENTO ELENCO CLIENTI CON TOTALI ECONOMICI
         async function caricaClienti() {
-            // Estrazione clienti con join annidati per commesse, contratti e fatture
             const { data: clienti, error } = await supabaseClient
                 .from('clienti')
                 .select(`
@@ -357,7 +355,6 @@
                 const commesse = cli.commesse || [];
                 const totCantieri = commesse.length;
 
-                // Calcoli economici reali
                 let totaleContratti = 0;
                 let totaleIncassato = 0;
 
@@ -381,7 +378,7 @@
                 tr.innerHTML = `
                     <td class="px-6 py-4">
                         <div class="font-bold text-gray-900 text-base">${cli.nome_ragione_sociale}</div>
-                        <div class="text-[11px] text-gray-400 mt-0.5">CF/P.IVA: ${cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || '--'}</div>
+                        <div class="text-[11px] text-gray-400 mt-0.5">CF/P.IVA: ${cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || 'Non specificato'}</div>
                     </td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${sede}</td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${contatti}</td>
@@ -406,7 +403,6 @@
             disegnaTabellaClienti(filtrati);
         }
 
-        // 2. SCHEDA DETTAGLIO CLIENTE E STORICO CANTIERI
         function apriSchedaCliente(index) {
             clienteAttivoIndex = index;
             const cli = clientiCorrenti[index];
@@ -417,13 +413,12 @@
             document.getElementById('dett-indirizzo').innerText = cli.indirizzo || '--';
             document.getElementById('dett-citta').innerText = cli.citta || '--';
             document.getElementById('dett-cap').innerText = cli.cap || '--';
-            document.getElementById('dett-piva').innerText = cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || '--';
+            document.getElementById('dett-piva').innerText = cli.codice_fiscale_piva || cli.partita_iva || cli.codice_fiscale || 'Non specificato';
             document.getElementById('dett-telefono').innerText = cli.telefono || '--';
             document.getElementById('dett-email').innerText = cli.email || '--';
             document.getElementById('dett-pec-sdi').innerText = cli.pec_sdi || cli.pec || '--';
             document.getElementById('dett-note').innerText = cli.note || 'Nessuna nota presente.';
 
-            // Calcolo e visualizzazione KPI economici
             let totaleContratti = 0;
             let totaleIncassato = 0;
             const commesse = cli.commesse || [];
@@ -446,7 +441,6 @@
             document.getElementById('scheda-tot-incassato').innerText = formattaEuro(totaleIncassato);
             document.getElementById('scheda-tot-residuo').innerText = formattaEuro(residuo);
 
-            // Generazione elenco cantieri con badge verde su preventivo approvato
             disegnaListaCommesseCliente(commesse);
 
             document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
@@ -474,7 +468,6 @@
             }
 
             commesse.forEach(c => {
-                // Calcolo contratti e incassi del singolo cantiere
                 let valoreCantiere = 0;
                 let incassatoCantiere = 0;
 
@@ -489,7 +482,6 @@
                     });
                 }
 
-                // Allineamento stato commessa: verde con scritta scura se il preventivo è accettato
                 const haPrevAccettato = c.preventivi && c.preventivi.some(p => p.stato === 'Accettato');
                 let bgStato = 'bg-gray-100 text-gray-700';
                 if (haPrevAccettato) {
@@ -527,7 +519,6 @@
             window.location.href = `commesse.html?action=new&cliente_id=${cli.id}`;
         }
 
-        // 3. MODALE NUOVO / MODIFICA CLIENTE
         function apriModaleCliente(index = null) {
             document.getElementById('form-cliente').reset();
             document.getElementById('form-cli-id').value = '';
@@ -567,16 +558,17 @@
             btn.disabled = true;
 
             const id = document.getElementById('form-cli-id').value;
+            // Gestione dei campi facoltativi: se vuoti salviamo null per evitare vincoli di database
             const dati = {
                 nome_ragione_sociale: document.getElementById('form-cli-nome').value.trim(),
-                codice_fiscale_piva: document.getElementById('form-cli-piva').value.trim(),
-                pec_sdi: document.getElementById('form-cli-pec').value.trim(),
-                indirizzo: document.getElementById('form-cli-indirizzo').value.trim(),
-                citta: document.getElementById('form-cli-citta').value.trim(),
-                cap: document.getElementById('form-cli-cap').value.trim(),
-                telefono: document.getElementById('form-cli-tel').value.trim(),
-                email: document.getElementById('form-cli-email').value.trim(),
-                note: document.getElementById('form-cli-note').value.trim()
+                codice_fiscale_piva: document.getElementById('form-cli-piva').value.trim() || null,
+                pec_sdi: document.getElementById('form-cli-pec').value.trim() || null,
+                indirizzo: document.getElementById('form-cli-indirizzo').value.trim() || null,
+                citta: document.getElementById('form-cli-citta').value.trim() || null,
+                cap: document.getElementById('form-cli-cap').value.trim() || null,
+                telefono: document.getElementById('form-cli-tel').value.trim() || null,
+                email: document.getElementById('form-cli-email').value.trim() || null,
+                note: document.getElementById('form-cli-note').value.trim() || null
             };
 
             let error = null;
