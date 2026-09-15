@@ -416,7 +416,7 @@
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                <button type="submit" form="form-gestisci-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento</button>
+                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento</button>
             </div>
         </div>
     </div>
@@ -658,13 +658,19 @@
         async function caricaCommesse() {
             const { data: commesse, error } = await supabaseClient
                 .from('commesse')
-                .select('*, clienti(nome_ragione_sociale), preventivi(id, stato)')
+                .select('*, clienti(nome_ragione_sociale)')
                 .order('created_at', { ascending: false });
 
             const tbody = document.getElementById('tabella-commesse');
             if (error) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore DB</td></tr>'; return; }
 
-            commesseCorrenti = commesse || []; 
+            const { data: preventiviTutti } = await supabaseClient.from('preventivi').select('commessa_id, id, stato');
+
+            commesseCorrenti = (commesse || []).map(com => {
+                const prevsCom = (preventiviTutti || []).filter(p => String(p.commessa_id) === String(com.id));
+                return { ...com, preventivi: prevsCom };
+            });
+
             totaleCommesse = commesseCorrenti.length; 
             document.getElementById('conteggio-commesse').innerText = `${commesseCorrenti.length} commesse in corso`;
             tbody.innerHTML = ''; 
@@ -698,26 +704,29 @@
         }
 
         async function apriSchedaCommessa(index) {
-            commessaAttivaIndex = index;
-            
-            const { data: freshPrevs } = await supabaseClient.from('preventivi').select('id, stato').eq('commessa_id', commesseCorrenti[index].id);
-            if (freshPrevs) commesseCorrenti[index].preventivi = freshPrevs;
+            try {
+                commessaAttivaIndex = index;
+                const com = commesseCorrenti[index];
+                
+                const { data: freshPrevs } = await supabaseClient.from('preventivi').select('id, stato').eq('commessa_id', com.id);
+                if (freshPrevs) com.preventivi = freshPrevs;
 
-            aggiornaDatiSchedaUI();
-            cambiaTab('riepilogo'); 
-            caricaCronologia(commesseCorrenti[index].id);
-            document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
-            document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
-            window.history.replaceState({}, document.title, window.location.pathname);
+                aggiornaDatiSchedaUI();
+                cambiaTab('riepilogo'); 
+                await caricaCronologia(com.id);
+
+                document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
+                document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (err) {
+                alert("Errore nell'apertura della commessa: " + err.message);
+            }
         }
 
         function chiudiScheda() {
             commessaAttivaIndex = null;
             document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
-            document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
-            document.getElementById('vista-elenco').classList.replace('hidden', 'flex'); // Fallback corretto
-            document.getElementById('vista-elenco').classList.remove('hidden');
-            document.getElementById('vista-elenco').classList.add('flex');
+            document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
         function cambiaTab(tabName) {
@@ -1254,7 +1263,6 @@
             const com = commesseCorrenti[commessaAttivaIndex];
             const selectContratti = document.getElementById('form-ord-contratto-rif');
             
-            // RENDIAMO IL CONTRATTO FACOLTATIVO AGGIUNGENDO L'OPZIONE VUOTA
             selectContratti.innerHTML = '<option value="">-- Nessun Contratto / Extra (Facoltativo) --</option>';
             const { data: contratti } = await supabaseClient.from('contratti').select('id, numero').eq('commessa_id', com.id);
             if(contratti && contratti.length > 0) { 
@@ -1275,8 +1283,6 @@
             const idContratto = document.getElementById('form-ord-contratto-rif').value; 
             const com = commesseCorrenti[commessaAttivaIndex];
             
-            // RIMOSSO IL BLOCCO OBBLIGATORIO !idContratto
-            
             btnSubmit.innerText = "Salvataggio..."; 
             btnSubmit.disabled = true;
             
@@ -1285,7 +1291,8 @@
             if (isSostituzione) testoDescrizione = `[SOSTITUZIONE/ASSISTENZA] ${testoDescrizione}`;
             
             const nuovoOrdine = { 
-                contratto_id: idContratto ? idContratto : null, // Se vuoto, salva correttamente null
+                commessa_id: com.id,
+                contratto_id: idContratto ? idContratto : null, 
                 fornitore_id: document.getElementById('form-ord-new-fornitore').value, 
                 descrizione: testoDescrizione, 
                 costo_previsto: document.getElementById('form-ord-new-costo').value || 0, 
@@ -1310,28 +1317,208 @@
 
         async function caricaOrdiniDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
-            const tbody = document.getElementById('lista-ordini-commessa'); tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>';
-            const { data: ordini, error } = await supabaseClient.from('ordini_fornitori').select(`*, fornitori(nome_azienda), contratti(commessa_id)`).eq('contratti.commessa_id', com.id).order('created_at', { ascending: false });
-            
-            // Nota: Se ci sono ordini senza contratto (contratto_id is null), la join inner potrebbe filtrarli. Usiamo left join se serve, oppure gestiamo gli ordini extra. 
-            // In alternativa carichiamo tutti gli ordini legati alla commessa o con contratto nullo:
-            // Per sicurezza, carichiamo gli ordini filtrando direttamente sulla commessa se la tabella ordini ha il legame, altrimenti tramite contratto.
-            // Poiché ordini_fornitori ha contratto_id, vediamo come recuperarli correttamente:
-        }
-        
-        // Riscriviamo la funzione di caricamento ordini per gestire correttamente anche quelli SENZA contratto (extra / sostituzioni):
-        async function caricaOrdiniDiQuestaCommessa() {
-            const com = commesseCorrenti[commessaAttivaIndex];
             const tbody = document.getElementById('lista-ordini-commessa'); 
             tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>';
+            
+            const { data: ordini, error } = await supabaseClient
+                .from('ordini_fornitori')
+                .select('*, fornitori(nome_azienda)')
+                .eq('commessa_id', com.id)
+                .order('created_at', { ascending: false });
 
-            // 1. Troviamo prima tutti gli ID dei contratti di questa commessa
-            const { data: contrattiCom } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
-            const idsContratti = contrattiCom ? contrattiCom.map(c => c.id) : [];
-
-            // 2. Recuperiamo gli ordini collegati a questi contratti OPPURE con contratto_id nullo (ma come facciamo a sapere se un ordine senza contratto appartiene a questa commessa? Di solito un ordine senza contratto inserito da commesse.html viene salvato. Salviamo un log o filtriamo? Un attimo: nella tabella ordini_fornitori abbiamo contratto_id. Se è null, come lo associamo alla commessa? 
-            // Soluzione pulita: aggiungiamo commessa_id anche alla tabella ordini_fornitori oppure filtriamo dai log o diamo per scontato che se inserito da qui si riferisce alla commessa. Oppure aggiungiamo commessa_id alla tabella ordini_fornitori).
+            if (error || !ordini || ordini.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Nessun ordine fornitore presente.</td></tr>'; 
+                return; 
+            }
+            
+            ordiniCommessaCache = ordini; 
+            let html = '';
+            ordini.forEach((ord, i) => {
+                let statoPulito = ord.stato;
+                if(statoPulito === 'Conferma') statoPulito = 'Conferma Arrivata'; 
+                if(statoPulito === 'Da controllare ed inviare') statoPulito = 'Da Controllare'; 
+                if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
+                
+                const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore Extra'; 
+                let descVisuale = ord.descrizione;
+                
+                if (descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
+                    descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
+                }
+                
+                let badgeClass = 'bg-gray-100 text-gray-600';
+                if(statoPulito === 'Conferma Arrivata') badgeClass = 'bg-blue-100 text-blue-700'; 
+                if(statoPulito === 'Da Controllare') badgeClass = 'bg-yellow-100 text-yellow-800'; 
+                if(statoPulito === 'In Revisione') badgeClass = 'bg-orange-100 text-orange-800'; 
+                if(statoPulito === 'Ordine confermato ed inviato al Fornitore') badgeClass = 'bg-emerald-100 text-emerald-800'; 
+                if(statoPulito === 'Merce Arrivata in Magazzino') badgeClass = 'bg-teal-100 text-teal-800';
+                
+                let nomeStatoBadge = statoPulito; 
+                if(nomeStatoBadge === 'Ordine confermato ed inviato al Fornitore') nomeStatoBadge = 'Ordine Conf.'; 
+                if(nomeStatoBadge === 'Merce Arrivata in Magazzino') nomeStatoBadge = 'Arrivata';
+                
+                html += `<tr class="hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td><td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td><td class="px-4 py-3 w-32"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${nomeStatoBadge}</span></td><td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td></tr>`;
+            });
+            tbody.innerHTML = html;
         }
+
+        const sequenzaStatiOrdine = ['Richiesta Inviata', 'Conferma Arrivata', 'Da Controllare', 'Ordine confermato ed inviato al Fornitore', 'Merce Arrivata in Magazzino'];
+        let statoPendenteOrdine = '';
+        async function caricaFileSuStorage(file, prefisso) {
+            if (!file) return null;
+            const lastDotIndex = file.name.lastIndexOf('.');
+            let baseName = file.name;
+            let extension = '';
+            if (lastDotIndex !== -1) {
+                baseName = file.name.substring(0, lastDotIndex);
+                extension = file.name.substring(lastDotIndex);
+            }
+            baseName = baseName.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
+            const dataOggi = new Date().toISOString().split('T')[0];
+            const randomHash = Math.random().toString(36).substring(2, 6);
+            const fileName = `${prefisso}_${dataOggi}_${baseName}_${randomHash}${extension}`;
+
+            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) { alert("Errore upload file: " + error.message); return null; }
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
+
+        function apriModaleGestioneOrdine(indexMemoria) {
+            const ord = ordiniCommessaCache[indexMemoria]; const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+            document.getElementById('gest-ord-id').value = ord.id; document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
+            let statoPartenza = ord.stato || 'Richiesta Inviata';
+            if(statoPartenza === 'Conferma') statoPartenza = 'Conferma Arrivata'; if(statoPartenza === 'Da controllare ed inviare') statoPartenza = 'Da Controllare'; if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
+            document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || ''; document.getElementById('gest-ord-revisione').value = ord.revisione || 0; document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || ''; document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; document.getElementById('gest-ord-file').value = ''; 
+            impostaStatoPendenteOrdine(statoPartenza); document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
+        }
+        function chiudiModaleGestioneOrdine() { document.getElementById('modal-gestisci-ordine').classList.add('hidden'); }
+        function impostaStatoPendenteOrdine(nuovoStato) {
+            statoPendenteOrdine = nuovoStato; const container = document.getElementById('stepper-container-ordine'); const azioniBox = document.getElementById('stepper-azioni-ordine'); container.innerHTML = ''; azioniBox.innerHTML = '';
+            if (statoPendenteOrdine === 'In Revisione') { container.innerHTML = `<div class="w-full text-center py-3 bg-orange-50 text-orange-600 font-bold rounded-lg border border-orange-200 text-sm">⚠️ ORDINE IN REVISIONE FORNITORE</div>`; azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-gray-600 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white shadow-sm transition-colors">Termina Revisione</button>`; return; }
+            const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine); const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4'; container.appendChild(bgLine);
+            const etichetteBrevi = ['Richiesta', 'Conferma', 'Controllo', 'Inviato', 'Arrivato'];
+            sequenzaStatiOrdine.forEach((stato, index) => {
+                const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-1 z-10';
+                let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
+                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
+                else if (index === currentIdx) iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-[10px] shadow-md ring-2 ring-blue-100">${index + 1}</div>`;
+                let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-14 leading-tight ${textColor}">${etichetteBrevi[index]}</span>`; container.appendChild(punto);
+            });
+            if (statoPendenteOrdine === 'Richiesta Inviata') azioniBox.innerHTML = `<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Segna Conferma &rarr;</button>`;
+            else if (statoPendenteOrdine === 'Conferma Arrivata') azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Richiesta Inviata')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg shadow-sm">Passa a Controllo &rarr;</button>`;
+            else if (statoPendenteOrdine === 'Da Controllare') azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma Arrivata')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Ordine confermato ed inviato al Fornitore')" class="text-xs font-bold text-white bg-emerald-600 px-4 py-2 rounded-lg shadow-sm">Invia Definitivo &rarr;</button>`;
+            else if (statoPendenteOrdine === 'Ordine confermato ed inviato al Fornitore') azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Da Controllare')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata in Magazzino')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">📦 Merce Arrivata &rarr;</button>`;
+            else if (statoPendenteOrdine === 'Merce Arrivata in Magazzino') azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Ordine confermato ed inviato al Fornitore')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>`;
+        }
+        document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btnSubmit = document.getElementById('btn-salva-gest-ordine'); const idOrdine = document.getElementById('gest-ord-id').value; const com = commesseCorrenti[commessaAttivaIndex];
+            const ordOriginale = ordiniCommessaCache.find(o => o.id == idOrdine); const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
+            btnSubmit.innerText = "Salvataggio..."; btnSubmit.disabled = true;
+            let fileUrl = null; const fileInputUpdate = document.getElementById('gest-ord-file'); if (fileInputUpdate.files.length > 0) fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
+            let datiUpdate = { stato: statoPendenteOrdine, costo_confermato: document.getElementById('gest-ord-costo-conf').value || null, revisione: document.getElementById('gest-ord-revisione').value, data_arrivo_merce: document.getElementById('gest-ord-data-consegna').value || null, annotazioni: document.getElementById('gest-ord-annotazioni').value || null };
+            if(fileUrl) datiUpdate.file_url = (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') ? ordOriginale.file_url + ',' + fileUrl : fileUrl;
+            const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
+            if (!error) {
+                let nomeStatoPerLog = statoPendenteOrdine; if(nomeStatoPerLog === 'Ordine confermato ed inviato al Fornitore') nomeStatoPerLog = 'Ordine Confermato'; if(nomeStatoPerLog === 'Merce Arrivata in Magazzino') nomeStatoPerLog = 'Merce in Magazzino';
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
+                if (com.stato === 'In Consegna' || com.stato === 'Ordini') {
+                    const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato, commessa_id').eq('commessa_id', com.id);
+                    if (tuttiOrdini && tuttiOrdini.length > 0) {
+                        const tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata in Magazzino');
+                        if (tuttiArrivati) { await supabaseClient.from('commesse').update({ stato: 'In Posa' }).eq('id', com.id); await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `⚡ Tutta la merce è arrivata! Il cantiere avanza in automatico a: IN POSA`, autore: 'Sistema Auto' }]); com.stato = 'In Posa'; aggiornaDatiSchedaUI(); caricaCommesse(); }
+                    }
+                }
+                chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); caricaCronologia(com.id);
+            } else { alert("Errore ordine: " + error.message); }
+            btnSubmit.innerText = "💾 Salva Aggiornamento Definitivo"; btnSubmit.disabled = false;
+        });
+
+        // --- TAB POSA / INTERVENTI ---
+        async function caricaPosaInterventi() {
+            const com = commesseCorrenti[commessaAttivaIndex]; const divLista = document.getElementById('lista-interventi-posa'); divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
+            const { data: interventi, error } = await supabaseClient.from('interventi_posa').select('*').eq('commessa_id', com.id).order('data_intervento', { ascending: false });
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB posa.</p>'; return; }
+            if (!interventi || interventi.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun intervento registrato. Aggiungilo quando vai in cantiere!</p></div>'; return; }
+            let html = '';
+            interventi.forEach(int => {
+                const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; const dataIta = int.data_intervento ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
+                const note = int.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${int.note}</p>` : ''; const btnFile = int.file_url ? `<a href="${int.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>` : '';
+                html += `<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">${int.posatore}</span></div><button onclick="eliminaPosa(${int.id})" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div>${note} ${btnFile}</div>`;
+            }); divLista.innerHTML = html;
+        }
+        function apriModalePosa() { document.getElementById('form-intervento-posa').reset(); document.getElementById('posa-data').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-intervento-posa').classList.remove('hidden'); }
+        function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
+        document.getElementById('form-intervento-posa').addEventListener('submit', async (e) => {
+            e.preventDefault(); const btn = document.getElementById('btn-salva-posa'); const com = commesseCorrenti[commessaAttivaIndex]; btn.innerText = "Salvataggio..."; btn.disabled = true;
+            let fileUrl = null; const fileInput = document.getElementById('posa-file');
+            if (fileInput.files.length > 0) { btn.innerText = "Caricamento foto..."; const cleanName = fileInput.files[0].name.replace(/[^a-zA-Z0-9.\-_]/g, ''); const fName = `POSA_${Date.now()}_${cleanName}`; await supabaseClient.storage.from('contratti_docs').upload(fName, fileInput.files[0], { cacheControl: '3600', upsert: false }); const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fName); fileUrl = data.publicUrl; }
+            const nuovoInt = { commessa_id: com.id, data_intervento: document.getElementById('posa-data').value, posatore: document.getElementById('posa-squadra').value, note: document.getElementById('posa-note').value || null, file_url: fileUrl };
+            const { error } = await supabaseClient.from('interventi_posa').insert([nuovoInt]);
+            if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Registrato intervento di posa in cantiere da: ${nuovoInt.posatore}`, file_url: fileUrl, autore: UTENTE_CORRENTE }]); chiudiModalePosa(); caricaPosaInterventi(); caricaCronologia(com.id); } else { alert("Errore posa: " + error.message); }
+            btn.innerText = "Salva Intervento"; btn.disabled = false;
+        });
+        async function eliminaPosa(id) { if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; await supabaseClient.from('interventi_posa').delete().eq('id', id); caricaPosaInterventi(); }
+
+        // --- GESTIONE NOTA MANUALE E DIARIO GLOBALE ---
+        async function salvaNotaLibera() {
+            const inputNota = document.getElementById('input-nota-libera'); const testo = inputNota.value; if (!testo || testo.trim() === '') return; const com = commesseCorrenti[commessaAttivaIndex];
+            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: "Comunicazione / Appunto Manuale", nota: testo, autore: UTENTE_CORRENTE }]);
+            if (!error) { inputNota.value = ''; caricaCronologia(com.id); } else { alert("Errore salvataggio nota: " + error.message); }
+        }
+        async function caricaCronologia(commessaId) {
+            const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
+            const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
+            if (error || !logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata.</p>'; return; }
+            let html = '';
+            logs.forEach(log => {
+                const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
+                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
+                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>` : '';
+                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
+                if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
+                if (log.azione.includes('Rilievo')) icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-blue-100 text-blue-700 text-xs ring-4 ring-blue-50">📐</div>';
+                html += `<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">${icona}<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">${log.azione}</p><p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${dataFormat} ${autoreText}</p></div>${notaHtml}${fileHtml}</div></div>`;
+            }); divLog.innerHTML = html;
+        }
+
+        // --- GESTIONE MODIFICA E NUOVA COMMESSA ---
+        function apriModaleModifica() {
+            if (commessaAttivaIndex === null) return; const com = commesseCorrenti[commessaAttivaIndex]; document.getElementById('mod-com-id').value = com.id;
+            document.getElementById('mod-com-sede').value = com.sede_gestione || ''; document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || ''; document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || ''; document.getElementById('mod-com-citta').value = com.citta_cantiere || ''; document.getElementById('mod-com-referente').value = com.referente || ''; document.getElementById('mod-com-tel-referente').value = com.telefono_referente || ''; document.getElementById('mod-com-email-referente').value = com.email_referente || '';
+            document.getElementById('modal-modifica-commessa').classList.remove('hidden');
+        }
+        function chiudiModaleModifica() { document.getElementById('modal-modifica-commessa').classList.add('hidden'); }
+        document.getElementById('form-modifica-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault(); const id = document.getElementById('mod-com-id').value;
+            const datiAggiornati = { sede_gestione: document.getElementById('mod-com-sede').value || null, nome_cantiere: document.getElementById('mod-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value, citta_cantiere: document.getElementById('mod-com-citta').value, referente: document.getElementById('mod-com-referente').value, telefono_referente: document.getElementById('mod-com-tel-referente').value, email_referente: document.getElementById('mod-com-email-referente').value };
+            const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
+            if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: `Dati anagrafici e operativi del cantiere aggiornati`, autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
+        });
+
+        function apriModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.remove('hidden'); const anno = new Date().getFullYear(); document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`; document.getElementById('check-copia-dati').checked = false; }
+        function chiudiModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.add('hidden'); document.getElementById('form-nuova-commessa').reset(); window.history.replaceState({}, document.title, window.location.pathname); }
+        document.getElementById('check-copia-dati').addEventListener('change', () => {
+            const isChecked = document.getElementById('check-copia-dati').checked; const clienteId = document.getElementById('form-com-cliente').value;
+            if (isChecked && clienteId) { const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId)); if (cliente) { document.getElementById('form-com-indirizzo').value = cliente.indirizzo || ''; document.getElementById('form-com-citta').value = cliente.citta || ''; document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || ''; } } else if (!isChecked) { document.getElementById('form-com-indirizzo').value = ''; document.getElementById('form-com-citta').value = ''; document.getElementById('form-com-referente').value = ''; }
+        });
+        document.getElementById('form-com-cliente').addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
+        document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
+            e.preventDefault(); const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivazione', valore: null };
+            const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
+            if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
+        });
+        async function confermaEliminazioneCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, rilievi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
+            if (conferma !== 'ELIMINA') { if(conferma !== null) alert("Eliminazione annullata."); return; }
+            const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
+            if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
+            await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
+            const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
+            if (!error) { alert(`Commessa ${com.numero} eliminata con successo.`); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
+        }
+
     </script>
 </body>
 </html>
