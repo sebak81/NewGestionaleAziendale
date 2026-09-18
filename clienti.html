@@ -61,10 +61,19 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <!-- BARRA DI RICERCA E ORDINAMENTO -->
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca" onkeyup="filtraClienti()" placeholder="Cerca cliente per ragione sociale, città, telefono o P.IVA..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="applicaFiltriEOrdinamento()" placeholder="Cerca cliente per ragione sociale, città, telefono o P.IVA..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
+                    </div>
+                    <div class="w-full sm:w-64">
+                        <select id="select-ordinamento" onchange="applicaFiltriEOrdinamento()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors font-medium text-gray-700 cursor-pointer">
+                            <option value="modifica">⏱️ Recenti / Modificati</option>
+                            <option value="az">🔤 Nome (A > Z)</option>
+                            <option value="citta">📍 Città (A > Z)</option>
+                            <option value="valore">💰 € Lavoro (Dal più alto)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -337,8 +346,7 @@
                         contratti (id, valore_finale, stato),
                         fatture (id, importo, stato)
                     )
-                `)
-                .order('nome_ragione_sociale', { ascending: true });
+                `);
 
             const tbody = document.getElementById('tabella-clienti');
             if (error) {
@@ -348,7 +356,60 @@
 
             clientiCorrenti = clienti || [];
             document.getElementById('conteggio-clienti').innerText = `${clientiCorrenti.length} clienti registrati`;
-            disegnaTabellaClienti(clientiCorrenti);
+            
+            // Esegue il filtraggio e l'ordinamento iniziale (default: recenti)
+            applicaFiltriEOrdinamento();
+        }
+
+        function applicaFiltriEOrdinamento() {
+            const query = document.getElementById('input-ricerca').value.toLowerCase();
+            const ordinamento = document.getElementById('select-ordinamento').value;
+
+            // 1. Filtraggio per testo di ricerca
+            let filtrati = clientiCorrenti.filter(c => 
+                (c.nome_ragione_sociale && c.nome_ragione_sociale.toLowerCase().includes(query)) ||
+                (c.citta && c.citta.toLowerCase().includes(query)) ||
+                (c.telefono && c.telefono.toLowerCase().includes(query)) ||
+                (c.codice_fiscale && c.codice_fiscale.toLowerCase().includes(query)) ||
+                (c.partita_iva && c.partita_iva.toLowerCase().includes(query))
+            );
+
+            // 2. Ordinamento basato sulla scelta dell'utente
+            filtrati.sort((a, b) => {
+                if (ordinamento === 'az') {
+                    return (a.nome_ragione_sociale || '').localeCompare(b.nome_ragione_sociale || '');
+                } else if (ordinamento === 'citta') {
+                    return (a.citta || '').localeCompare(b.citta || '');
+                } else if (ordinamento === 'valore') {
+                    const valA = calcolaTotaleContrattiCliente(a);
+                    const valB = calcolaTotaleContrattiCliente(b);
+                    return valB - valA; // Dal valore più alto al più basso
+                } else {
+                    // Default: 'modifica' / recenti (prima i più giovani/recenti basati su created_at o ID)
+                    const dataA = new Date(a.created_at || 0);
+                    const dataB = new Date(b.created_at || 0);
+                    if (dataB - dataA !== 0) return dataB - dataA;
+                    return (b.id || 0) - (a.id || 0);
+                }
+            });
+
+            disegnaTabellaClienti(filtrati);
+        }
+
+        function calcolaTotaleContrattiCliente(cli) {
+            let totale = 0;
+            if (cli.commesse) {
+                cli.commesse.forEach(com => {
+                    if (com.contratti) {
+                        com.contratti.forEach(con => {
+                            if (con.stato !== 'Disdetto' && con.valore_finale) {
+                                totale += parseFloat(con.valore_finale);
+                            }
+                        });
+                    }
+                });
+            }
+            return totale;
         }
 
         function disegnaTabellaClienti(lista) {
@@ -360,10 +421,13 @@
                 return;
             }
 
-            lista.forEach((cli, idx) => {
+            lista.forEach((cli) => {
+                // Troviamo l'indice reale nel vettore principale per l'apertura della scheda
+                const realIndex = clientiCorrenti.findIndex(c => c.id === cli.id);
+
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.onclick = () => apriSchedaCliente(idx);
+                tr.onclick = () => apriSchedaCliente(realIndex);
 
                 const sede = [cli.indirizzo, cli.citta].filter(Boolean).join(' - ') || '--';
                 const contatti = [cli.telefono ? `📞 ${cli.telefono}` : '', cli.email ? `✉️ ${cli.email}` : ''].filter(Boolean).join(' &bull; ') || '--';
@@ -411,18 +475,6 @@
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function filtraClienti() {
-            const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const filtrati = clientiCorrenti.filter(c => 
-                (c.nome_ragione_sociale && c.nome_ragione_sociale.toLowerCase().includes(query)) ||
-                (c.citta && c.citta.toLowerCase().includes(query)) ||
-                (c.telefono && c.telefono.toLowerCase().includes(query)) ||
-                (c.codice_fiscale && c.codice_fiscale.toLowerCase().includes(query)) ||
-                (c.partita_iva && c.partita_iva.toLowerCase().includes(query))
-            );
-            disegnaTabellaClienti(filtrati);
         }
 
         function apriSchedaCliente(index) {
