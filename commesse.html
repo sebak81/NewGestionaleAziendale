@@ -435,7 +435,18 @@
                         <input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer">
                         <label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label>
                     </div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento (Facoltativo)</label><select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine *</label>
+                            <input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento</label>
+                            <select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select>
+                        </div>
+                    </div>
+                    
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label><input type="number" step="0.01" id="form-ord-new-costo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none" placeholder="0.00"></div>
@@ -728,6 +739,8 @@
             commessaAttivaIndex = null;
             document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
             document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
+            document.getElementById('vista-elenco').classList.remove('hidden');
+            document.getElementById('vista-elenco').classList.add('flex');
         }
 
         function cambiaTab(tabName) {
@@ -1279,6 +1292,10 @@
             
             if(document.getElementById('form-ord-new-fornitore').options.length <= 1) await caricaFornitoriTendina();
             document.getElementById('form-nuovo-ordine-commessa').reset();
+            
+            // Imposta la data di default a oggi
+            document.getElementById('form-ord-new-data').value = new Date().toISOString().split('T')[0];
+            
             if (com.stato === 'In Assistenza / Ripristino' || com.stato === 'Contestazione') document.getElementById('form-ord-sostituzione').checked = true;
             document.getElementById('modal-nuovo-ordine-commessa').classList.remove('hidden');
         }
@@ -1289,6 +1306,7 @@
             e.preventDefault();
             const btnSubmit = document.getElementById('btn-salva-nuovo-ordine-commessa'); 
             const idContratto = document.getElementById('form-ord-contratto-rif').value; 
+            const dataOrdine = document.getElementById('form-ord-new-data').value;
             const com = commesseCorrenti[commessaAttivaIndex];
             
             btnSubmit.innerText = "Salvataggio..."; 
@@ -1302,6 +1320,7 @@
                 commessa_id: com.id,
                 contratto_id: idContratto ? idContratto : null, 
                 fornitore_id: document.getElementById('form-ord-new-fornitore').value, 
+                data_ordine: dataOrdine,
                 descrizione: testoDescrizione, 
                 costo_previsto: document.getElementById('form-ord-new-costo').value || 0, 
                 stato: 'Richiesta Inviata', 
@@ -1348,8 +1367,11 @@
                 if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
                 
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore Extra'; 
-                let descVisuale = ord.descrizione;
                 
+                // Formattazione data ordine
+                const dataOrdineVisuale = ord.data_ordine ? new Date(ord.data_ordine).toLocaleDateString('it-IT') : new Date(ord.created_at).toLocaleDateString('it-IT');
+                
+                let descVisuale = ord.descrizione;
                 if (descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
                     descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
                 }
@@ -1365,7 +1387,14 @@
                 if(nomeStatoBadge === 'Ordine confermato ed inviato al Fornitore') nomeStatoBadge = 'Ordine Conf.'; 
                 if(nomeStatoBadge === 'Merce Arrivata in Magazzino') nomeStatoBadge = 'Arrivata';
                 
-                html += `<tr class="hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td><td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td><td class="px-4 py-3 w-32"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${nomeStatoBadge}</span></td><td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td></tr>`;
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}<div class="text-[10px] font-normal text-gray-400 mt-0.5">📅 ${dataOrdineVisuale}</div></td>
+                        <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
+                        <td class="px-4 py-3 w-32"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${nomeStatoBadge}</span></td>
+                        <td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td>
+                    </tr>
+                `;
             });
             tbody.innerHTML = html;
         }
