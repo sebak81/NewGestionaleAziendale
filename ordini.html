@@ -58,7 +58,7 @@
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
                                 <tr>
-                                    <th class="px-4 py-3">Commessa / Cantiere</th>
+                                    <th class="px-4 py-3">Commessa / Cantiere / Cliente</th>
                                     <th class="px-4 py-3">Fornitore</th>
                                     <th class="px-4 py-3">Descrizione</th>
                                     <th class="px-4 py-3">Importo Conf.</th>
@@ -82,7 +82,7 @@
                         <table class="w-full text-left text-sm">
                             <thead class="bg-teal-50 text-xs uppercase font-semibold text-teal-800 border-b border-teal-100">
                                 <tr>
-                                    <th class="px-4 py-3">Commessa / Cantiere</th>
+                                    <th class="px-4 py-3">Commessa / Cantiere / Cliente</th>
                                     <th class="px-4 py-3">Fornitore</th>
                                     <th class="px-4 py-3">Descrizione</th>
                                     <th class="px-4 py-3">Data Consegna Prev.</th>
@@ -116,29 +116,39 @@
                         <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Costo Confermato Effettivo (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label>
+                            <input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine</label>
+                            <input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700">
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
                             <div class="flex items-center">
                                 <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
-                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
+                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
                             </div>
                         </div>
-                        <div id="box-data-consegna" class="col-span-2 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
+                        <div id="box-data-consegna" class="col-span-2 sm:col-span-1 hidden bg-blue-50 p-4 rounded-lg border border-blue-100">
                             <label class="block text-sm font-bold text-blue-900 mb-1">📅 Data presunta arrivo merce</label>
-                            <input type="date" id="gest-ord-data-consegna" class="w-full sm:w-1/2 px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700">
+                            <input type="date" id="gest-ord-data-consegna" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700">
                         </div>
-                        <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+                        <div class="col-span-2 mt-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Annotazioni / Note</label>
+                            <textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea>
+                        </div>
                     </div>
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label>
-                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
+                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
                     </div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600">Annulla</button>
-                <button type="submit" form="form-gestisci-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md">💾 Salva Aggiornamento Definitivo</button>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
+                <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">💾 Salva Aggiornamento Definitivo</button>
             </div>
         </div>
     </div>
@@ -160,9 +170,17 @@
         }
 
         async function caricaTuttiOrdini() {
+            // Ottimizzazione della Query: estrae direttamente il nome del cliente dalla commessa associata all'ordine (se l'ordine punta alla commessa) o attraverso il contratto.
+            // Dato che ordini_fornitori.commessa_id è stato aggiunto di recente, lo preleviamo direttamente, insieme all'eventuale associazione passata dal contratto_id.
+            
             const { data: ordini, error } = await supabaseClient
                 .from('ordini_fornitori')
-                .select(`*, fornitori(nome_azienda, categoria), contratti!inner (commessa_id, commesse (numero, nome_cantiere))`)
+                .select(`
+                    *, 
+                    fornitori(nome_azienda, categoria), 
+                    commesse!ordini_fornitori_commessa_id_fkey(numero, nome_cantiere, clienti(nome_ragione_sociale)),
+                    contratti(commessa_id, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale)))
+                `)
                 .order('created_at', { ascending: false });
 
             const tLavorazione = document.getElementById('tabella-ordini-lavorazione');
@@ -185,13 +203,35 @@
                 if(statoPulito === 'Approvato ed Inviato') statoPulito = 'Ordine confermato ed inviato al Fornitore';
 
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
-                const commessaNum = ord.contratti.commesse ? ord.contratti.commesse.numero : '--';
-                const cantiereNome = ord.contratti.commesse ? ord.contratti.commesse.nome_cantiere : '--';
+                
+                // Ricerca della commessa e del cliente, con fallback tra commessa_id diretto o contratto_id (vecchi inserimenti)
+                let numCommessa = '--';
+                let cantiereNome = '--';
+                let clienteNome = '';
+                let commessaIdPerLink = '';
+
+                if (ord.commesse) {
+                    numCommessa = ord.commesse.numero;
+                    cantiereNome = ord.commesse.nome_cantiere || '';
+                    clienteNome = ord.commesse.clienti ? ord.commesse.clienti.nome_ragione_sociale : '';
+                    commessaIdPerLink = ord.commessa_id;
+                } else if (ord.contratti && ord.contratti.commesse) {
+                    numCommessa = ord.contratti.commesse.numero;
+                    cantiereNome = ord.contratti.commesse.nome_cantiere || '';
+                    clienteNome = ord.contratti.commesse.clienti ? ord.contratti.commesse.clienti.nome_ragione_sociale : '';
+                    commessaIdPerLink = ord.contratti.commessa_id;
+                }
+
+                // Genera l'etichetta visiva completa "COM-2026/001 (Mario Rossi)"
+                const riferimentoCommessa = clienteNome ? `${numCommessa} <span class="font-normal text-gray-500">(${clienteNome})</span>` : numCommessa;
                 
                 let descVisuale = ord.descrizione;
                 if (descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
                     descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
                 }
+
+                const dataOrdineVisuale = ord.data_ordine ? new Date(ord.data_ordine).toLocaleDateString('it-IT') : new Date(ord.created_at).toLocaleDateString('it-IT');
+                const htmlFornitoreConData = `<span class="font-bold text-gray-900">${fornitoreNome}</span><div class="text-[10px] font-normal text-gray-400 mt-0.5">📅 ${dataOrdineVisuale}</div>`;
 
                 const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
                 
@@ -211,7 +251,7 @@
                     // VA NELLA TABELLA IN BASSO (MERCE IN ARRIVO)
                     let tastoAzione = '';
                     if (statoPulito === 'Ordine confermato ed inviato al Fornitore') {
-                        tastoAzione = `<button onclick="segnaArrivatoMagazzino(${ord.id}, ${ord.contratti.commessa_id}, '${fornitoreNome.replace(/'/g, "\\'")}')" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition-colors mr-2">📦 Segna Arrivato</button>`;
+                        tastoAzione = `<button onclick="segnaArrivatoMagazzino(${ord.id}, ${commessaIdPerLink}, '${fornitoreNome.replace(/'/g, "\\'")}')" class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow-sm transition-colors mr-2">📦 Segna Arrivato</button>`;
                     } else {
                         tastoAzione = `<span class="bg-gray-100 text-gray-500 px-3 py-1.5 rounded text-xs font-bold mr-2 inline-block">✅ Già a Magazzino</span>`;
                     }
@@ -220,10 +260,10 @@
                     htmlArrivo += `
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3">
-                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${ord.contratti.commessa_id}'">${commessaNum}</div>
+                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
                                 <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
                             </td>
-                            <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
+                            <td class="px-4 py-3">${htmlFornitoreConData}</td>
                             <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
                             <td class="px-4 py-3 text-sm">${stringaConsegna}</td>
                             <td class="px-4 py-3 text-center whitespace-nowrap">${tastoAzione}</td>
@@ -234,10 +274,10 @@
                     htmlLavorazione += `
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3">
-                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${ord.contratti.commessa_id}'">${commessaNum}</div>
+                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
                                 <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
                             </td>
-                            <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
+                            <td class="px-4 py-3">${htmlFornitoreConData}</td>
                             <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
                             <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
                             <td class="px-4 py-3"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${statoPulito}</span></td>
@@ -265,7 +305,8 @@
                 // Controllo Avanzamento Commessa
                 const { data: commessa } = await supabaseClient.from('commesse').select('stato').eq('id', idCommessa).single();
                 if (commessa && (commessa.stato === 'In Consegna' || commessa.stato === 'Ordini' || commessa.stato === 'In Assistenza / Ripristino')) {
-                    const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', ordiniGlobaliCache.find(o=>o.id==idOrdine).contratto_id);
+                    // Controlla se tutti gli ordini legati alla commessa sono arrivati
+                    const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('commessa_id', idCommessa);
                     if (tuttiOrdini && tuttiOrdini.every(o => o.stato === 'Merce Arrivata in Magazzino')) {
                         await supabaseClient.from('commesse').update({ stato: 'In Posa' }).eq('id', idCommessa);
                         await supabaseClient.from('commesse_log').insert([{ commessa_id: idCommessa, azione: `⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: IN POSA`, autore: 'Sistema Auto' }]);
@@ -285,9 +326,11 @@
         function apriModaleGestioneOrdine(indexMemoria) {
             const ord = ordiniGlobaliCache[indexMemoria];
             const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+            
+            const numCommessa = ord.commesse ? ord.commesse.numero : (ord.contratti && ord.contratti.commesse ? ord.contratti.commesse.numero : '--');
 
             document.getElementById('gest-ord-id').value = ord.id;
-            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore} (Commessa: ${ord.contratti.commesse.numero})`;
+            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore} (Commessa: ${numCommessa})`;
             
             let statoPartenza = ord.stato || 'Richiesta Inviata';
             if(statoPartenza === 'Conferma') statoPartenza = 'Conferma Arrivata';
@@ -295,6 +338,7 @@
             if(statoPartenza === 'Approvato ed Inviato') statoPartenza = 'Ordine confermato ed inviato al Fornitore';
             
             document.getElementById('gest-ord-costo-conf').value = ord.costo_confermato || '';
+            document.getElementById('gest-ord-data-ordine').value = ord.data_ordine || (ord.created_at ? ord.created_at.split('T')[0] : '');
             document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
             document.getElementById('gest-ord-data-consegna').value = ord.data_arrivo_merce || '';
             document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; 
@@ -370,7 +414,9 @@
             const btnSubmit = document.getElementById('btn-salva-gest-ordine');
             const idOrdine = document.getElementById('gest-ord-id').value;
             const ordOriginale = ordiniGlobaliCache.find(o => o.id == idOrdine);
-            const commessaId = ordOriginale.contratti.commessa_id;
+            
+            // Trova l'ID della commessa usando commessa_id diretto o tramite contratto_id
+            const commessaId = ordOriginale.commessa_id || (ordOriginale.contratti ? ordOriginale.contratti.commessa_id : null);
             const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
 
             btnSubmit.innerText = "Salvataggio...";
@@ -383,6 +429,7 @@
             let datiUpdate = {
                 stato: statoPendenteOrdine, 
                 costo_confermato: document.getElementById('gest-ord-costo-conf').value || null,
+                data_ordine: document.getElementById('gest-ord-data-ordine').value || null,
                 revisione: document.getElementById('gest-ord-revisione').value,
                 data_arrivo_merce: document.getElementById('gest-ord-data-consegna').value || null,
                 annotazioni: document.getElementById('gest-ord-annotazioni').value || null
@@ -397,16 +444,27 @@
                 if(nomeStatoPerLog === 'Ordine confermato ed inviato al Fornitore') nomeStatoPerLog = 'Ordine Confermato';
                 if(nomeStatoPerLog === 'Merce Arrivata in Magazzino') nomeStatoPerLog = 'Merce in Magazzino';
                 
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
+                if (commessaId) {
+                    await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `Ordine a ${nomeFornitore} aggiornato in: ${nomeStatoPerLog.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
 
-                // Controllo auto-avanzamento a In Posa se la merce è tutta arrivata
-                if (statoPendenteOrdine === 'Merce Arrivata in Magazzino') {
-                    const { data: commessa } = await supabaseClient.from('commesse').select('stato').eq('id', commessaId).single();
-                    if (commessa && (commessa.stato === 'In Consegna' || commessa.stato === 'Ordini' || commessa.stato === 'In Assistenza / Ripristino')) {
-                        const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', ordOriginale.contratto_id);
-                        if (tuttiOrdini && tuttiOrdini.every(o => o.stato === 'Merce Arrivata in Magazzino')) {
-                            await supabaseClient.from('commesse').update({ stato: 'In Posa' }).eq('id', commessaId);
-                            await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: IN POSA`, autore: 'Sistema Auto' }]);
+                    // Controllo auto-avanzamento a In Posa se la merce è tutta arrivata
+                    if (statoPendenteOrdine === 'Merce Arrivata in Magazzino') {
+                        const { data: commessa } = await supabaseClient.from('commesse').select('stato').eq('id', commessaId).single();
+                        if (commessa && (commessa.stato === 'In Consegna' || commessa.stato === 'Ordini' || commessa.stato === 'In Assistenza / Ripristino')) {
+                            // Check su ordini associati al contratto o direttamente alla commessa
+                            let tuttiArrivati = false;
+                            if (ordOriginale.contratto_id) {
+                                const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', ordOriginale.contratto_id);
+                                if (tuttiOrdini) tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata in Magazzino');
+                            } else {
+                                const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('commessa_id', commessaId);
+                                if (tuttiOrdini) tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata in Magazzino');
+                            }
+                            
+                            if (tuttiArrivati) {
+                                await supabaseClient.from('commesse').update({ stato: 'In Posa' }).eq('id', commessaId);
+                                await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: IN POSA`, autore: 'Sistema Auto' }]);
+                            }
                         }
                     }
                 }
