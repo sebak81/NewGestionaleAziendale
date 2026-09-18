@@ -44,10 +44,8 @@
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar max-w-7xl w-full">
             
-            <!-- VISTA: MENU PRINCIPALE DEI PULSANTONI -->
+            <!-- VISTA: MENU PRINCIPALE -->
             <div id="vista-menu" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 block">
-                
-                <!-- CARD FORNITORI -->
                 <button onclick="apriPannello('fornitori')" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-start gap-4 hover:border-[#2e2a5b] hover:shadow-md transition-all text-left group">
                     <div class="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 text-2xl group-hover:scale-110 transition-transform shrink-0">🤝</div>
                     <div>
@@ -56,7 +54,6 @@
                     </div>
                 </button>
 
-                <!-- CARD SEDI AZIENDALI -->
                 <button onclick="apriPannello('sedi')" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-start gap-4 hover:border-blue-500 hover:shadow-md transition-all text-left group">
                     <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl group-hover:scale-110 transition-transform shrink-0">🏢</div>
                     <div>
@@ -65,16 +62,14 @@
                     </div>
                 </button>
 
-                <!-- CARD CONDIZIONI PAGAMENTO -->
                 <button onclick="apriPannello('pagamenti')" class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex items-start gap-4 hover:border-emerald-500 hover:shadow-md transition-all text-left group">
                     <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-2xl group-hover:scale-110 transition-transform shrink-0">💳</div>
                     <div>
                         <h3 class="font-bold text-gray-900 text-lg">Condizioni Pagamento</h3>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Configura i metodi di pagamento (es. 50% Acconto + Finanziamento).</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Configura i metodi di pagamento (es. 50% Acconto + Saldo).</p>
                     </div>
                 </button>
             </div>
-
 
             <!-- VISTA: PANNELLO FORNITORI -->
             <div id="pannello-fornitori" class="hidden flex-col h-full space-y-6 animate-fade-in">
@@ -151,7 +146,7 @@
         </div>
     </main>
 
-    <!-- MODALE GESTIONE FORNITORE (Invariato) -->
+    <!-- MODALE GESTIONE FORNITORE CON ETICHETTE CHIARE -->
     <div id="modal-fornitore" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col my-auto">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl sticky top-0 z-10">
@@ -164,12 +159,12 @@
                     <input type="hidden" id="fornitore-id">
                     <div class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label><input type="text" id="f-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
-                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede</label><input type="text" id="f-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
-                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Città</label><input type="text" id="f-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Nome Azienda *</label><input type="text" id="f-nome" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Indirizzo Sede</label><input type="text" id="f-indirizzo" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></div>
+                            <div><label class="block text-xs font-semibold text-gray-600 mb-1">Città</label><input type="text" id="f-citta" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></div>
                             <div class="grid grid-cols-2 gap-2">
-                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Tel. Azienda</label><input type="text" id="f-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
-                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Email Azienda</label><input type="email" id="f-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
+                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Tel. Azienda</label><input type="text" id="f-telefono" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></div>
+                                <div><label class="block text-xs font-semibold text-gray-600 mb-1">Email Azienda</label><input type="email" id="f-email" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></div>
                             </div>
                         </div>
                         <div class="pt-2">
@@ -200,7 +195,18 @@
                             <button type="button" onclick="aggiungiRigaReferente()" class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">+ Aggiungi Referente</button>
                         </div>
                         <div class="border border-gray-200 rounded-xl overflow-hidden">
-                            <table class="w-full text-left text-xs"><tbody id="tabella-referenti-dinamica" class="divide-y divide-gray-100 bg-white"></tbody></table>
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-gray-50 text-[10px] uppercase font-semibold text-gray-500 border-b border-gray-100">
+                                    <tr>
+                                        <th class="p-2">Nome Referente</th>
+                                        <th class="p-2">Reparto / Mansione</th>
+                                        <th class="p-2">Telefono</th>
+                                        <th class="p-2">Email</th>
+                                        <th class="p-2 text-center w-10"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabella-referenti-dinamica" class="divide-y divide-gray-100 bg-white"></tbody>
+                            </table>
                         </div>
                     </div>
                 </form>
@@ -208,7 +214,7 @@
 
             <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl">
                 <button type="button" onclick="chiudiModaleFornitore()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600">Annulla</button>
-                <button type="submit" form="form-fornitore" id="btn-salva-fornitore-def" class="bg-[#2e2a5b] text-white px-6 py-2.5 rounded-lg text-sm font-semibold">Salva Fornitore</button>
+                <button type="submit" form="form-fornitore" id="btn-salva-fornitore-def" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-semibold">Salva Fornitore</button>
             </div>
         </div>
     </div>
@@ -221,7 +227,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             caricaFornitori();
             caricaSedi(); 
-            caricaPagamenti(); // Nuova funzione!
+            caricaPagamenti();
         });
 
         function apriPannello(idPannello) {
@@ -304,7 +310,7 @@
             caricaSedi();
         }
 
-        // --- FORNITORI (Riassunto per brevità visiva nel codice) ---
+        // --- FORNITORI E REFERENTI ---
         async function caricaFornitori() {
             const { data: fornitori, error } = await supabaseClient.from('fornitori').select('*, fornitori_referenti(*)').order('nome_azienda');
             const tbody = document.getElementById('tabella-fornitori');
@@ -319,7 +325,7 @@
                 
                 html += `
                     <tr class="hover:bg-gray-50 align-top">
-                        <td class="px-6 py-4"><b>${f.nome_azienda}</b></td>
+                        <td class="px-6 py-4"><b>${f.nome_azienda}</b><br><span class="text-xs text-gray-500">${f.citta || ''}</span></td>
                         <td class="px-6 py-4">${cats}</td>
                         <td class="px-6 py-4">${contatti}${refs}</td>
                         <td class="px-6 py-4 text-center">
@@ -332,11 +338,133 @@
             tbody.innerHTML = html;
         }
 
-        async function apriModaleFornitore(id=null) { document.getElementById('form-fornitore').reset(); document.getElementById('fornitore-id').value=''; document.getElementById('tabella-referenti-dinamica').innerHTML=''; document.getElementById('modal-fornitore').classList.remove('hidden'); if(id) { const {data:f} = await supabaseClient.from('fornitori').select('*').eq('id',id).single(); document.getElementById('fornitore-id').value=f.id; document.getElementById('f-nome').value=f.nome_azienda; /* logic per campi... */ } else aggiungiRigaReferente(); }
-        function chiudiModaleFornitore() { document.getElementById('modal-fornitore').classList.add('hidden'); }
-        function aggiungiRigaReferente() { const tbody = document.getElementById('tabella-referenti-dinamica'); const tr = document.createElement('tr'); tr.innerHTML=`<td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1"></td><td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1"></td><td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1"></td><td class="p-2"><input type="text" class="ref-email w-full border rounded text-xs p-1"></td><td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 font-bold">&times;</button></td>`; tbody.appendChild(tr); }
-        document.getElementById('form-fornitore').addEventListener('submit', async (e) => { e.preventDefault(); chiudiModaleFornitore(); caricaFornitori(); }); // Semplificato graficamente
-        async function eliminaFornitore(id) { if(!confirm("Eliminare?")) return; await supabaseClient.from('fornitori').delete().eq('id', id); caricaFornitori(); }
+        async function apriModaleFornitore(id = null) {
+            document.getElementById('form-fornitore').reset();
+            document.getElementById('fornitore-id').value = '';
+            document.getElementById('tabella-referenti-dinamica').innerHTML = '';
+            document.querySelectorAll('input[name="categoria"]').forEach(cb => cb.checked = false);
+            
+            if (id) {
+                document.getElementById('modale-titolo').innerText = "Modifica Fornitore";
+                document.getElementById('fornitore-id').value = id;
+                
+                const { data: f } = await supabaseClient.from('fornitori').select('*').eq('id', id).single();
+                if (f) {
+                    document.getElementById('f-nome').value = f.nome_azienda || '';
+                    document.getElementById('f-indirizzo').value = f.indirizzo || '';
+                    document.getElementById('f-citta').value = f.citta || '';
+                    document.getElementById('f-telefono').value = f.telefono || '';
+                    document.getElementById('f-email').value = f.email || '';
+
+                    if (f.categoria) {
+                        const arrCats = f.categoria.split(',').map(c => c.trim());
+                        document.querySelectorAll('input[name="categoria"]').forEach(cb => {
+                            if (arrCats.includes(cb.value)) cb.checked = true;
+                        });
+                    }
+                }
+
+                const { data: refs } = await supabaseClient.from('fornitori_referenti').select('*').eq('fornitoore_id', id);
+                if (refs && refs.length > 0) {
+                    refs.forEach(r => aggiungiRigaReferente(r));
+                }
+            } else {
+                document.getElementById('modale-titolo').innerText = "Nuovo Fornitore";
+                aggiungiRigaReferente();
+            }
+
+            document.getElementById('modal-fornitore').classList.remove('hidden');
+        }
+
+        function chiudiModaleFornitore() {
+            document.getElementById('modal-fornitore').classList.add('hidden');
+        }
+
+        function aggiungiRigaReferente(data = null) {
+            const tbody = document.getElementById('tabella-referenti-dinamica');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1.5" placeholder="Nome" value="${data ? data.nome_referente || '' : ''}"></td>
+                <td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1.5" placeholder="Reparto" value="${data ? data.mansione_reparto || '' : ''}"></td>
+                <td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1.5" placeholder="Telefono" value="${data ? data.telefono || '' : ''}"></td>
+                <td class="p-2"><input type="email" class="ref-email w-full border rounded text-xs p-1.5" placeholder="Email" value="${data ? data.email || '' : ''}"></td>
+                <td class="p-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-400 hover:text-red-600 font-bold text-base">&times;</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+
+        document.getElementById('form-fornitore').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salva-fornitore-def');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const id = document.getElementById('fornitore-id').value;
+            const categorieSelezionate = Array.from(document.querySelectorAll('input[name="categoria"]:checked')).map(cb => cb.value).join(',');
+
+            const datiFornitore = {
+                nome_azienda: document.getElementById('f-nome').value.trim(),
+                indirizzo: document.getElementById('f-indirizzo').value.trim() || null,
+                citta: document.getElementById('f-citta').value.trim() || null,
+                telefono: document.getElementById('f-telefono').value.trim() || null,
+                email: document.getElementById('f-email').value.trim() || null,
+                categoria: categorieSelezionate || null
+            };
+
+            let fornitoreId = id;
+            let error = null;
+
+            if (id) {
+                const res = await supabaseClient.from('fornitori').update(datiFornitore).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('fornitori').insert([datiFornitore]).select();
+                error = res.error;
+                if (!error && res.data) {
+                    fornitoreId = res.data[0].id;
+                }
+            }
+
+            if (!error) {
+                // Gestione Referenti Dinamici
+                if (id) {
+                    await supabaseClient.from('fornitori_referenti').delete().eq('fornitoore_id', id);
+                }
+
+                const righeReferenti = document.querySelectorAll('#tabella-referenti-dinamica tr');
+                for (let riga of righeReferenti) {
+                    const nome = riga.querySelector('.ref-nome').value.trim();
+                    const reparto = riga.querySelector('.ref-reparto').value.trim();
+                    const tel = riga.querySelector('.ref-tel').value.trim();
+                    const email = riga.querySelector('.ref-email').value.trim();
+
+                    if (nome || reparto || tel || email) {
+                        await supabaseClient.from('fornitori_referenti').insert([{
+                            fornitoore_id: fornitoreId,
+                            nome_referente: nome || null,
+                            mansione_reparto: reparto || null,
+                            telefono: tel || null,
+                            email: email || null
+                        }]);
+                    }
+                }
+
+                chiudiModaleFornitore();
+                caricaFornitori();
+            } else {
+                alert("Errore durante il salvataggio: " + error.message);
+            }
+
+            btn.innerText = "Salva Fornitore";
+            btn.disabled = false;
+        });
+
+        async function eliminaFornitore(id) {
+            if(!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
+            await supabaseClient.from('fornitori_referenti').delete().eq('fornitoore_id', id);
+            const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
+            if (!error) caricaFornitori(); else alert("Impossibile eliminare: " + error.message);
+        }
     </script>
 </body>
 </html>
