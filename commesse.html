@@ -235,6 +235,7 @@
             <div id="tab-content-contratti" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Contratti Esecutivi</h3>
+                    <button onclick="creaContrattoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Contratto</button>
                 </div>
                 <div id="lista-contratti-commessa" class="space-y-3"></div>
             </div>
@@ -726,7 +727,8 @@
         function chiudiScheda() {
             commessaAttivaIndex = null;
             document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
-            document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
+            document.getElementById('vista-elenco').classList.remove('hidden');
+            document.getElementById('vista-elenco').classList.add('flex');
         }
 
         function cambiaTab(tabName) {
@@ -750,6 +752,13 @@
             if (commessaAttivaIndex !== null) {
                 const com = commesseCorrenti[commessaAttivaIndex];
                 window.location.href = `preventivi.html?action=new&commessa_id=${com.id}`;
+            }
+        }
+
+        function creaContrattoDaCommessa() {
+            if (commessaAttivaIndex !== null) {
+                const com = commesseCorrenti[commessaAttivaIndex];
+                window.location.href = `contratti.html?action=new&commessa_id=${com.id}`;
             }
         }
         
@@ -1029,7 +1038,7 @@
             if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento contratti.</p>'; return; }
 
             if (!contratti || contratti.length === 0) {
-                divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun contratto generato per questa commessa.</p></div>';
+                divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500 mb-2">Nessun contratto generato per questa commessa.</p><button onclick="creaContrattoDaCommessa()" class="text-xs font-bold text-[#2e2a5b] hover:underline">+ Aggiungi Nuovo Contratto</button></div>';
                 return;
             }
 
