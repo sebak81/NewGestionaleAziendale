@@ -114,7 +114,7 @@
                 Valore Lavoro (Reale): <span id="scheda-sottotitolo-valore" class="font-bold text-emerald-700">Calcolo...</span>
             </div>
 
-            <!-- STEPPER CANTIERE SEMPLIFICATO -->
+            <!-- STEPPER CANTIERE SEMPLIFICATO E SLEAGATO -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
                     <span>Avanzamento Cantiere</span>
@@ -252,13 +252,12 @@
                             <tr>
                                 <th class="px-4 py-3">Fornitore</th>
                                 <th class="px-4 py-3">Materiale</th>
-                                <th class="px-4 py-3">Data</th>
                                 <th class="px-4 py-3 w-40">Stato & Consegna</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
+                            <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -431,6 +430,52 @@
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
                 <button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
+    <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
+                    <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
+                </div>
+                <button type="button" onclick="chiudiModaleCollaudo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-800 mb-3">Qual è l'esito dei lavori in cantiere?</label>
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza a "Conclusa". Il cliente è pronto per la fattura finale.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
+                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa resta in "Posa" ma viene segnalato l'incompleto.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                            <div><span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span><span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza/Ripristino". Serve riordinare del materiale.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione.</span></div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo (Obbligatorio per difetti/contestazioni)</label>
+                    <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="salvaEsitoCollaudo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Esito</button>
             </div>
         </div>
     </div>
@@ -647,7 +692,7 @@
             const { data: commesse, error } = await supabaseClient
                 .from('commesse')
                 .select('*, clienti(nome_ragione_sociale)')
-                .order('updated_at', { ascending: false, nullsFirst: false }); // ORDINAMENTO PER ULTIMA MODIFICA
+                .order('updated_at', { ascending: false, nullsFirst: false }); 
 
             const tbody = document.getElementById('tabella-commesse');
             if (error) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore DB</td></tr>'; return; }
@@ -1083,7 +1128,7 @@
             divLista.innerHTML = html;
         }
 
-        // --- STEPPER CANTIERE SEMPLIFICATO ---
+        // --- STEPPER CANTIERE SEMPLIFICATO E SLEAGATO ---
         function aggiornaDatiSchedaUI() {
             if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -1096,7 +1141,7 @@
             let colorStato = 'bg-blue-100 text-blue-800';
             if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
             if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-            if(com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800';
+            if(com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
             
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
             document.getElementById('scheda-badge-stato').innerText = com.stato || 'Prev / Contratto';
@@ -1128,7 +1173,7 @@
             if (statoAttuale === 'In Assistenza / Ripristino') { idxCalcolato = 4; etichettaOverride = 'ASSISTENZA'; coloreOverride = 'bg-orange-500'; } 
             else if (statoAttuale === 'Contestazione') { idxCalcolato = 4; etichettaOverride = 'CONTESTAZ.'; coloreOverride = 'bg-red-600'; }
 
-            if (idxCalcolato === -1) idxCalcolato = 0; // Fallback
+            if (idxCalcolato === -1) idxCalcolato = 0;
 
             const bgLine = document.createElement('div');
             bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
@@ -1142,22 +1187,33 @@
                 let labelVisuale = stato;
                 if (index === 4 && etichettaOverride) labelVisuale = etichettaOverride;
 
-                let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length - 1) ? 'text-gray-900 font-bold' : 'text-gray-400';
+                let iconaHTML = '';
+                let textColor = 'text-gray-400';
 
-                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length - 1 && index === idxCalcolato)) {
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm">✓</div>`;
-                } else if (index === idxCalcolato) {
-                    const coloreBg = coloreOverride || 'bg-blue-500';
-                    const coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
+                // SOLO la fase attuale prende il colore
+                if (index === idxCalcolato) {
+                    let coloreBg = coloreOverride || 'bg-blue-500';
+                    let coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
                     let mark = index + 1;
+                    
                     if(etichettaOverride === 'ASSISTENZA') mark = '⚠️';
                     if(etichettaOverride === 'CONTESTAZ.') mark = '🛑';
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${coloreBg} text-white font-bold text-sm shadow-lg ring-4 ${coloreRing}">${mark}</div>`;
-                }
+                    if(stato === 'Conclusa') { coloreBg = 'bg-emerald-500'; coloreRing = 'ring-emerald-100'; mark = '✓'; }
 
-                if(index === idxCalcolato && coloreOverride === 'bg-orange-500') textColor = 'text-orange-600 font-bold';
-                if(index === idxCalcolato && coloreOverride === 'bg-red-600') textColor = 'text-red-600 font-bold';
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${coloreBg} text-white font-bold text-sm shadow-lg ring-4 ${coloreRing}">${mark}</div>`;
+                    
+                    if (stato === 'Conclusa') textColor = 'text-emerald-700 font-bold';
+                    else if (coloreOverride === 'bg-orange-500') textColor = 'text-orange-600 font-bold';
+                    else if (coloreOverride === 'bg-red-600') textColor = 'text-red-600 font-bold';
+                    else textColor = 'text-[#2e2a5b] font-bold';
+                } 
+                // Le altre fasi (passate o future) restano grigie
+                else {
+                    let mark = index + 1;
+                    if (stato === 'Conclusa') mark = '✓';
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">${mark}</div>`;
+                    textColor = 'text-gray-400';
+                }
 
                 punto.innerHTML = `
                     ${iconaHTML}
@@ -1256,7 +1312,6 @@
             let testoDescrizione = document.getElementById('form-ord-new-descrizione').value;
             if (isSostituzione) testoDescrizione = `[SOSTITUZIONE/ASSISTENZA] ${testoDescrizione}`;
             
-            // COSTO PREVISTO RIMOSSO DALLA CREAZIONE
             const nuovoOrdine = { 
                 commessa_id: com.id,
                 contratto_id: idContratto ? idContratto : null, 
@@ -1313,10 +1368,9 @@
                     descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
                 }
                 
-                // DATA DINAMICA IN BASE ALLO STATO
+                // DATA DINAMICA
                 let dataStatoStr = '--';
                 let labelData = 'Inserito';
-
                 if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
                     dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
                     labelData = 'Inviato';
@@ -1330,7 +1384,6 @@
                     dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT');
                     labelData = 'Creato';
                 }
-
                 const htmlDataCella = `<div class="font-bold text-gray-900">${dataStatoStr}</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">${labelData}</div>`;
 
                 let stringaConsegna = '<div class="text-xs text-gray-400 mt-1">Consegna: Non definita</div>';
@@ -1338,7 +1391,7 @@
                     const d = ord.data_presunta_consegna.split('-');
                     stringaConsegna = `<div class="text-xs text-gray-600 mt-1">Consegna: <strong>${d[2]}/${d[1]}/${d[0]}</strong></div>`;
                 }
-                
+
                 let badgeClass = 'bg-gray-100 text-gray-600';
                 if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700'; 
                 if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800'; 
