@@ -63,7 +63,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" placeholder="Cerca numero commessa, cliente o cantiere..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
@@ -74,7 +74,7 @@
                                 <th class="px-6 py-4">Numero & Sede</th>
                                 <th class="px-6 py-4">Cliente Principale</th>
                                 <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
-                                <th class="px-6 py-4">Stato</th>
+                                <th class="px-6 py-4">Fase Corrente</th>
                             </tr>
                         </thead>
                         <tbody id="tabella-commesse" class="divide-y divide-gray-100">
@@ -114,14 +114,13 @@
                 Valore Lavoro (Reale): <span id="scheda-sottotitolo-valore" class="font-bold text-emerald-700">Calcolo...</span>
             </div>
 
-            <!-- STEPPER CANTIERE SEMPLIFICATO E SLEAGATO -->
+            <!-- PULSANTONI LED AVANZAMENTO CANTIERE -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
-                    <span>Avanzamento Cantiere</span>
-                    <span class="text-xs font-normal text-gray-400">Clicca sui pallini per spostare la fase operativa</span>
+                    <span>Avanzamento Cantiere (Fasi Operative)</span>
+                    <span class="text-xs font-normal text-gray-400">Clicca sui LED per accenderli (In Corso) o completarli</span>
                 </h3>
-                <div class="relative flex justify-between items-center w-full mb-8 px-4" id="stepper-container"></div>
-                <div class="flex items-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
+                <div class="relative flex justify-between items-center w-full mb-4 px-4" id="stepper-container"></div>
             </div>
 
             <!-- MENU TABS -->
@@ -150,7 +149,7 @@
 
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
-                    <p class="text-xs text-gray-500 mb-5">Questo registro è globale: include tutte le modifiche, gli avanzamenti dei preventivi/contratti collegati e le note scritte a mano.</p>
+                    <p class="text-xs text-gray-500 mb-5">Questo registro include l'attivazione dei LED, le modifiche ai contratti e le note libere.</p>
                     <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
@@ -170,32 +169,7 @@
 
             <!-- CONTENUTO TAB RILIEVI MISURE -->
             <div id="tab-content-rilievi" class="hidden space-y-6">
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
-                        <span>Avanzamento Rilievo Misure</span>
-                        <span id="rilievo-badge-stato" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
-                    </h3>
-
-                    <!-- MINI STEPPER 2 STATI -->
-                    <div class="relative flex justify-between items-center w-full max-w-md mx-auto mb-8 px-6" id="stepper-rilievo-container">
-                        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
-                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-1">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-2">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>
-                            <span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-4 pt-4 border-t border-gray-100" id="azioni-rilievo-container">
-                        <!-- Generato dinamicamente -->
-                    </div>
-                </div>
-
-                <!-- BOX DETTAGLIO RILIEVO ED ALLEGATI -->
-                <div id="box-scheda-rilievo-dati" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
                         <h4 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 flex items-center justify-between">
                             <span>Dati Sopralluogo</span>
@@ -215,6 +189,9 @@
                                 <p class="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 mt-1 italic leading-relaxed" id="rilievo-view-note">Nessuna nota inserita.</p>
                             </div>
                         </div>
+                        <button onclick="apriModaleRilievo(false)" class="w-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 py-2 rounded-lg shadow-sm transition-colors mt-4">
+                            + Aggiungi / Sovrascrivi Dati Rilievo
+                        </button>
                     </div>
 
                     <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
@@ -222,7 +199,6 @@
                             <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
                                 <span>📐</span> Allegati, Scansioni Misure e Foto
                             </h4>
-                            <button onclick="apriModaleRilievo(true)" class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-bold transition-colors">+ Aggiungi File</button>
                         </div>
                         <div id="rilievo-lista-allegati" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
                             <p class="text-sm text-gray-400 italic">Nessun documento caricato per questo rilievo.</p>
@@ -252,12 +228,13 @@
                             <tr>
                                 <th class="px-4 py-3">Fornitore</th>
                                 <th class="px-4 py-3">Materiale</th>
+                                <th class="px-4 py-3">Data</th>
                                 <th class="px-4 py-3 w-40">Stato & Consegna</th>
                                 <th class="px-4 py-3 text-center">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100">
-                            <tr><td colspan="4" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
+                            <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -278,7 +255,7 @@
             <!-- CONTENUTO TAB FATTURE -->
             <div id="tab-content-fatture" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture</h3>
+                    <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture (Pagamenti)</h3>
                     <button onclick="creaFatturaDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuova Richiesta / Fattura</button>
                 </div>
                 <div id="lista-fatture-commessa" class="space-y-3"></div>
@@ -289,12 +266,29 @@
 
     <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
 
+    <!-- NUOVO MODALE: CONFERMA FASE LED -->
+    <div id="modal-conferma-fase" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden transform transition-all scale-100">
+            <div class="p-6 text-center space-y-4">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner ring-4 ring-emerald-50">
+                    <span class="text-3xl text-emerald-500">✓</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Confermi completamento?</h3>
+                <p class="text-sm text-gray-500">Stai per segnare come conclusa la fase operativa:<br><strong class="text-lg text-emerald-700 mt-2 block" id="nome-fase-popup">NOME FASE</strong></p>
+            </div>
+            <div class="p-4 bg-gray-50 flex justify-center gap-3 border-t border-gray-100">
+                <button type="button" onclick="chiudiModaleConfermaFase()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors w-full">Annulla</button>
+                <button type="button" onclick="confermaFaseLed()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors w-full">Conferma Fine Lavorazione</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODALE: REGISTRA / MODIFICA RILIEVO MISURE -->
     <div id="modal-rilievo-misure" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Rilievo Misure</h3>
+                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Dati Rilievo Misure</h3>
                     <p class="text-xs text-gray-500">Inserisci data, tecnico incaricato, misure e documentazione</p>
                 </div>
                 <button type="button" onclick="chiudiModaleRilievo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
@@ -312,22 +306,19 @@
                             <input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Sebastiano">
                         </div>
                     </div>
-
                     <div>
                         <label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche, Misure e Particolari</label>
                         <textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Annotazioni su imbotte, falso telaio, quote soglia, vincoli di cantiere..."></textarea>
                     </div>
-
                     <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                         <label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto (PDF / Immagini)</label>
                         <input type="file" id="rilievo-input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-xs text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                     </div>
                 </form>
             </div>
-
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleRilievo()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
-                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Rilievo</button>
+                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Dati Rilievo</button>
             </div>
         </div>
     </div>
@@ -430,52 +421,6 @@
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
                 <button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
-    <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
-                    <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
-                </div>
-                <button type="button" onclick="chiudiModaleCollaudo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            
-            <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-gray-800 mb-3">Qual è l'esito dei lavori in cantiere?</label>
-                    <div class="space-y-3">
-                        <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza a "Conclusa". Il cliente è pronto per la fattura finale.</span></div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
-                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa resta in "Posa" ma viene segnalato l'incompleto.</span></div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300">
-                            <div><span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span><span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza/Ripristino". Serve riordinare del materiale.</span></div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione.</span></div>
-                        </label>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo (Obbligatorio per difetti/contestazioni)</label>
-                    <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
-                </div>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
-                <button type="button" onclick="salvaEsitoCollaudo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Esito</button>
             </div>
         </div>
     </div>
@@ -619,6 +564,8 @@
         ];
         
         let commessaAttivaIndex = null; 
+        let ledStati = [0,0,0,0,0,0];
+        let faseDaCompletare = null;
 
         function formattaEuro(numero) {
             if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
@@ -721,14 +668,12 @@
 
                 let bgStato = 'bg-gray-100 text-gray-700';
                 if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
-                if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-                if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-
+                
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Prev / Contratto'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivazione'}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -818,195 +763,149 @@
             document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
         }
 
-        // ================= GESTIONE RILIEVI MISURE =================
-        async function caricaRilieviDiQuestaCommessa() {
+        // ================= GESTIONE STEPPER LED =================
+        function aggiornaDatiSchedaUI() {
+            if(commessaAttivaIndex === null) return;
             const com = commesseCorrenti[commessaAttivaIndex];
+            document.getElementById('scheda-titolo').innerText = com.numero;
             
-            const { data: rilievi, error } = await supabaseClient
-                .from('rilievi_misure')
-                .select('*')
-                .eq('commessa_id', com.id)
-                .order('created_at', { ascending: false });
+            const bdgSede = document.getElementById('scheda-badge-sede');
+            if (com.sede_gestione) { bdgSede.innerText = com.sede_gestione; bdgSede.classList.remove('hidden'); } 
+            else { bdgSede.classList.add('hidden'); }
 
-            rilievoAttivo = (rilievi && rilievi.length > 0) ? rilievi[0] : null;
+            let colorStato = 'bg-blue-100 text-blue-800';
+            if (com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
+            
+            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivazione';
 
-            const statoRilievo = rilievoAttivo ? (rilievoAttivo.stato || 'Da Fare') : 'Da Fare';
-            const badgeStato = document.getElementById('rilievo-badge-stato');
-            const step1 = document.getElementById('step-rilievo-1');
-            const step2 = document.getElementById('step-rilievo-2');
-            const containerAzioni = document.getElementById('azioni-rilievo-container');
-            const boxScheda = document.getElementById('box-scheda-rilievo-dati');
+            const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+            
+            document.getElementById('scheda-sottotitolo-cliente').innerText = nomeCliente;
+            document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
+            document.getElementById('scheda-sottotitolo-valore').innerText = "Calcolo in corso..."; 
 
-            if (statoRilievo === 'Rilievo Eseguito') {
-                badgeStato.innerText = 'Rilievo Eseguito';
-                badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
-
-                step1.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div><span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span>`;
-                step2.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div><span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span>`;
-
-                containerAzioni.innerHTML = `
-                    <button onclick="riportaRilievoADaFare()" class="text-xs font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg">&larr; Riporta a Da Fare</button>
-                    <div class="flex-1"></div>
-                    <button onclick="apriModaleRilievo(true)" class="text-xs font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-5 py-2.5 rounded-lg shadow-sm">✏️ Modifica Dati / Aggiungi File</button>
-                `;
-
-                document.getElementById('rilievo-view-data').innerText = rilievoAttivo.data_rilievo ? new Date(rilievoAttivo.data_rilievo).toLocaleDateString('it-IT') : '--';
-                document.getElementById('rilievo-view-tecnico').innerText = rilievoAttivo.tecnico || '--';
-                document.getElementById('rilievo-view-note').innerText = rilievoAttivo.note || 'Nessuna nota inserita.';
-
-                disegnaAllegatiRilievo(rilievoAttivo.file_url);
-                boxScheda.classList.remove('hidden');
-            } else {
-                badgeStato.innerText = 'Da Fare';
-                badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
-
-                step1.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div><span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>`;
-                step2.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div><span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>`;
-
-                containerAzioni.innerHTML = `
-                    <button onclick="apriModaleRilievo(false)" class="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 px-8 py-2.5 rounded-lg shadow-md transition-all flex items-center gap-2">
-                        <span>📐</span> Registra Rilievo Eseguito &rarr;
-                    </button>
-                `;
-
-                boxScheda.classList.add('hidden');
-            }
+            disegnaStepperLed();
         }
 
-        function disegnaAllegatiRilievo(urls_csv) {
-            const container = document.getElementById('rilievo-lista-allegati');
-            if (!urls_csv || urls_csv.trim() === '') {
-                container.innerHTML = '<p class="text-xs text-gray-400 italic py-2">Nessun file o scansione caricata per questo rilievo.</p>';
-                return;
+        function disegnaStepperLed() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const container = document.getElementById('stepper-container');
+            container.innerHTML = '';
+            document.getElementById('stepper-azioni').innerHTML = ''; // Azzerato perché non ci sono più i vecchi bottoni
+            
+            let fasiArr = [0,0,0,0,0,0];
+            if (com.fasi_cantiere) {
+                fasiArr = com.fasi_cantiere.split(',').map(Number);
             }
+            ledStati = fasiArr;
 
-            const urls = urls_csv.split(',').filter(x => x.trim() !== '');
-            let html = '';
+            const bgLine = document.createElement('div');
+            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
+            container.appendChild(bgLine);
 
-            urls.forEach((url, i) => {
-                let fileName = decodeURIComponent(url.split('/').pop());
-                let cleanName = fileName.replace(/_[a-z0-9]{4}(\.[a-zA-Z0-9]+)$/i, '$1');
+            sequenzaStati.forEach((stato, index) => {
+                const punto = document.createElement('div');
+                punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform';
+                punto.onclick = () => gestisciClickLed(index); 
+                
+                let val = fasiArr[index] || 0;
+                let iconaHTML = '';
+                let textColor = 'text-gray-400';
 
-                html += `
-                    <a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 hover:bg-blue-50/50 hover:border-blue-200 border-gray-200 transition-all group">
-                        <div class="text-xl text-blue-600 group-hover:scale-110 transition-transform">📄</div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-gray-900 truncate">${cleanName}</p>
-                            <p class="text-[10px] text-gray-400">Clicca per visualizzare o scaricare</p>
-                        </div>
-                        <div class="text-gray-400 font-bold">&rarr;</div>
-                    </a>
+                if (val === 0) { // Spento
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">${index + 1}</div>`;
+                    textColor = 'text-gray-400';
+                } else if (val === 1) { // In corso (Celeste)
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-sky-500 text-white font-bold text-sm shadow-md ring-4 ring-sky-100">${index + 1}</div>`;
+                    textColor = 'text-sky-600 font-bold';
+                } else if (val === 2) { // Completato (Verde)
+                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold ring-4 ring-emerald-100">✓</div>`;
+                    textColor = 'text-emerald-700 font-bold';
+                }
+
+                punto.innerHTML = `
+                    ${iconaHTML}
+                    <span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>
                 `;
+                container.appendChild(punto);
             });
-
-            container.innerHTML = html;
         }
 
-        function apriModaleRilievo(isModifica = false) {
-            document.getElementById('form-rilievo-misure').reset();
-            const inputData = document.getElementById('rilievo-input-data');
-            const inputTecnico = document.getElementById('rilievo-input-tecnico');
-            const inputNote = document.getElementById('rilievo-input-note');
-            const modalTitolo = document.getElementById('modal-rilievo-titolo');
-
-            if (isModifica && rilievoAttivo) {
-                modalTitolo.innerText = "Modifica Dati Rilievo Misure";
-                inputData.value = rilievoAttivo.data_rilievo || new Date().toISOString().split('T')[0];
-                inputTecnico.value = rilievoAttivo.tecnico || UTENTE_CORRENTE;
-                inputNote.value = rilievoAttivo.note || '';
-            } else {
-                modalTitolo.innerText = "Registra Rilievo Misure";
-                inputData.value = new Date().toISOString().split('T')[0];
-                inputTecnico.value = UTENTE_CORRENTE;
-                inputNote.value = '';
+        async function gestisciClickLed(index) {
+            let val = ledStati[index];
+            if (val === 0) {
+                // Passa a IN CORSO
+                await aggiornaLedDB(index, 1);
+            } else if (val === 1) {
+                // Chiede conferma per COMPLETATO
+                faseDaCompletare = index;
+                document.getElementById('nome-fase-popup').innerText = sequenzaStati[index].toUpperCase();
+                document.getElementById('modal-conferma-fase').classList.remove('hidden');
+            } else if (val === 2) {
+                // Torna a SPENTO
+                if(confirm(`Vuoi annullare il completamento della fase "${sequenzaStati[index]}" e riportarla a stato inattivo?`)) {
+                    await aggiornaLedDB(index, 0);
+                }
             }
-
-            document.getElementById('modal-rilievo-misure').classList.remove('hidden');
         }
 
-        function chiudiModaleRilievo() {
-            document.getElementById('modal-rilievo-misure').classList.add('hidden');
+        function chiudiModaleConfermaFase() {
+            faseDaCompletare = null;
+            document.getElementById('modal-conferma-fase').classList.add('hidden');
         }
 
-        document.getElementById('form-rilievo-misure').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function confermaFaseLed() {
+            if (faseDaCompletare !== null) {
+                await aggiornaLedDB(faseDaCompletare, 2);
+                chiudiModaleConfermaFase();
+            }
+        }
+
+        async function aggiornaLedDB(index, nuovoValore) {
             const com = commesseCorrenti[commessaAttivaIndex];
-            const btn = document.getElementById('btn-salva-rilievo');
-            btn.innerText = "Salvataggio...";
-            btn.disabled = true;
-
-            const dataRilievo = document.getElementById('rilievo-input-data').value;
-            const tecnico = document.getElementById('rilievo-input-tecnico').value.trim();
-            const note = document.getElementById('rilievo-input-note').value.trim();
-            const fileInput = document.getElementById('rilievo-input-file');
-
-            let nuovoFileUrl = null;
-            if (fileInput.files.length > 0) {
-                btn.innerText = "Caricamento file...";
-                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO');
+            let nuoviStati = [...ledStati];
+            nuoviStati[index] = nuovoValore;
+            const nuovaStringa = nuoviStati.join(',');
+            
+            // Calcoliamo lo stato testuale globale (il più alto in corso, o il più alto completato)
+            let nuovoStatoTestuale = 'Preventivazione';
+            let found = false;
+            for (let i = nuoviStati.length - 1; i >= 0; i--) {
+                if (nuoviStati[i] > 0) {
+                    nuovoStatoTestuale = sequenzaStati[i];
+                    found = true;
+                    break;
+                }
             }
+            if (!found) nuovoStatoTestuale = 'Preventivazione';
 
-            let fileUrlFinale = rilievoAttivo ? (rilievoAttivo.file_url || '') : '';
-            if (nuovoFileUrl) {
-                fileUrlFinale = fileUrlFinale ? `${fileUrlFinale},${nuovoFileUrl}` : nuovoFileUrl;
-            }
-
-            const payload = {
-                commessa_id: com.id,
-                stato: 'Rilievo Eseguito',
-                data_rilievo: dataRilievo,
-                tecnico: tecnico,
-                note: note || null,
-                file_url: fileUrlFinale || null
-            };
-
-            let error = null;
-            if (rilievoAttivo && rilievoAttivo.id) {
-                const res = await supabaseClient.from('rilievi_misure').update(payload).eq('id', rilievoAttivo.id);
-                error = res.error;
-            } else {
-                const res = await supabaseClient.from('rilievi_misure').insert([payload]);
-                error = res.error;
-            }
+            const { error } = await supabaseClient.from('commesse').update({ 
+                fasi_cantiere: nuovaStringa,
+                stato: nuovoStatoTestuale
+            }).eq('id', com.id);
 
             if (!error) {
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: com.id,
-                    azione: `📐 Rilievo misure eseguito da ${tecnico}`,
-                    nota: note || null,
-                    file_url: nuovoFileUrl,
-                    autore: UTENTE_CORRENTE
-                }]);
-
-                chiudiModaleRilievo();
-                await caricaRilieviDiQuestaCommessa();
-                await caricaCronologia(com.id);
+                let logMsg = '';
+                if(nuovoValore === 1) logMsg = `🔹 Iniziata fase: ${sequenzaStati[index]}`;
+                if(nuovoValore === 2) logMsg = `✅ Completata fase: ${sequenzaStati[index]}`;
+                if(nuovoValore === 0) logMsg = `Resettata fase: ${sequenzaStati[index]}`;
+                
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, autore: UTENTE_CORRENTE }]);
+                
+                com.fasi_cantiere = nuovaStringa;
+                com.stato = nuovoStatoTestuale;
+                ledStati = nuoviStati;
+                
+                aggiornaDatiSchedaUI();
+                caricaCronologia(com.id);
             } else {
-                alert("Errore salvataggio rilievo misure: " + error.message);
-            }
-
-            btn.innerText = "Salva Rilievo";
-            btn.disabled = false;
-        });
-
-        async function riportaRilievoADaFare() {
-            if (!confirm("Vuoi riportare lo stato del rilievo a 'Da Fare'?")) return;
-            if (!rilievoAttivo) return;
-            const com = commesseCorrenti[commessaAttivaIndex];
-
-            const { error } = await supabaseClient.from('rilievi_misure').update({ stato: 'Da Fare' }).eq('id', rilievoAttivo.id);
-            if (!error) {
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: com.id,
-                    azione: `Stato rilievo misure riportato a: DA FARE`,
-                    autore: UTENTE_CORRENTE
-                }]);
-                await caricaRilieviDiQuestaCommessa();
-                await caricaCronologia(com.id);
+                alert("Errore aggiornamento fase: " + error.message);
             }
         }
 
-        // ================= PREVENTIVI, CONTRATTI E FATTURE =================
+
+        // ================= GESTIONE PREVENTIVI, CONTRATTI, FATTURE =================
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -1128,149 +1027,7 @@
             divLista.innerHTML = html;
         }
 
-        // --- STEPPER CANTIERE SEMPLIFICATO E SLEAGATO ---
-        function aggiornaDatiSchedaUI() {
-            if(commessaAttivaIndex === null) return;
-            const com = commesseCorrenti[commessaAttivaIndex];
-            document.getElementById('scheda-titolo').innerText = com.numero;
-            
-            const bdgSede = document.getElementById('scheda-badge-sede');
-            if (com.sede_gestione) { bdgSede.innerText = com.sede_gestione; bdgSede.classList.remove('hidden'); } 
-            else { bdgSede.classList.add('hidden'); }
-
-            let colorStato = 'bg-blue-100 text-blue-800';
-            if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-            if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-            if(com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
-            
-            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
-            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Prev / Contratto';
-
-            const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
-            
-            document.getElementById('scheda-sottotitolo-cliente').innerText = nomeCliente;
-            document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
-            document.getElementById('scheda-sottotitolo-valore').innerText = "Calcolo in corso..."; 
-
-            disegnaStepper(com.stato || 'Prev / Contratto');
-        }
-
-        function disegnaStepper(statoAttuale) {
-            const container = document.getElementById('stepper-container');
-            const azioniBox = document.getElementById('stepper-azioni');
-            container.innerHTML = ''; azioniBox.innerHTML = '';
-
-            if (statoAttuale === 'Annullata') {
-                container.innerHTML = `<div class="w-full text-center py-4 bg-red-50 text-red-600 font-bold rounded-lg border border-red-200">❌ COMMESSA ANNULLATA</div>`;
-                azioniBox.innerHTML = `<button onclick="cambiaStatoDB('Prev / Contratto')" class="text-sm font-medium text-gray-500 hover:text-gray-900 border border-gray-300 px-4 py-2 rounded-lg bg-white">Ripristina</button>`;
-                return;
-            }
-
-            let idxCalcolato = sequenzaStati.indexOf(statoAttuale);
-            let etichettaOverride = null;
-            let coloreOverride = null;
-
-            if (statoAttuale === 'In Assistenza / Ripristino') { idxCalcolato = 4; etichettaOverride = 'ASSISTENZA'; coloreOverride = 'bg-orange-500'; } 
-            else if (statoAttuale === 'Contestazione') { idxCalcolato = 4; etichettaOverride = 'CONTESTAZ.'; coloreOverride = 'bg-red-600'; }
-
-            if (idxCalcolato === -1) idxCalcolato = 0;
-
-            const bgLine = document.createElement('div');
-            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full';
-            container.appendChild(bgLine);
-
-            sequenzaStati.forEach((stato, index) => {
-                const punto = document.createElement('div');
-                punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform';
-                punto.onclick = () => saltoStato(stato); 
-                
-                let labelVisuale = stato;
-                if (index === 4 && etichettaOverride) labelVisuale = etichettaOverride;
-
-                let iconaHTML = '';
-                let textColor = 'text-gray-400';
-
-                // SOLO la fase attuale prende il colore
-                if (index === idxCalcolato) {
-                    let coloreBg = coloreOverride || 'bg-blue-500';
-                    let coloreRing = coloreOverride ? (coloreOverride === 'bg-orange-500' ? 'ring-orange-100' : 'ring-red-100') : 'ring-blue-100';
-                    let mark = index + 1;
-                    
-                    if(etichettaOverride === 'ASSISTENZA') mark = '⚠️';
-                    if(etichettaOverride === 'CONTESTAZ.') mark = '🛑';
-                    if(stato === 'Conclusa') { coloreBg = 'bg-emerald-500'; coloreRing = 'ring-emerald-100'; mark = '✓'; }
-
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${coloreBg} text-white font-bold text-sm shadow-lg ring-4 ${coloreRing}">${mark}</div>`;
-                    
-                    if (stato === 'Conclusa') textColor = 'text-emerald-700 font-bold';
-                    else if (coloreOverride === 'bg-orange-500') textColor = 'text-orange-600 font-bold';
-                    else if (coloreOverride === 'bg-red-600') textColor = 'text-red-600 font-bold';
-                    else textColor = 'text-[#2e2a5b] font-bold';
-                } 
-                // Le altre fasi (passate o future) restano grigie
-                else {
-                    let mark = index + 1;
-                    if (stato === 'Conclusa') mark = '✓';
-                    iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">${mark}</div>`;
-                    textColor = 'text-gray-400';
-                }
-
-                punto.innerHTML = `
-                    ${iconaHTML}
-                    <span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${labelVisuale}</span>
-                `;
-                container.appendChild(punto);
-            });
-
-            if (statoAttuale === 'In Assistenza / Ripristino') {
-                azioniBox.innerHTML = `<div class="w-full bg-orange-50 border border-orange-200 p-4 rounded-lg flex items-center justify-between"><div><p class="text-sm font-bold text-orange-800">⚠️ Cantiere in Ripristino / Sostituzione Materiali</p></div><button onclick="apriModaleCollaudo()" class="text-sm font-bold text-white bg-orange-600 hover:bg-orange-700 px-5 py-2 rounded shadow-sm">Nuovo Collaudo (Risolto)</button></div>`;
-            } else if (statoAttuale === 'Contestazione') {
-                azioniBox.innerHTML = `<div class="w-full bg-red-50 border border-red-200 p-4 rounded-lg flex items-center justify-between"><div><p class="text-sm font-bold text-red-800">🛑 CANTIERE BLOCCATO PER CONTESTAZIONE</p></div><button onclick="apriModaleCollaudo()" class="text-sm font-bold text-white bg-red-600 hover:bg-red-700 px-5 py-2 rounded shadow-sm">Sblocca Contestazione</button></div>`;
-            } else {
-                if (idxCalcolato > 0) azioniBox.innerHTML += `<button onclick="cambiaStatoDB('${sequenzaStati[idxCalcolato - 1]}')" class="text-sm font-medium text-gray-600 hover:text-gray-900 bg-white border border-gray-300 px-4 py-2 rounded-lg"><span>&larr;</span> Indietro</button>`;
-                if (idxCalcolato < sequenzaStati.length - 1) azioniBox.innerHTML += `<div class="flex-1"></div><button onclick="cambiaStatoDB('${sequenzaStati[idxCalcolato + 1]}')" class="text-sm font-bold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-6 py-2 rounded-lg shadow-sm">Passa a ${sequenzaStati[idxCalcolato + 1]} <span>&rarr;</span></button>`;
-            }
-        }
-
-        function saltoStato(nuovoStato) {
-            const com = commesseCorrenti[commessaAttivaIndex];
-            if (com.stato === nuovoStato) return; 
-            if (confirm(`Vuoi spostare manualmente il cantiere allo stato: ${nuovoStato.toUpperCase()}?\nL'azione verrà registrata nel diario.`)) {
-                cambiaStatoDB(nuovoStato, true);
-            }
-        }
-
-        async function cambiaStatoDB(nuovoStato, isSalto = false) {
-            const com = commesseCorrenti[commessaAttivaIndex];
-
-            const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
-            if (!error) {
-                let msgLog = isSalto ? `Salto lavorazione manuale in: ${nuovoStato.toUpperCase()}` : `Stato cantiere aggiornato in: ${nuovoStato.toUpperCase()}`;
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: msgLog, autore: UTENTE_CORRENTE }]);
-                com.stato = nuovoStato; aggiornaDatiSchedaUI(); caricaCronologia(com.id); caricaCommesse(); 
-            }
-        }
-
-        function apriModaleCollaudo() { document.getElementById('collaudo-note').value = ''; document.querySelectorAll('input[name="esito_strada"]').forEach(radio => radio.checked = false); document.getElementById('modal-esito-collaudo').classList.remove('hidden'); }
-        function chiudiModaleCollaudo() { document.getElementById('modal-esito-collaudo').classList.add('hidden'); }
-        async function salvaEsitoCollaudo() {
-            const radioSelezionato = document.querySelector('input[name="esito_strada"]:checked');
-            if (!radioSelezionato) { alert("Devi selezionare una delle 4 strade per poter chiudere il collaudo!"); return; }
-            const strada = radioSelezionato.value; const note = document.getElementById('collaudo-note').value;
-            if ((strada === "3" || strada === "4") && (!note || note.trim() === '')) { alert("Per le Anomalie e le Contestazioni è OBBLIGATORIO compilare il campo Note per spiegare il problema."); return; }
-            const com = commesseCorrenti[commessaAttivaIndex]; let nuovoStato = ''; let logAzione = '';
-            if (strada === "1") { nuovoStato = 'Conclusa'; logAzione = "✅ COLLAUDO SUPERATO: Lavoro completato a regola d'arte e concluso."; } 
-            else if (strada === "2") { nuovoStato = 'Posa'; logAzione = "🟡 COLLAUDO CON RISERVA: Restano finiture da fare."; } 
-            else if (strada === "3") { nuovoStato = 'In Assistenza / Ripristino'; logAzione = "🟠 COLLAUDO FALLITO (Non Conformità/Mancanze): Cantiere spostato in Assistenza."; } 
-            else if (strada === "4") { nuovoStato = 'Contestazione'; logAzione = "🔴 CANTIERE BLOCCATO PER CONTESTAZIONE CLIENTE."; }
-            const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
-            if (!error) {
-                let testoCompletoLog = logAzione; if (note) testoCompletoLog += ` Dettagli: "${note}"`;
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: testoCompletoLog, autore: UTENTE_CORRENTE }]);
-                com.stato = nuovoStato; chiudiModaleCollaudo(); aggiornaDatiSchedaUI(); caricaCronologia(com.id); caricaCommesse();
-            } else { alert("Errore salvataggio collaudo: " + error.message); }
-        }
-
+        // ================= GESTIONE ORDINI FORNITORI =================
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
             if (fornitori) { const select = document.getElementById('form-ord-new-fornitore'); select.innerHTML = '<option value="">-- Seleziona --</option>'; fornitori.forEach(f => select.innerHTML += `<option value="${f.id}">${f.nome_azienda}</option>`); }
@@ -1289,10 +1046,7 @@
             if(document.getElementById('form-ord-new-fornitore').options.length <= 1) await caricaFornitoriTendina();
             document.getElementById('form-nuovo-ordine-commessa').reset();
             
-            // Imposta la data di default a oggi
             document.getElementById('form-ord-new-data').value = new Date().toISOString().split('T')[0];
-            
-            if (com.stato === 'In Assistenza / Ripristino' || com.stato === 'Contestazione') document.getElementById('form-ord-sostituzione').checked = true;
             document.getElementById('modal-nuovo-ordine-commessa').classList.remove('hidden');
         }
 
@@ -1368,7 +1122,6 @@
                     descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
                 }
                 
-                // DATA DINAMICA
                 let dataStatoStr = '--';
                 let labelData = 'Inserito';
                 if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
@@ -1481,7 +1234,7 @@
                 punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
             });
             
-            // Gestione dei Box Nascosti
+            // Gestione visibilità caselle dinamiche
             document.getElementById('box-ord-data-conferma').classList.add('hidden');
             document.getElementById('box-ord-costo').classList.add('hidden');
             document.getElementById('box-ord-presunta').classList.add('hidden');
@@ -1550,21 +1303,6 @@
             
             if (!error) {
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Ordine a ${nomeFornitore} aggiornato in: ${statoPendenteOrdine.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
-                
-                if (com.stato === 'Ordini' && statoPendenteOrdine === 'Merce Arrivata') {
-                    const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato, commessa_id').eq('commessa_id', com.id);
-                    if (tuttiOrdini && tuttiOrdini.length > 0) {
-                        const tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata');
-                        if (tuttiArrivati) { 
-                            await supabaseClient.from('commesse').update({ stato: 'Posa' }).eq('id', com.id); 
-                            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `⚡ Tutta la merce è arrivata! Il cantiere avanza in automatico a: POSA`, autore: 'Sistema Auto' }]); 
-                            com.stato = 'Posa'; 
-                            aggiornaDatiSchedaUI(); 
-                            caricaCommesse(); 
-                        }
-                    }
-                }
-                
                 chiudiModaleGestioneOrdine(); 
                 caricaOrdiniDiQuestaCommessa(); 
                 caricaCronologia(com.id);
