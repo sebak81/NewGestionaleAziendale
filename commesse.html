@@ -792,7 +792,6 @@
             const com = commesseCorrenti[commessaAttivaIndex];
             const container = document.getElementById('stepper-container');
             container.innerHTML = '';
-            document.getElementById('stepper-azioni').innerHTML = ''; // Azzerato perché non ci sono più i vecchi bottoni
             
             let fasiArr = [0,0,0,0,0,0];
             if (com.fasi_cantiere) {
@@ -869,7 +868,7 @@
             const nuovaStringa = nuoviStati.join(',');
             
             // Calcoliamo lo stato testuale globale (il più alto in corso, o il più alto completato)
-            let nuovoStatoTestuale = 'Preventivazione';
+            let nuovoStatoTestuale = 'Prev / Contratto';
             let found = false;
             for (let i = nuoviStati.length - 1; i >= 0; i--) {
                 if (nuoviStati[i] > 0) {
@@ -878,7 +877,7 @@
                     break;
                 }
             }
-            if (!found) nuovoStatoTestuale = 'Preventivazione';
+            if (!found) nuovoStatoTestuale = 'Prev / Contratto';
 
             const { error } = await supabaseClient.from('commesse').update({ 
                 fasi_cantiere: nuovaStringa,
@@ -1234,7 +1233,7 @@
                 punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
             });
             
-            // Gestione visibilità caselle dinamiche
+            // Gestione dei Box Nascosti
             document.getElementById('box-ord-data-conferma').classList.add('hidden');
             document.getElementById('box-ord-costo').classList.add('hidden');
             document.getElementById('box-ord-presunta').classList.add('hidden');
