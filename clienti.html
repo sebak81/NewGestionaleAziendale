@@ -290,7 +290,7 @@
             </div>
 
             <div class="px-6 py-4 border-t border-gray-100 flex justify-between items-center bg-gray-50 rounded-b-2xl">
-                <button type="button" id="btn-elimina-cliente" onclick="confermaEliminazioneCliente()" class="hidden text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Cliente</button>
+                <button type="button" id="btn-elimina-cliente" onclick="confermaEliminazioneCliente()" class="hidden text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Cliente a Cascata</button>
                 <div class="flex gap-2 ml-auto">
                     <button type="button" onclick="chiudiModaleCliente()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Annulla</button>
                     <button type="submit" form="form-cliente" id="btn-salva-cli" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">Salva Cliente</button>
@@ -562,14 +562,10 @@
                     });
                 }
 
-                const haPrevAccettato = c.preventivi && c.preventivi.some(p => p.stato === 'Accettato');
                 let bgStato = 'bg-gray-100 text-gray-700';
-                if (haPrevAccettato) {
-                    bgStato = 'bg-green-200 text-gray-900 border border-green-300 font-bold';
-                }
+                if (c.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
                 if (c.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
                 if (c.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-                if (c.stato === 'Conclusa' || c.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
 
                 const sede = c.sede_gestione ? `<span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[9px] font-bold uppercase">${c.sede_gestione}</span>` : '';
 
@@ -582,7 +578,7 @@
                         <div class="flex items-center gap-2">
                             <span class="font-bold text-[#2e2a5b] text-base group-hover:underline">${c.numero}</span>
                             ${sede}
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider ${bgStato}">${c.stato || 'Preventivazione'}</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] uppercase tracking-wider ${bgStato}">${c.stato || 'Prev / Contratto'}</span>
                         </div>
                         <p class="text-xs font-medium text-gray-800">${c.nome_cantiere || 'Cantiere Principale'}</p>
                         <p class="text-[11px] text-gray-500">Contratto: <strong class="text-gray-900">${formattaEuro(valoreCantiere)}</strong> &bull; Incassato: <strong class="text-emerald-600">${formattaEuro(incassatoCantiere)}</strong></p>
@@ -640,6 +636,7 @@
             btn.disabled = true;
 
             const id = document.getElementById('form-cli-id').value;
+            // Campi facoltativi gestiti con .trim() || null per evitare errori in caso di vuoto
             const dati = {
                 nome_ragione_sociale: document.getElementById('form-cli-nome').value.trim(),
                 codice_fiscale: document.getElementById('form-cli-cf').value.trim() || null,
@@ -677,17 +674,55 @@
             btn.disabled = false;
         });
 
+        // ELIMINAZIONE CLIENTE E DATI A CASCATA
         async function confermaEliminazioneCliente() {
             const cli = clientiCorrenti[clienteAttivoIndex];
-            if (!confirm(`Sei sicuro di voler eliminare definitivamente il cliente "${cli.nome_ragione_sociale}"?\nL'operazione non sarà reversibile.`)) return;
+            
+            const conferma = prompt(`ATTENZIONE ESTREMA: Stai per eliminare definitivamente il cliente "${cli.nome_ragione_sociale}".\n\nQuesto eliminerà A CASCATA anche TUTTE le sue Commesse, Preventivi, Contratti, Ordini, Fatture e Rilievi!\n\nL'operazione NON è reversibile. Per confermare, digita la parola ELIMINA qui sotto:`);
+            
+            if (conferma !== 'ELIMINA') { 
+                if(conferma !== null) alert("Eliminazione annullata."); 
+                return; 
+            }
 
+            // 1. Trova tutte le commesse del cliente
+            const { data: commesseCli } = await supabaseClient.from('commesse').select('id').eq('cliente_id', cli.id);
+            
+            if (commesseCli && commesseCli.length > 0) {
+                const commesseIds = commesseCli.map(c => c.id);
+
+                // 2. Trova tutti i contratti legati a queste commesse e rimuovi gli ordini associati
+                const { data: contratti } = await supabaseClient.from('contratti').select('id').in('commessa_id', commesseIds);
+                if (contratti && contratti.length > 0) {
+                    const contrattiIds = contratti.map(c => c.id);
+                    await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds);
+                }
+
+                // 3. Elimina gli ordini collegati direttamente alla commessa
+                await supabaseClient.from('ordini_fornitori').delete().in('commessa_id', commesseIds);
+
+                // 4. Elimina tutti i documenti e record collegati alle commesse
+                await supabaseClient.from('preventivi').delete().in('commessa_id', commesseIds);
+                await supabaseClient.from('rilievi_misure').delete().in('commessa_id', commesseIds);
+                await supabaseClient.from('contratti').delete().in('commessa_id', commesseIds);
+                await supabaseClient.from('fatture').delete().in('commessa_id', commesseIds);
+                await supabaseClient.from('interventi_posa').delete().in('commessa_id', commesseIds);
+                await supabaseClient.from('commesse_log').delete().in('commessa_id', commesseIds);
+
+                // 5. Elimina le commesse
+                await supabaseClient.from('commesse').delete().in('id', commesseIds);
+            }
+
+            // 6. Infine, elimina il cliente
             const { error } = await supabaseClient.from('clienti').delete().eq('id', cli.id);
+            
             if (!error) {
+                alert(`Il cliente ${cli.nome_ragione_sociale} e tutti i suoi dati sono stati eliminati con successo.`);
                 chiudiModaleCliente();
                 chiudiSchedaCliente();
                 await caricaClienti();
             } else {
-                alert("Impossibile eliminare il cliente. Verifica che non vi siano commesse o documenti vincolati:\n" + error.message);
+                alert("Errore durante l'eliminazione del cliente: " + error.message);
             }
         }
     </script>
