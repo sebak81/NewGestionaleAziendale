@@ -169,67 +169,26 @@
 
             <!-- CONTENUTO TAB RILIEVI MISURE -->
             <div id="tab-content-rilievi" class="hidden space-y-6">
+                
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Registro Rilievi e Sopralluoghi</h3>
+                    <button onclick="apriModaleRilievo()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuovo Rilievo</button>
+                </div>
+
+                <!-- MINI STEPPER RILIEVO -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
-                        <span>Avanzamento Rilievo Misure</span>
+                        <span>Avanzamento Rilievo Esecutivo</span>
                         <span id="rilievo-badge-stato" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
                     </h3>
-
-                    <!-- MINI STEPPER 2 STATI -->
-                    <div class="relative flex justify-between items-center w-full max-w-md mx-auto mb-8 px-6" id="stepper-rilievo-container">
-                        <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
-                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-1">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>
-                        </div>
-                        <div class="flex flex-col items-center gap-2 bg-white px-3 z-10" id="step-rilievo-2">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>
-                            <span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-center gap-4 pt-4 border-t border-gray-100" id="azioni-rilievo-container">
-                        <!-- Generato dinamicamente -->
+                    <div class="relative flex justify-between items-center w-full max-w-md mx-auto mb-4 px-6" id="stepper-rilievo-container">
+                        <!-- Generato via JS -->
                     </div>
                 </div>
 
-                <!-- BOX DETTAGLIO RILIEVO ED ALLEGATI -->
-                <div id="box-scheda-rilievo-dati" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 space-y-4">
-                        <h4 class="text-sm font-bold text-gray-800 border-b border-gray-100 pb-2 flex items-center justify-between">
-                            <span>Dati Sopralluogo</span>
-                            <button onclick="apriModaleRilievo(true)" class="text-xs text-blue-600 hover:underline font-bold">✏️ Modifica</button>
-                        </h4>
-                        <div class="space-y-3 text-xs">
-                            <div>
-                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Data Rilievo</span>
-                                <span class="font-bold text-gray-800 text-sm" id="rilievo-view-data">--</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Tecnico Incaricato</span>
-                                <span class="font-bold text-[#2e2a5b] text-sm" id="rilievo-view-tecnico">--</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-400 font-semibold block uppercase text-[10px]">Note Tecniche / Misure</span>
-                                <p class="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 mt-1 italic leading-relaxed" id="rilievo-view-note">Nessuna nota inserita.</p>
-                            </div>
-                        </div>
-                        <button onclick="apriModaleRilievo(false)" class="w-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 py-2 rounded-lg shadow-sm transition-colors mt-4">
-                            + Aggiungi / Sovrascrivi Dati Rilievo
-                        </button>
-                    </div>
-
-                    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-                        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
-                            <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
-                                <span>📐</span> Allegati, Scansioni Misure e Foto
-                            </h4>
-                            <button onclick="apriModaleRilievo(true)" class="text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-lg font-bold transition-colors">+ Aggiungi File</button>
-                        </div>
-                        <div id="rilievo-lista-allegati" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
-                            <p class="text-sm text-gray-400 italic">Nessun documento caricato per questo rilievo.</p>
-                        </div>
-                    </div>
+                <!-- LISTA ATTIVITA' DI RILIEVO -->
+                <div id="lista-rilievi-commessa" class="space-y-3">
+                    <p class="text-sm text-gray-500 italic py-2 text-center">Nessuna attività registrata.</p>
                 </div>
             </div>
 
@@ -309,27 +268,35 @@
         </div>
     </div>
 
-    <!-- MODALE: REGISTRA / MODIFICA RILIEVO MISURE -->
+    <!-- MODALE: REGISTRA NUOVO RILIEVO MISURE (Versione Log) -->
     <div id="modal-rilievo-misure" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <div>
-                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Rilievo Misure</h3>
-                    <p class="text-xs text-gray-500">Inserisci data, tecnico incaricato, misure e documentazione</p>
+                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Attività Rilievo</h3>
+                    <p class="text-xs text-gray-500">Inserisci i dati dell'uscita e gli allegati</p>
                 </div>
                 <button type="button" onclick="chiudiModaleRilievo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
             
             <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
                 <form id="form-rilievo-misure" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">📅 Data del Rilievo *</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">📅 Data *</label>
                             <input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico che ha rilevato *</label>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico *</label>
                             <input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Sebastiano">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Tipo Attività *</label>
+                            <select id="rilievo-input-tipo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                                <option value="Rilievo Preventivo">Rilievo Preventivo</option>
+                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
+                                <option value="Ricontrollo">Ricontrollo</option>
+                            </select>
                         </div>
                     </div>
 
@@ -347,7 +314,7 @@
 
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleRilievo()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
-                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Rilievo</button>
+                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Attività</button>
             </div>
         </div>
     </div>
@@ -585,7 +552,6 @@
         let ordiniCommessaCache = [];
         let sediGlobali = []; 
         let totaleCommesse = 0; 
-        let rilievoAttivo = null; 
         
         // NUOVA SEQUENZA STATI SEMPLIFICATA
         const sequenzaStati = [
@@ -697,14 +663,12 @@
 
                 let bgStato = 'bg-gray-100 text-gray-700';
                 if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
-                if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-                if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-
+                
                 tr.innerHTML = `
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Prev / Contratto'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivazione'}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -806,11 +770,9 @@
 
             let colorStato = 'bg-blue-100 text-blue-800';
             if (com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
-            if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-            if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
             
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
-            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Prev / Contratto';
+            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivazione';
 
             const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
             
@@ -937,7 +899,160 @@
         }
 
 
-        // ================= GESTIONE PREVENTIVI, CONTRATTI, FATTURE =================
+        // ================= GESTIONE RILIEVI MISURE =================
+        async function caricaRilieviDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const divLista = document.getElementById('lista-rilievi-commessa');
+            divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-2 text-center">Caricamento in corso...</p>';
+
+            const { data: rilievi, error } = await supabaseClient
+                .from('rilievi_misure')
+                .select('*')
+                .eq('commessa_id', com.id)
+                .order('data_rilievo', { ascending: false });
+
+            // LOGICA STEPPER RILIEVO (Se c'è un rilievo esecutivo, allora diventa Eseguito)
+            const hasEsecutivo = rilievi && rilievi.some(r => r.tipo_rilievo === 'Rilievo Esecutive');
+            const badgeStato = document.getElementById('rilievo-badge-stato');
+            const containerStepper = document.getElementById('stepper-rilievo-container');
+
+            if (hasEsecutivo) {
+                badgeStato.innerText = 'Rilievo Eseguito';
+                badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
+                containerStepper.innerHTML = `
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-emerald-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div>
+                        <span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span>
+                    </div>
+                `;
+            } else {
+                badgeStato.innerText = 'Da Fare';
+                badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
+                containerStepper.innerHTML = `
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>
+                        <span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>
+                    </div>
+                `;
+            }
+
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB.</p>'; return; }
+            if (!rilievi || rilievi.length === 0) {
+                divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-4 text-center">Nessuna attività registrata. Clicca su "+ Nuovo Rilievo" per iniziare.</p>';
+                return;
+            }
+
+            let html = '';
+            rilievi.forEach(ril => {
+                const dataSplit = ril.data_rilievo ? ril.data_rilievo.split('-') : ['','','']; 
+                const dataIta = ril.data_rilievo ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
+                const tipo = ril.tipo_rilievo || 'Rilievo Misure';
+                
+                let colorBadge = 'bg-gray-100 text-gray-700';
+                if (tipo === 'Rilievo Esecutive') colorBadge = 'bg-emerald-100 text-emerald-800';
+                if (tipo === 'Rilievo Preventivo') colorBadge = 'bg-blue-100 text-blue-800';
+                if (tipo === 'Ricontrollo') colorBadge = 'bg-orange-100 text-orange-800';
+
+                const note = ril.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${ril.note}</p>` : ''; 
+                const btnFile = ril.file_url ? `<a href="${ril.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>` : '';
+                
+                html += `
+                    <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span>
+                                <span class="ml-2 px-2 py-0.5 ${colorBadge} rounded-full text-xs font-bold">${tipo}</span>
+                                <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ${ril.tecnico || '--'}</span>
+                            </div>
+                            <button onclick="eliminaRilievo(${ril.id})" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button>
+                        </div>
+                        ${note} 
+                        ${btnFile}
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+        }
+
+        function apriModaleRilievo() {
+            document.getElementById('form-rilievo-misure').reset();
+            document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0];
+            document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE;
+            document.getElementById('modal-rilievo-misure').classList.remove('hidden');
+        }
+
+        function chiudiModaleRilievo() {
+            document.getElementById('modal-rilievo-misure').classList.add('hidden');
+        }
+
+        document.getElementById('form-rilievo-misure').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const btn = document.getElementById('btn-salva-rilievo');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const dataRilievo = document.getElementById('rilievo-input-data').value;
+            const tecnico = document.getElementById('rilievo-input-tecnico').value.trim();
+            const note = document.getElementById('rilievo-input-note').value.trim();
+            const tipoRilievo = document.getElementById('rilievo-input-tipo').value;
+            const fileInput = document.getElementById('rilievo-input-file');
+
+            let nuovoFileUrl = null;
+            if (fileInput.files.length > 0) {
+                btn.innerText = "Caricamento file...";
+                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO');
+            }
+
+            const payload = {
+                commessa_id: com.id,
+                stato: 'Eseguito',
+                tipo_rilievo: tipoRilievo,
+                data_rilievo: dataRilievo,
+                tecnico: tecnico,
+                note: note || null,
+                file_url: nuovoFileUrl
+            };
+
+            const { error } = await supabaseClient.from('rilievi_misure').insert([payload]);
+
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `📐 Inserita uscita: ${tipoRilievo} (Tecnico: ${tecnico})`,
+                    nota: note || null,
+                    file_url: nuovoFileUrl,
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                chiudiModaleRilievo();
+                await caricaRilieviDiQuestaCommessa();
+                await caricaCronologia(com.id);
+            } else {
+                alert("Errore salvataggio rilievo misure: " + error.message);
+            }
+
+            btn.innerText = "Salva Attività";
+            btn.disabled = false;
+        });
+
+        async function eliminaRilievo(id) {
+            if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return;
+            await supabaseClient.from('rilievi_misure').delete().eq('id', id);
+            caricaRilieviDiQuestaCommessa();
+        }
+
+        // ================= PREVENTIVI E CONTRATTI =================
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -1266,6 +1381,7 @@
                 punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
             });
             
+            // Gestione dei Box Nascosti
             document.getElementById('box-ord-data-conferma').classList.add('hidden');
             document.getElementById('box-ord-costo').classList.add('hidden');
             document.getElementById('box-ord-presunta').classList.add('hidden');
