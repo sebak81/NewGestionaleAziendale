@@ -321,7 +321,10 @@
             fornitori.forEach(f => {
                 let cats = f.categoria ? f.categoria.split(',').map(c => `<span class="inline-block px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-semibold mr-1 mb-1">${c.trim()}</span>`).join('') : '--';
                 let contatti = `<div class="font-bold text-[#2e2a5b]">${f.nome_azienda}</div><div class="text-xs text-gray-600">📞 ${f.telefono||'N/D'} &bull; ✉️ ${f.email||'N/D'}</div>`;
-                let refs = f.fornitori_referenti && f.fornitori_referenti.length > 0 ? f.fornitori_referenti.map(r => `<div class="bg-gray-50 p-2 rounded text-xs mt-1"><b>${r.nome_referente}</b> (${r.mansione_reparto}) - ${r.telefono}</div>`).join('') : '<div class="text-xs text-gray-400 mt-1">Nessun referente</div>';
+                
+                let refs = f.fornitori_referenti && f.fornitori_referenti.length > 0 
+                    ? f.fornitori_referenti.map(r => `<div class="bg-gray-50 p-2 rounded text-xs mt-1"><b>${r.nome_referente}</b> (${r.mansione_reparto}) - ${r.telefono}</div>`).join('') 
+                    : '<div class="text-xs text-gray-400 mt-1">Nessun referente</div>';
                 
                 html += `
                     <tr class="hover:bg-gray-50 align-top">
@@ -364,7 +367,8 @@
                     }
                 }
 
-                const { data: refs } = await supabaseClient.from('fornitori_referenti').select('*').eq('fornitoore_id', id);
+                // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
+                const { data: refs } = await supabaseClient.from('fornitori_referenti').select('*').eq('fornitore_id', id);
                 if (refs && refs.length > 0) {
                     refs.forEach(r => aggiungiRigaReferente(r));
                 }
@@ -428,7 +432,8 @@
             if (!error) {
                 // Gestione Referenti Dinamici
                 if (id) {
-                    await supabaseClient.from('fornitori_referenti').delete().eq('fornitoore_id', id);
+                    // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
+                    await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
                 }
 
                 const righeReferenti = document.querySelectorAll('#tabella-referenti-dinamica tr');
@@ -439,8 +444,9 @@
                     const email = riga.querySelector('.ref-email').value.trim();
 
                     if (nome || reparto || tel || email) {
+                        // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
                         await supabaseClient.from('fornitori_referenti').insert([{
-                            fornitoore_id: fornitoreId,
+                            fornitore_id: fornitoreId,
                             nome_referente: nome || null,
                             mansione_reparto: reparto || null,
                             telefono: tel || null,
@@ -461,7 +467,8 @@
 
         async function eliminaFornitore(id) {
             if(!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
-            await supabaseClient.from('fornitori_referenti').delete().eq('fornitoore_id', id);
+            // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
+            await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
             const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
             if (!error) caricaFornitori(); else alert("Impossibile eliminare: " + error.message);
         }
