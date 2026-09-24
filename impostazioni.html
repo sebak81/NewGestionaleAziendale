@@ -37,11 +37,12 @@
 
     <!-- SCHERMATA PRINCIPALE (IMPOSTAZIONI) -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
+        <header class="p-8 pb-4 shrink-0">
             <h1 class="text-xl font-bold">Impostazioni & Anagrafiche ⚙️</h1>
             <p class="text-sm text-gray-500 mt-1">Configurazioni globali e personalizzazione del gestionale</p>
         </header>
 
+        <!-- CONTENITORE PRINCIPALE SCORREVOLE -->
         <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar max-w-7xl w-full">
             
             <!-- VISTA: MENU PRINCIPALE -->
@@ -72,7 +73,7 @@
             </div>
 
             <!-- VISTA: PANNELLO FORNITORI -->
-            <div id="pannello-fornitori" class="hidden flex-col h-full space-y-6 animate-fade-in">
+            <div id="pannello-fornitori" class="hidden flex-col space-y-6 animate-fade-in pb-10">
                 <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-10">
                     <div class="flex items-center gap-4">
                         <button onclick="tornaAlMenu()" class="text-gray-500 hover:text-[#2e2a5b] font-medium flex items-center gap-2 transition-colors"><span>&larr;</span> Indietro</button>
@@ -102,7 +103,7 @@
             </div>
 
             <!-- VISTA: PANNELLO SEDI -->
-            <div id="pannello-sedi" class="hidden flex-col h-full space-y-6 max-w-2xl animate-fade-in">
+            <div id="pannello-sedi" class="hidden flex-col space-y-6 max-w-2xl animate-fade-in pb-10">
                 <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-10">
                     <div class="flex items-center gap-4">
                         <button onclick="tornaAlMenu()" class="text-gray-500 hover:text-[#2e2a5b] font-medium flex items-center gap-2 transition-colors"><span>&larr;</span> Indietro</button>
@@ -111,19 +112,19 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
                     <form id="form-nuova-sede" class="flex gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
                         <input type="text" id="input-sede" required placeholder="Aggiungi una nuova sede aziendale..." class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button type="submit" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Aggiungi</button>
                     </form>
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex-1 overflow-y-auto no-scrollbar shadow-inner">
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-inner">
                         <ul id="lista-sedi" class="divide-y divide-gray-100 text-sm"></ul>
                     </div>
                 </div>
             </div>
 
             <!-- VISTA: PANNELLO CONDIZIONI PAGAMENTO -->
-            <div id="pannello-pagamenti" class="hidden flex-col h-full space-y-6 max-w-2xl animate-fade-in">
+            <div id="pannello-pagamenti" class="hidden flex-col space-y-6 max-w-2xl animate-fade-in pb-10">
                 <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-gray-200 shadow-sm sticky top-0 z-10">
                     <div class="flex items-center gap-4">
                         <button onclick="tornaAlMenu()" class="text-gray-500 hover:text-[#2e2a5b] font-medium flex items-center gap-2 transition-colors"><span>&larr;</span> Indietro</button>
@@ -132,12 +133,12 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
                     <form id="form-nuovo-pagamento" class="flex gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
                         <input type="text" id="input-pagamento" required placeholder="Es. 50% Acconto + 50% Saldo" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button type="submit" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Aggiungi</button>
                     </form>
-                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden flex-1 overflow-y-auto no-scrollbar shadow-inner">
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-inner">
                         <ul id="lista-pagamenti" class="divide-y divide-gray-100 text-sm"></ul>
                     </div>
                 </div>
@@ -367,7 +368,6 @@
                     }
                 }
 
-                // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
                 const { data: refs } = await supabaseClient.from('fornitori_referenti').select('*').eq('fornitore_id', id);
                 if (refs && refs.length > 0) {
                     refs.forEach(r => aggiungiRigaReferente(r));
@@ -432,7 +432,6 @@
             if (!error) {
                 // Gestione Referenti Dinamici
                 if (id) {
-                    // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
                     await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
                 }
 
@@ -444,7 +443,6 @@
                     const email = riga.querySelector('.ref-email').value.trim();
 
                     if (nome || reparto || tel || email) {
-                        // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
                         await supabaseClient.from('fornitori_referenti').insert([{
                             fornitore_id: fornitoreId,
                             nome_referente: nome || null,
@@ -467,7 +465,6 @@
 
         async function eliminaFornitore(id) {
             if(!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
-            // ERRORE CORRETTO: fornitore_id invece di fornitoore_id
             await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
             const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
             if (!error) caricaFornitori(); else alert("Impossibile eliminare: " + error.message);
