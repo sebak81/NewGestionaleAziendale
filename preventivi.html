@@ -51,7 +51,7 @@
         <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
             <div class="mb-6 flex justify-between items-end">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Elenco Preventivi</h2>
+                    <h2 class="text-3xl font-bold tracking-tight">Pipeline Preventivi</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-preventivi">Caricamento in corso...</p>
                 </div>
                 <button onclick="apriModaleNuovo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
@@ -59,28 +59,17 @@
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4 shrink-0">
                     <div class="flex-1 relative">
                         <input type="text" id="input-ricerca" onkeyup="filtraPreventivi()" placeholder="Cerca per numero o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                            <tr>
-                                <th class="px-6 py-4">Numero & Rev.</th>
-                                <th class="px-6 py-4">Commessa / Cantiere</th>
-                                <th class="px-6 py-4">Cliente</th>
-                                <th class="px-6 py-4">Stato Approvazione</th>
-                                <th class="px-6 py-4">Importo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabella-preventivi" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Caricamento...</td></tr>
-                        </tbody>
-                    </table>
+                
+                <!-- CONTENITORE PIPELINE SUDDIVISO PER STATO -->
+                <div id="contenitore-pipeline" class="p-6 space-y-8 bg-gray-50/30 overflow-y-auto no-scrollbar">
+                    <p class="text-center text-gray-500 py-10">Caricamento pipeline...</p>
                 </div>
             </div>
         </div>
@@ -295,54 +284,102 @@
 
         async function caricaPreventivi() {
             const { data: prevs, error } = await supabaseClient.from('preventivi').select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))').order('created_at', { ascending: false });
-            const tbody = document.getElementById('tabella-preventivi');
-            if (error) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-red-500 py-4">Errore DB</td></tr>'; return; }
+            const contenitore = document.getElementById('contenitore-pipeline');
+            if (error) { contenitore.innerHTML = '<div class="text-center text-red-500 py-4 font-bold">Errore di comunicazione con il Database.</div>'; return; }
 
             preventiviCorrenti = prevs || [];
-            document.getElementById('conteggio-preventivi').innerText = `${preventiviCorrenti.length} preventivi registrati`;
-            disegnaTabella(preventiviCorrenti);
+            document.getElementById('conteggio-preventivi').innerText = `${preventiviCorrenti.length} preventivi gestiti`;
+            disegnaTabellaPipeline(preventiviCorrenti);
         }
 
-        function disegnaTabella(lista) {
-            const tbody = document.getElementById('tabella-preventivi');
-            tbody.innerHTML = '';
-            if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-center text-gray-500">Nessun preventivo trovato.</td></tr>'; return; }
+        function disegnaTabellaPipeline(lista) {
+            const container = document.getElementById('contenitore-pipeline');
+            container.innerHTML = '';
+            if (lista.length === 0) { 
+                container.innerHTML = '<div class="p-8 text-center text-gray-500 bg-white rounded-2xl border border-gray-200">Nessun preventivo trovato in archivio.</div>'; 
+                return; 
+            }
 
-            lista.forEach((p, index) => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.onclick = () => apriSchedaPreventivo(index);
-                
-                const cantiere = p.commesse ? `${p.commesse.numero} ${p.commesse.nome_cantiere ? '('+p.commesse.nome_cantiere+')' : ''}` : '--';
-                const cliente = (p.commesse && p.commesse.clienti) ? p.commesse.clienti.nome_ragione_sociale : '--';
-                const importo = p.importo ? formattaEuro(p.importo) : '--';
-                const rev = p.revisione || 0;
+            // Definiamo i blocchi della pipeline con colori coordinati
+            const sezioniPipeline = [
+                { id: 'Da Fare', titolo: '📝 Da Fare / Da Prezzare', bgHeader: 'bg-gray-100', border: 'border-gray-200', testCol: 'text-gray-700' },
+                { id: 'Stesura', titolo: '✍️ In Stesura Operativa', bgHeader: 'bg-yellow-100', border: 'border-yellow-200', testCol: 'text-yellow-800' },
+                { id: 'Controllo', titolo: '🧐 In Controllo Direzionale', bgHeader: 'bg-purple-100', border: 'border-purple-200', testCol: 'text-purple-800' },
+                { id: 'Inviato', titolo: '📤 Inviati (In attesa di risposta)', bgHeader: 'bg-blue-100', border: 'border-blue-200', testCol: 'text-blue-800' },
+                { id: 'Accettato', titolo: '✅ Approvati / Accettati dal Cliente', bgHeader: 'bg-emerald-100', border: 'border-emerald-200', testCol: 'text-emerald-800' },
+                { id: 'Rifiutato', titolo: '❌ Rifiutati / Disdetti', bgHeader: 'bg-red-100', border: 'border-red-200', testCol: 'text-red-800' }
+            ];
 
-                let colorStato = 'bg-gray-100 text-gray-600';
-                if(p.stato === 'Stesura') colorStato = 'bg-yellow-100 text-yellow-800';
-                if(p.stato === 'Controllo') colorStato = 'bg-purple-100 text-purple-800';
-                if(p.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
-                if(p.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800';
-                if(p.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
+            sezioniPipeline.forEach(sez => {
+                const prevDellaSezione = lista.filter(p => {
+                    const st = p.stato && p.stato.trim() !== '' ? p.stato : 'Da Fare';
+                    return st === sez.id;
+                });
 
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-bold text-[#2e2a5b]">
-                        ${p.numero} 
-                        <span class="ml-2 px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
-                    </td>
-                    <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
-                    <td class="px-6 py-4 text-gray-600 font-medium">${cliente}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${p.stato || 'Da Fare'}</span></td>
-                    <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
+                if (prevDellaSezione.length === 0) return; // Salta il blocco se vuoto per tenere pulita la pagina
+
+                let htmlTabella = `
+                <div class="mb-8 last:mb-0">
+                    <div class="inline-flex items-center gap-3 px-4 py-2 mb-3 rounded-lg border ${sez.bgHeader} ${sez.border} shadow-sm">
+                        <h3 class="text-sm font-bold uppercase tracking-wider ${sez.testCol}">${sez.titolo}</h3>
+                        <span class="px-2 py-0.5 bg-white rounded-full text-xs font-bold shadow-sm ${sez.testCol}">${prevDellaSezione.length}</span>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3 w-48">Numero & Rev.</th>
+                                        <th class="px-6 py-3">Cliente Principale</th>
+                                        <th class="px-6 py-3">Rif. Commessa / Cantiere</th>
+                                        <th class="px-6 py-3 text-right">Importo Stimato</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-100">
                 `;
-                tbody.appendChild(tr);
+
+                prevDellaSezione.forEach(p => {
+                    // Trova l'indice reale globale per l'apertura
+                    const realIndex = preventiviCorrenti.findIndex(x => x.id === p.id);
+
+                    const cantiereNomeStr = p.commesse && p.commesse.nome_cantiere ? `<br><span class="text-xs text-gray-400 font-normal">${p.commesse.nome_cantiere}</span>` : '';
+                    const cantiere = p.commesse ? `<span class="font-medium text-gray-700">${p.commesse.numero}</span>${cantiereNomeStr}` : '--';
+                    const cliente = (p.commesse && p.commesse.clienti) ? p.commesse.clienti.nome_ragione_sociale : '--';
+                    const importo = p.importo ? formattaEuro(p.importo) : '<span class="text-gray-300">--</span>';
+                    const rev = p.revisione || 0;
+
+                    htmlTabella += `
+                        <tr class="hover:bg-gray-50 transition-colors cursor-pointer group" onclick="apriSchedaPreventivo(${realIndex})">
+                            <td class="px-6 py-4">
+                                <span class="font-bold text-[#2e2a5b] group-hover:underline">${p.numero}</span>
+                                <span class="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-500 border border-gray-200 rounded text-[9px] font-bold">REV.${rev}</span>
+                            </td>
+                            <td class="px-6 py-4 text-gray-900 font-bold">${cliente}</td>
+                            <td class="px-6 py-4 leading-tight">${cantiere}</td>
+                            <td class="px-6 py-4 text-right font-bold text-gray-900">${importo}</td>
+                        </tr>
+                    `;
+                });
+
+                htmlTabella += `
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                `;
+                container.innerHTML += htmlTabella;
             });
         }
 
         function filtraPreventivi() {
             const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const filtrati = preventiviCorrenti.filter(p => (p.numero && p.numero.toLowerCase().includes(query)) || (p.commesse && p.commesse.clienti && p.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query)));
-            disegnaTabella(filtrati);
+            const filtrati = preventiviCorrenti.filter(p => 
+                (p.numero && p.numero.toLowerCase().includes(query)) || 
+                (p.commesse && p.commesse.clienti && p.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query)) ||
+                (p.commesse && p.commesse.numero && p.commesse.numero.toLowerCase().includes(query))
+            );
+            disegnaTabellaPipeline(filtrati);
         }
 
         function apriSchedaPreventivo(index, fromUrl = false) {
