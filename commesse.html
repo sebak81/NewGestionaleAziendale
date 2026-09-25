@@ -63,7 +63,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" placeholder="Cerca numero commessa, cliente o cantiere..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
@@ -605,13 +605,13 @@
         let sediGlobali = []; 
         let totaleCommesse = 0; 
         
-        // NUOVA SEQUENZA STATI SEMPLIFICATA
+        // NUOVA SEQUENZA STATI AGGIORNATA CON "CONTRATTI"
         const sequenzaStati = [
-            'Prev / Contratto', 'Rilievo Misure', 'Pagamenti', 'Ordini', 'Posa', 'Conclusa'
+            'Preventivi', 'Rilievo Misure', 'Contratti', 'Pagamenti', 'Ordini', 'Posa', 'Conclusa'
         ];
         
         let commessaAttivaIndex = null; 
-        let ledStati = [0,0,0,0,0,0];
+        let ledStati = [0,0,0,0,0,0,0];
         let faseDaCompletare = null;
 
         function formattaEuro(numero) {
@@ -720,7 +720,7 @@
                     <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
                     <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
                     <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivazione'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivi'}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -822,9 +822,11 @@
 
             let colorStato = 'bg-blue-100 text-blue-800';
             if (com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
+            if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
+            if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
             
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
-            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivazione';
+            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivi';
 
             const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
             
@@ -840,9 +842,15 @@
             const container = document.getElementById('stepper-container');
             container.innerHTML = '';
             
-            let fasiArr = [0,0,0,0,0,0];
+            let fasiArr = [0,0,0,0,0,0,0];
             if (com.fasi_cantiere) {
-                fasiArr = com.fasi_cantiere.split(',').map(Number);
+                let tempArr = com.fasi_cantiere.split(',').map(Number);
+                // Migrazione silente se l'array è ancora da 6 blocchi
+                if (tempArr.length === 6) {
+                    tempArr.splice(2, 0, 0); 
+                }
+                fasiArr = tempArr;
+                while(fasiArr.length < 7) fasiArr.push(0);
             }
             ledStati = fasiArr;
 
@@ -881,15 +889,12 @@
         async function gestisciClickLed(index) {
             let val = ledStati[index];
             if (val === 0) {
-                // Passa a IN CORSO
                 await aggiornaLedDB(index, 1);
             } else if (val === 1) {
-                // Chiede conferma per COMPLETATO
                 faseDaCompletare = index;
                 document.getElementById('nome-fase-popup').innerText = sequenzaStati[index].toUpperCase();
                 document.getElementById('modal-conferma-fase').classList.remove('hidden');
             } else if (val === 2) {
-                // Torna a SPENTO
                 if(confirm(`Vuoi annullare il completamento della fase "${sequenzaStati[index]}" e riportarla a stato inattivo?`)) {
                     await aggiornaLedDB(index, 0);
                 }
@@ -914,8 +919,7 @@
             nuoviStati[index] = nuovoValore;
             const nuovaStringa = nuoviStati.join(',');
             
-            // Calcoliamo lo stato testuale globale (il più alto in corso, o il più alto completato)
-            let nuovoStatoTestuale = 'Prev / Contratto';
+            let nuovoStatoTestuale = 'Preventivi';
             let found = false;
             for (let i = nuoviStati.length - 1; i >= 0; i--) {
                 if (nuoviStati[i] > 0) {
@@ -924,7 +928,7 @@
                     break;
                 }
             }
-            if (!found) nuovoStatoTestuale = 'Prev / Contratto';
+            if (!found) nuovoStatoTestuale = 'Preventivi';
 
             const { error } = await supabaseClient.from('commesse').update({ 
                 fasi_cantiere: nuovaStringa,
@@ -963,7 +967,6 @@
                 .eq('commessa_id', com.id)
                 .order('data_rilievo', { ascending: false });
 
-            // LOGICA STEPPER RILIEVO (Se c'è un rilievo esecutivo, allora diventa Eseguito)
             const hasEsecutivo = rilievi && rilievi.some(r => r.tipo_rilievo === 'Rilievo Esecutive');
             const badgeStato = document.getElementById('rilievo-badge-stato');
             const containerStepper = document.getElementById('stepper-rilievo-container');
@@ -1087,7 +1090,7 @@
                     autore: UTENTE_CORRENTE
                 }]);
 
-                // GESTIONE AUTOMATICA LED RILIEVI
+                // GESTIONE AUTOMATICA LED RILIEVI (Ora Indice 1)
                 if (tipoRilievo === 'Rilievo Esecutive') {
                     if(ledStati[1] !== 2) await aggiornaLedDB(1, 2);
                 } else {
@@ -1288,7 +1291,8 @@
                 const labelAssistenza = isSostituzione ? ' ⚠️ (In Sostituzione / Post-Posa)' : '';
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Creato Ordine Inviato a: ${nomeFornitore}${labelAssistenza}`, autore: UTENTE_CORRENTE }]);
                 
-                if(ledStati[3] === 0) await aggiornaLedDB(3, 1);
+                // GESTIONE AUTOMATICA LED "Ordini" (ora Indice 4)
+                if(ledStati[4] === 0) await aggiornaLedDB(4, 1);
 
                 chiudiModaleNuovoOrdineDaCommessa(); 
                 caricaOrdiniDiQuestaCommessa(); 
@@ -1378,6 +1382,26 @@
         const sequenzaStatiOrdine = ['Ordine inviato', 'Conferma', 'Merce Arrivata'];
         let statoPendenteOrdine = '';
 
+        async function caricaFileSuStorage(file, prefisso) {
+            if (!file) return null;
+            const lastDotIndex = file.name.lastIndexOf('.');
+            let baseName = file.name;
+            let extension = '';
+            if (lastDotIndex !== -1) {
+                baseName = file.name.substring(0, lastDotIndex);
+                extension = file.name.substring(lastDotIndex);
+            }
+            baseName = baseName.replace(/[^a-zA-Z0-9\-_ ]/g, '').trim();
+            const dataOggi = new Date().toISOString().split('T')[0];
+            const randomHash = Math.random().toString(36).substring(2, 6);
+            const fileName = `${prefisso}_${dataOggi}_${baseName}_${randomHash}${extension}`;
+
+            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
+            if (error) { alert("Errore upload file: " + error.message); return null; }
+            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
+            return data.publicUrl;
+        }
+
         function apriModaleGestioneOrdine(indexMemoria) {
             const ord = ordiniCommessaCache[indexMemoria]; 
             const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
@@ -1423,6 +1447,7 @@
                 punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
             });
             
+            // Gestione dei Box Nascosti
             document.getElementById('box-ord-data-conferma').classList.add('hidden');
             document.getElementById('box-ord-costo').classList.add('hidden');
             document.getElementById('box-ord-presunta').classList.add('hidden');
@@ -1501,7 +1526,7 @@
                     if (tuttiOrdini && tuttiOrdini.length > 0) {
                         const tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata');
                         if (tuttiArrivati) { 
-                            if(ledStati[3] !== 2) await aggiornaLedDB(3, 2);
+                            if(ledStati[4] !== 2) await aggiornaLedDB(4, 2);
                         }
                     }
                 }
@@ -1539,7 +1564,7 @@
             const { error } = await supabaseClient.from('interventi_posa').insert([nuovoInt]);
             if (!error) { 
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Registrato intervento di posa in cantiere da: ${nuovoInt.posatore}`, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
-                if(ledStati[4] === 0) await aggiornaLedDB(4, 1);
+                if(ledStati[5] === 0) await aggiornaLedDB(5, 1);
                 chiudiModalePosa(); 
                 caricaPosaInterventi(); 
                 caricaCronologia(com.id); 
@@ -1610,7 +1635,7 @@
 
         document.getElementById('form-com-cliente').addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
         document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
-            e.preventDefault(); const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Prev / Contratto', valore: null };
+            e.preventDefault(); const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivi', valore: null };
             const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
             if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
         });
