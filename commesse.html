@@ -63,7 +63,7 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" placeholder="Cerca numero commessa, cliente o cantiere..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
@@ -352,7 +352,7 @@
 
                         <!-- BOX CONFERMA E COSTI (Dinamici) -->
                         <div id="box-ord-data-conferma" class="hidden col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Ricezione Conferma</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label>
                             <input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700">
                         </div>
                         <div id="box-ord-costo" class="hidden col-span-1">
@@ -424,7 +424,7 @@
     <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
                     <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
@@ -950,7 +950,168 @@
             }
         }
 
-        // ================= GESTIONE PREVENTIVI E CONTRATTI =================
+
+        // ================= GESTIONE RILIEVI MISURE =================
+        async function caricaRilieviDiQuestaCommessa() {
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const divLista = document.getElementById('lista-rilievi-commessa');
+            divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-2 text-center">Caricamento in corso...</p>';
+
+            const { data: rilievi, error } = await supabaseClient
+                .from('rilievi_misure')
+                .select('*')
+                .eq('commessa_id', com.id)
+                .order('data_rilievo', { ascending: false });
+
+            // LOGICA STEPPER RILIEVO (Se c'è un rilievo esecutivo, allora diventa Eseguito)
+            const hasEsecutivo = rilievi && rilievi.some(r => r.tipo_rilievo === 'Rilievo Esecutive');
+            const badgeStato = document.getElementById('rilievo-badge-stato');
+            const containerStepper = document.getElementById('stepper-rilievo-container');
+
+            if (hasEsecutivo) {
+                badgeStato.innerText = 'Rilievo Eseguito';
+                badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
+                containerStepper.innerHTML = `
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-emerald-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div>
+                        <span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span>
+                    </div>
+                `;
+            } else {
+                badgeStato.innerText = 'Da Fare';
+                badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
+                containerStepper.innerHTML = `
+                    <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span>
+                    </div>
+                    <div class="flex flex-col items-center gap-2 bg-white px-3 z-10">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>
+                        <span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span>
+                    </div>
+                `;
+            }
+
+            if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB.</p>'; return; }
+            if (!rilievi || rilievi.length === 0) {
+                divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-4 text-center">Nessuna attività registrata. Clicca su "+ Nuovo Rilievo" per iniziare.</p>';
+                return;
+            }
+
+            let html = '';
+            rilievi.forEach(ril => {
+                const dataSplit = ril.data_rilievo ? ril.data_rilievo.split('-') : ['','','']; 
+                const dataIta = ril.data_rilievo ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
+                const tipo = ril.tipo_rilievo || 'Rilievo Misure';
+                
+                let colorBadge = 'bg-gray-100 text-gray-700';
+                if (tipo === 'Rilievo Esecutive') colorBadge = 'bg-emerald-100 text-emerald-800';
+                if (tipo === 'Rilievo Preventivo') colorBadge = 'bg-blue-100 text-blue-800';
+                if (tipo === 'Ricontrollo') colorBadge = 'bg-orange-100 text-orange-800';
+
+                const note = ril.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${ril.note}</p>` : ''; 
+                const btnFile = ril.file_url ? `<a href="${ril.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>` : '';
+                
+                html += `
+                    <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span>
+                                <span class="ml-2 px-2 py-0.5 ${colorBadge} rounded-full text-xs font-bold">${tipo}</span>
+                                <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ${ril.tecnico || '--'}</span>
+                            </div>
+                            <button onclick="eliminaRilievo(${ril.id})" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button>
+                        </div>
+                        ${note} 
+                        ${btnFile}
+                    </div>
+                `;
+            });
+            divLista.innerHTML = html;
+        }
+
+        function apriModaleRilievo() {
+            document.getElementById('form-rilievo-misure').reset();
+            document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0];
+            document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE;
+            document.getElementById('modal-rilievo-misure').classList.remove('hidden');
+        }
+
+        function chiudiModaleRilievo() {
+            document.getElementById('modal-rilievo-misure').classList.add('hidden');
+        }
+
+        document.getElementById('form-rilievo-misure').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const btn = document.getElementById('btn-salva-rilievo');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const dataRilievo = document.getElementById('rilievo-input-data').value;
+            const tecnico = document.getElementById('rilievo-input-tecnico').value.trim();
+            const note = document.getElementById('rilievo-input-note').value.trim();
+            const tipoRilievo = document.getElementById('rilievo-input-tipo').value;
+            const fileInput = document.getElementById('rilievo-input-file');
+
+            let nuovoFileUrl = null;
+            if (fileInput.files.length > 0) {
+                btn.innerText = "Caricamento file...";
+                nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO');
+            }
+
+            const payload = {
+                commessa_id: com.id,
+                stato: 'Eseguito',
+                tipo_rilievo: tipoRilievo,
+                data_rilievo: dataRilievo,
+                tecnico: tecnico,
+                note: note || null,
+                file_url: nuovoFileUrl
+            };
+
+            const { error } = await supabaseClient.from('rilievi_misure').insert([payload]);
+
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `📐 Inserita uscita: ${tipoRilievo} (Tecnico: ${tecnico})`,
+                    nota: note || null,
+                    file_url: nuovoFileUrl,
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                // GESTIONE AUTOMATICA LED RILIEVI
+                if (tipoRilievo === 'Rilievo Esecutive') {
+                    if(ledStati[1] !== 2) await aggiornaLedDB(1, 2);
+                } else {
+                    if(ledStati[1] === 0) await aggiornaLedDB(1, 1);
+                }
+
+                chiudiModaleRilievo();
+                await caricaRilieviDiQuestaCommessa();
+                await caricaCronologia(com.id);
+            } else {
+                alert("Errore salvataggio rilievo misure: " + error.message);
+            }
+
+            btn.innerText = "Salva Attività";
+            btn.disabled = false;
+        });
+
+        async function eliminaRilievo(id) {
+            if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return;
+            await supabaseClient.from('rilievi_misure').delete().eq('id', id);
+            caricaRilieviDiQuestaCommessa();
+        }
+
+        // ================= PREVENTIVI E CONTRATTI =================
         async function caricaPreventiviDiQuestaCommessa() {
             const com = commesseCorrenti[commessaAttivaIndex];
             const divLista = document.getElementById('lista-preventivi-commessa');
@@ -1127,7 +1288,6 @@
                 const labelAssistenza = isSostituzione ? ' ⚠️ (In Sostituzione / Post-Posa)' : '';
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Creato Ordine Inviato a: ${nomeFornitore}${labelAssistenza}`, autore: UTENTE_CORRENTE }]);
                 
-                // GESTIONE AUTOMATICA LED "Ordini"
                 if(ledStati[3] === 0) await aggiornaLedDB(3, 1);
 
                 chiudiModaleNuovoOrdineDaCommessa(); 
@@ -1272,14 +1432,18 @@
                 azioniBox.innerHTML = `<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>`;
             } 
             else if (statoPendenteOrdine === 'Conferma') {
-                document.getElementById('box-ord-data-conferma').classList.remove('hidden');
+                const lConferma = document.getElementById('box-ord-data-conferma');
+                lConferma.classList.remove('hidden');
+                lConferma.querySelector('label').innerText = "Data Invio Conferma";
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-presunta').classList.remove('hidden');
                 if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
                 azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>`;
             } 
             else if (statoPendenteOrdine === 'Merce Arrivata') {
-                document.getElementById('box-ord-data-conferma').classList.remove('hidden');
+                const lConferma = document.getElementById('box-ord-data-conferma');
+                lConferma.classList.remove('hidden');
+                lConferma.querySelector('label').innerText = "Data Invio Conferma";
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-arrivo').classList.remove('hidden');
                 if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
@@ -1332,7 +1496,6 @@
             if (!error) {
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Ordine a ${nomeFornitore} aggiornato in: ${statoPendenteOrdine.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
                 
-                // GESTIONE AUTOMATICA LED
                 if (statoPendenteOrdine === 'Merce Arrivata') {
                     const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato, commessa_id').eq('commessa_id', com.id);
                     if (tuttiOrdini && tuttiOrdini.length > 0) {
