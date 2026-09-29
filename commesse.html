@@ -251,7 +251,7 @@
             <div id="tab-content-fatture" class="hidden space-y-4">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture (Pagamenti)</h3>
-                    <button onclick="creaFatturaDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuova Richiesta / Fattura</button>
+                    <button onclick="apriModaleNuovaFattura()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuova Richiesta / Fattura</button>
                 </div>
                 <div id="lista-fatture-commessa" class="space-y-3"></div>
             </div>
@@ -274,6 +274,47 @@
             <div class="p-4 bg-gray-50 flex justify-center gap-3 border-t border-gray-100">
                 <button type="button" onclick="chiudiModaleConfermaFase()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors w-full">Annulla</button>
                 <button type="button" onclick="confermaFaseLed()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors w-full">Conferma Fine Lavorazione</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE: NUOVA FATTURA DA COMMESSA -->
+    <div id="modal-nuova-fattura" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Registra Acconto / Fattura</h3>
+                    <p class="text-xs text-gray-500">Inserisci i dati della richiesta di pagamento</p>
+                </div>
+                <button type="button" onclick="chiudiModaleNuovaFattura()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
+                <form id="form-nuova-fattura" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Numero / Riferimento *</label>
+                            <input type="text" id="fat-numero" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. FATT-15 o Acconto">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Importo (€) *</label>
+                            <input type="number" step="0.01" id="fat-importo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Stato *</label>
+                        <select id="fat-stato" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                            <option value="Da Emettere">Da Emettere / Richiesta</option>
+                            <option value="Emessa / Inviata">Emessa / Inviata al cliente</option>
+                            <option value="Pagata">Pagata / Incassata</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleNuovaFattura()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
+                <button type="submit" form="form-nuova-fattura" id="btn-salva-fattura" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Registra Pagamento</button>
             </div>
         </div>
     </div>
@@ -434,7 +475,7 @@
     <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
                     <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
@@ -796,13 +837,6 @@
                 window.location.href = `contratti.html?action=new&commessa_id=${com.id}`;
             }
         }
-        
-        function creaFatturaDaCommessa() {
-            if (commessaAttivaIndex !== null) {
-                const com = commesseCorrenti[commessaAttivaIndex];
-                window.location.href = `fatturazione.html?action=new&commessa_id=${com.id}`;
-            }
-        }
 
         async function calcolaValoriEconomici() {
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -820,6 +854,57 @@
             document.getElementById('scheda-residuo').innerText = formattaEuro(totaleContratti);
             document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
         }
+
+        // ================= NUOVE FUNZIONI FATTURA =================
+        function apriModaleNuovaFattura() {
+            document.getElementById('form-nuova-fattura').reset();
+            document.getElementById('modal-nuova-fattura').classList.remove('hidden');
+        }
+        
+        function chiudiModaleNuovaFattura() {
+            document.getElementById('modal-nuova-fattura').classList.add('hidden');
+        }
+
+        document.getElementById('form-nuova-fattura').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const com = commesseCorrenti[commessaAttivaIndex];
+            const btn = document.getElementById('btn-salva-fattura');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const numero = document.getElementById('fat-numero').value.trim();
+            const importo = document.getElementById('fat-importo').value;
+            const stato = document.getElementById('fat-stato').value;
+
+            const payload = {
+                commessa_id: com.id,
+                numero: numero,
+                importo: importo,
+                stato: stato
+            };
+
+            const { error } = await supabaseClient.from('fatture').insert([payload]);
+
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{
+                    commessa_id: com.id,
+                    azione: `💶 Registrata richiesta/fattura: ${numero} (Importo: € ${importo} - ${stato})`,
+                    autore: UTENTE_CORRENTE
+                }]);
+
+                if (ledStati[3] === 0) await aggiornaLedDB(3, 1);
+
+                chiudiModaleNuovaFattura();
+                await caricaFattureDiQuestaCommessa();
+                await caricaCronologia(com.id);
+                await calcolaValoriEconomici();
+            } else {
+                alert("Errore salvataggio fattura: " + error.message);
+            }
+
+            btn.innerText = "Registra Pagamento";
+            btn.disabled = false;
+        });
 
         // ================= GESTIONE STEPPER LED =================
         function aggiornaDatiSchedaUI() {
