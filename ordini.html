@@ -50,13 +50,13 @@
 
         <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
             
-            <!-- FILTRI A SUB-TAB -->
-            <div class="flex gap-4 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px shrink-0 mt-4">
-                <button onclick="cambiaTabOrdini('Tutti')" id="tab-ord-Tutti" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap">Registro Ordini (In Lavorazione)</button>
-                <button onclick="cambiaTabOrdini('Ordine inviato')" id="tab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Ordini Inviati (C.O. in attesa)</button>
-                <button onclick="cambiaTabOrdini('In Modifica')" id="tab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Modifica</button>
-                <button onclick="cambiaTabOrdini('Conferma')" id="tab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Arrivo (già confermati)</button>
-                <button onclick="cambiaTabOrdini('Merce Arrivata')" id="tab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Merce Arrivata (Magazzino)</button>
+            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-4">
+                <button onclick="cambiaTabOrdini('Tutti')" id="tab-ord-Tutti" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Ordini (In Lavorazione)</button>
+                <button onclick="cambiaTabOrdini('Ordine inviato')" id="tab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Ordini Inviati (C.O. in attesa)</button>
+                <button onclick="cambiaTabOrdini('In Modifica')" id="tab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">In Modifica</button>
+                <button onclick="cambiaTabOrdini('Conferma')" id="tab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">In Arrivo (già confermati)</button>
+                <button onclick="cambiaTabOrdini('Merce Arrivata')" id="tab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Merce Arrivata (Magazzino)</button>
             </div>
 
             <!-- TABELLA UNICA DINAMICA -->
@@ -84,7 +84,7 @@
         </div>
     </main>
 
-    <!-- MODALE: AGGIORNA E GESTISCI ORDINE (Allineato a commesse.html) -->
+    <!-- MODALE: AGGIORNA E GESTISCI ORDINE -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -193,22 +193,45 @@
             }
 
             ordiniGlobaliCache = ordini || [];
+            aggiornaStileTabsOrdini();
             disegnaTabellaOrdini();
+        }
+
+        function aggiornaStileTabsOrdini() {
+            const tabs = [
+                { id: 'Tutti', label: 'Registro Ordini (In Lavorazione)' },
+                { id: 'Ordine inviato', label: 'Ordini Inviati (C.O. in attesa)' },
+                { id: 'In Modifica', label: 'In Modifica' },
+                { id: 'Conferma', label: 'In Arrivo (già confermati)' },
+                { id: 'Merce Arrivata', label: 'Merce Arrivata (Magazzino)' }
+            ];
+
+            let counts = { 'Tutti': ordiniGlobaliCache.length, 'Ordine inviato': 0, 'In Modifica': 0, 'Conferma': 0, 'Merce Arrivata': 0 };
+            
+            ordiniGlobaliCache.forEach(o => {
+                let s = o.stato || 'Ordine inviato';
+                if(s === 'Inviato' || s === 'Richiesta Inviata') s = 'Ordine inviato';
+                if(s === 'Da controllare ed inviare' || s === 'Approvato ed Inviato' || s === 'Ordine confermato ed inviato al Fornitore') s = 'Conferma';
+                if(s === 'Merce Arrivata in Magazzino') s = 'Merce Arrivata';
+                if(counts[s] !== undefined) counts[s]++;
+            });
+
+            tabs.forEach(t => {
+                const btn = document.getElementById('tab-ord-' + t.id.replace(/ /g, ''));
+                if (btn) {
+                    btn.innerHTML = `${t.label} <span class="ml-1 opacity-80">(${counts[t.id]})</span>`;
+                    if (t.id === filtroOrdiniCorrente) {
+                        btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center";
+                    } else {
+                        btn.className = "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center";
+                    }
+                }
+            });
         }
 
         function cambiaTabOrdini(tab) {
             filtroOrdiniCorrente = tab;
-            const tabs = ['Tutti', 'Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
-            tabs.forEach(t => {
-                const btn = document.getElementById(`tab-ord-${t.replace(/ /g, '')}`);
-                if (btn) {
-                    if (t === tab) {
-                        btn.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap";
-                    } else {
-                        btn.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap";
-                    }
-                }
-            });
+            aggiornaStileTabsOrdini();
             disegnaTabellaOrdini();
         }
 
