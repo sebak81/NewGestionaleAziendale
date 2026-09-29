@@ -889,12 +889,15 @@
         async function gestisciClickLed(index) {
             let val = ledStati[index];
             if (val === 0) {
+                // Passa a IN CORSO
                 await aggiornaLedDB(index, 1);
             } else if (val === 1) {
+                // Chiede conferma per COMPLETATO
                 faseDaCompletare = index;
                 document.getElementById('nome-fase-popup').innerText = sequenzaStati[index].toUpperCase();
                 document.getElementById('modal-conferma-fase').classList.remove('hidden');
             } else if (val === 2) {
+                // Torna a SPENTO
                 if(confirm(`Vuoi annullare il completamento della fase "${sequenzaStati[index]}" e riportarla a stato inattivo?`)) {
                     await aggiornaLedDB(index, 0);
                 }
@@ -919,6 +922,7 @@
             nuoviStati[index] = nuovoValore;
             const nuovaStringa = nuoviStati.join(',');
             
+            // Calcoliamo lo stato testuale globale (il più alto in corso, o il più alto completato)
             let nuovoStatoTestuale = 'Preventivi';
             let found = false;
             for (let i = nuoviStati.length - 1; i >= 0; i--) {
@@ -967,6 +971,7 @@
                 .eq('commessa_id', com.id)
                 .order('data_rilievo', { ascending: false });
 
+            // LOGICA STEPPER RILIEVO (Se c'è un rilievo esecutivo, allora diventa Eseguito)
             const hasEsecutivo = rilievi && rilievi.some(r => r.tipo_rilievo === 'Rilievo Esecutive');
             const badgeStato = document.getElementById('rilievo-badge-stato');
             const containerStepper = document.getElementById('stepper-rilievo-container');
@@ -1340,6 +1345,9 @@
                 if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
                     dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
                     labelData = 'Inviato';
+                } else if (statoPulito === 'In Modifica' && ord.data_ordine) {
+                    dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
+                    labelData = 'Da Modificare';
                 } else if (statoPulito === 'Conferma' && ord.data_conferma) {
                     dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT');
                     labelData = 'Confermato';
@@ -1360,6 +1368,7 @@
 
                 let badgeClass = 'bg-gray-100 text-gray-600';
                 if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700'; 
+                if(statoPulito === 'In Modifica') badgeClass = 'bg-red-100 text-red-800 border border-red-200'; 
                 if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800'; 
                 if(statoPulito === 'Merce Arrivata') badgeClass = 'bg-teal-100 text-teal-800';
                 
@@ -1379,7 +1388,7 @@
             tbody.innerHTML = html;
         }
 
-        const sequenzaStatiOrdine = ['Ordine inviato', 'Conferma', 'Merce Arrivata'];
+        const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
         let statoPendenteOrdine = '';
 
         async function caricaFileSuStorage(file, prefisso) {
@@ -1440,11 +1449,20 @@
             
             sequenzaStatiOrdine.forEach((stato, index) => {
                 const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
+                
                 let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
-                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
-                else if (index === currentIdx) iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500 text-white font-bold text-[10px] shadow-md ring-2 ring-blue-100">${index + 1}</div>`;
+                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
+                } else if (index === currentIdx) {
+                    let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100';
+                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center ${col} text-white font-bold text-[10px] shadow-md ring-2">${index + 1}</div>`;
+                }
+                
                 let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
+                if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
+
+                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; 
+                container.appendChild(punto);
             });
             
             // Gestione dei Box Nascosti
@@ -1454,8 +1472,19 @@
             document.getElementById('box-ord-arrivo').classList.add('hidden');
 
             if (statoPendenteOrdine === 'Ordine inviato') {
-                azioniBox.innerHTML = `<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>`;
+                azioniBox.innerHTML = `
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
+                `;
             } 
+            else if (statoPendenteOrdine === 'In Modifica') {
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
+                `;
+            }
             else if (statoPendenteOrdine === 'Conferma') {
                 const lConferma = document.getElementById('box-ord-data-conferma');
                 lConferma.classList.remove('hidden');
@@ -1463,7 +1492,12 @@
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-presunta').classList.remove('hidden');
                 if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
-                azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>`;
+                
+                azioniBox.innerHTML = `
+                    <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
+                    <div class="flex-1"></div>
+                    <button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>
+                `;
             } 
             else if (statoPendenteOrdine === 'Merce Arrivata') {
                 const lConferma = document.getElementById('box-ord-data-conferma');
@@ -1472,6 +1506,7 @@
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-arrivo').classList.remove('hidden');
                 if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
+                
                 azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>`;
             }
         }
