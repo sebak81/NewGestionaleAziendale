@@ -43,59 +43,41 @@
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
+        <header class="p-8 pb-4 shrink-0">
             <h1 class="text-xl font-bold">Ufficio Acquisti & Logistica 📦</h1>
             <p class="text-sm text-gray-500 mt-1">Gestione materiali richiesti, in viaggio e arrivati a magazzino</p>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar space-y-8">
+        <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
             
-            <!-- BLOCCO 1: ORDINI IN LAVORAZIONE -->
-            <div>
-                <h2 class="text-2xl font-bold tracking-tight mb-4">Registro Ordini (In Lavorazione)</h2>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                                <tr>
-                                    <th class="px-4 py-3">Commessa / Cliente</th>
-                                    <th class="px-4 py-3">Fornitore</th>
-                                    <th class="px-4 py-3">Materiale</th>
-                                    <th class="px-4 py-3">Data</th>
-                                    <th class="px-4 py-3">Importo Conf.</th>
-                                    <th class="px-4 py-3">Stato</th>
-                                    <th class="px-4 py-3 text-center">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabella-ordini-lavorazione" class="divide-y divide-gray-100">
-                                <tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Caricamento...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+            <!-- FILTRI A SUB-TAB -->
+            <div class="flex gap-4 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px shrink-0 mt-4">
+                <button onclick="cambiaTabOrdini('Tutti')" id="tab-ord-Tutti" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap">Registro Ordini (In Lavorazione)</button>
+                <button onclick="cambiaTabOrdini('Ordine inviato')" id="tab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Ordini Inviati (C.O. in attesa)</button>
+                <button onclick="cambiaTabOrdini('In Modifica')" id="tab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Modifica</button>
+                <button onclick="cambiaTabOrdini('Conferma')" id="tab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Arrivo (già confermati)</button>
+                <button onclick="cambiaTabOrdini('Merce Arrivata')" id="tab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Merce Arrivata (Magazzino)</button>
             </div>
 
-            <!-- BLOCCO 2: MERCE IN ARRIVO E ARRIVATA -->
-            <div>
-                <h2 class="text-2xl font-bold tracking-tight mb-4 text-teal-800 flex items-center gap-2">🚚 Merce in Arrivo & Magazzino</h2>
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-teal-50 text-xs uppercase font-semibold text-teal-800 border-b border-teal-100">
-                                <tr>
-                                    <th class="px-4 py-3">Commessa / Cliente</th>
-                                    <th class="px-4 py-3">Fornitore</th>
-                                    <th class="px-4 py-3">Materiale</th>
-                                    <th class="px-4 py-3">Data</th>
-                                    <th class="px-4 py-3">Consegna Prev.</th>
-                                    <th class="px-4 py-3 text-center">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabella-merce-arrivo" class="divide-y divide-gray-100">
-                                <tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Nessuna merce in viaggio.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- TABELLA UNICA DINAMICA -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-1 overflow-hidden flex flex-col">
+                <div class="overflow-auto flex-1 no-scrollbar relative">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50/90 backdrop-blur-sm text-xs uppercase font-semibold text-gray-500 border-b border-gray-100 sticky top-0 z-10">
+                            <tr>
+                                <th class="px-4 py-3">Commessa / Cliente</th>
+                                <th class="px-4 py-3">Fornitore</th>
+                                <th class="px-4 py-3">Materiale</th>
+                                <th class="px-4 py-3">Data</th>
+                                <th class="px-4 py-3">Importo Conf.</th>
+                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
+                                <th class="px-4 py-3 text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabella-ordini" class="divide-y divide-gray-100">
+                            <tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Caricamento in corso...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -180,8 +162,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
         let ordiniGlobaliCache = [];
+        let filtroOrdiniCorrente = 'Tutti';
 
-        // GLI STATI SEMPLIFICATI DEGLI ORDINI
         const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
         let statoPendenteOrdine = '';
 
@@ -205,25 +187,56 @@
                 `)
                 .order('created_at', { ascending: false });
 
-            const tLavorazione = document.getElementById('tabella-ordini-lavorazione');
-            const tArrivo = document.getElementById('tabella-merce-arrivo');
-
-            if (error || !ordini || ordini.length === 0) {
-                tLavorazione.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato.</td></tr>';
-                tArrivo.innerHTML = '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Nessuna merce in viaggio.</td></tr>';
+            if (error) {
+                document.getElementById('tabella-ordini').innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-red-500">Errore caricamento dati dal server.</td></tr>';
                 return;
             }
 
-            ordiniGlobaliCache = ordini;
-            let htmlLavorazione = '';
-            let htmlArrivo = '';
-            
-            ordini.forEach((ord, i) => {
+            ordiniGlobaliCache = ordini || [];
+            disegnaTabellaOrdini();
+        }
+
+        function cambiaTabOrdini(tab) {
+            filtroOrdiniCorrente = tab;
+            const tabs = ['Tutti', 'Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-ord-${t.replace(/ /g, '')}`);
+                if (btn) {
+                    if (t === tab) {
+                        btn.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap";
+                    } else {
+                        btn.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap";
+                    }
+                }
+            });
+            disegnaTabellaOrdini();
+        }
+
+        function disegnaTabellaOrdini() {
+            const tbody = document.getElementById('tabella-ordini');
+            tbody.innerHTML = '';
+
+            const filtrati = ordiniGlobaliCache.filter(ord => {
                 let statoPulito = ord.stato || 'Ordine inviato';
                 if(statoPulito === 'Inviato' || statoPulito === 'Richiesta Inviata') statoPulito = 'Ordine inviato';
                 if(statoPulito === 'Da controllare ed inviare' || statoPulito === 'Approvato ed Inviato' || statoPulito === 'Ordine confermato ed inviato al Fornitore') statoPulito = 'Conferma';
                 if(statoPulito === 'Merce Arrivata in Magazzino') statoPulito = 'Merce Arrivata';
+                
+                ord.statoPulito = statoPulito;
+                
+                if (filtroOrdiniCorrente === 'Tutti') return true;
+                return statoPulito === filtroOrdiniCorrente;
+            });
 
+            if (filtrati.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato per questa categoria.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            filtrati.forEach(ord => {
+                const originalIndex = ordiniGlobaliCache.indexOf(ord);
+                const statoPulito = ord.statoPulito;
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
                 
                 let numCommessa = '--';
@@ -271,13 +284,12 @@
                 }
 
                 const htmlDataCella = `<div class="font-bold text-gray-900">${dataStatoStr}</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">${labelData}</div>`;
-
                 const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
                 
-                let stringaConsegna = '<span class="text-gray-300">Non definita</span>';
+                let stringaConsegna = '<span class="text-gray-400 text-xs">Consegna non definita</span>';
                 if (ord.data_presunta_consegna) {
                     const d = ord.data_presunta_consegna.split('-');
-                    stringaConsegna = `<strong class="text-gray-800">${d[2]}/${d[1]}/${d[0]}</strong>`;
+                    stringaConsegna = `<span class="text-gray-600 text-xs">Consegna: <strong>${d[2]}/${d[1]}/${d[0]}</strong></span>`;
                 }
 
                 let badgeClass = 'bg-gray-100 text-gray-600';
@@ -286,47 +298,27 @@
                 if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800';
                 if(statoPulito === 'Merce Arrivata') badgeClass = 'bg-teal-100 text-teal-800';
 
-                // DIVISIONE TABELLE
-                if (statoPulito === 'Merce Arrivata') {
-                    // TABELLA IN BASSO
-                    let tastoAzione = `<button onclick="apriModaleGestioneOrdine(${i})" class="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded text-xs font-bold transition-colors border border-gray-200" title="Gestisci o Allega Documenti">✏️ Gestisci</button>`;
-
-                    htmlArrivo += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3">
-                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
-                                <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
-                            </td>
-                            <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
-                            <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
-                            <td class="px-4 py-3">${htmlDataCella}</td>
-                            <td class="px-4 py-3 text-sm">${stringaConsegna}</td>
-                            <td class="px-4 py-3 text-center whitespace-nowrap">${tastoAzione}</td>
-                        </tr>
-                    `;
-                } else {
-                    // TABELLA IN ALTO (IN LAVORAZIONE E CONFERMA)
-                    htmlLavorazione += `
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-3">
-                                <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
-                                <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
-                            </td>
-                            <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
-                            <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
-                            <td class="px-4 py-3">${htmlDataCella}</td>
-                            <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
-                            <td class="px-4 py-3"><span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block">${statoPulito}</span></td>
-                            <td class="px-4 py-3 text-center">
-                                <button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Gestisci</button>
-                            </td>
-                        </tr>
-                    `;
-                }
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3">
+                            <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
+                            <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
+                        </td>
+                        <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
+                        <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
+                        <td class="px-4 py-3">${htmlDataCella}</td>
+                        <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
+                        <td class="px-4 py-3 w-40">
+                            <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${statoPulito}</span>
+                            <div class="mt-1">${stringaConsegna}</div>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <button onclick="apriModaleGestioneOrdine(${originalIndex})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Gestisci</button>
+                        </td>
+                    </tr>
+                `;
             });
-
-            tLavorazione.innerHTML = htmlLavorazione || '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nessun ordine in lavorazione.</td></tr>';
-            tArrivo.innerHTML = htmlArrivo || '<tr><td colspan="6" class="px-4 py-4 text-center text-gray-500">Nessuna merce in viaggio o a magazzino.</td></tr>';
+            tbody.innerHTML = html;
         }
 
         function apriModaleGestioneOrdine(indexMemoria) {
