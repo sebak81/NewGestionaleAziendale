@@ -207,6 +207,16 @@
                     <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
                     <a href="ordini.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai alla pagina globale Ordini &rarr;</a>
                 </div>
+                
+                <!-- SUB TABS -->
+                <div class="flex gap-4 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px mb-4">
+                    <button onclick="cambiaSubTabOrdini('Tutti')" id="subtab-ord-Tutti" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap">Registro Ordini (In Lavorazione)</button>
+                    <button onclick="cambiaSubTabOrdini('Ordine inviato')" id="subtab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Ordini Inviati (C.O. in attesa)</button>
+                    <button onclick="cambiaSubTabOrdini('In Modifica')" id="subtab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Modifica</button>
+                    <button onclick="cambiaSubTabOrdini('Conferma')" id="subtab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">In Arrivo (già confermati)</button>
+                    <button onclick="cambiaSubTabOrdini('Merce Arrivata')" id="subtab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap">Merce Arrivata (Magazzino)</button>
+                </div>
+
                 <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
@@ -343,7 +353,7 @@
                             <input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero Revisione</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
                             <div class="flex items-center">
                                 <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
                                 <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
@@ -613,6 +623,7 @@
         let commessaAttivaIndex = null; 
         let ledStati = [0,0,0,0,0,0,0];
         let faseDaCompletare = null;
+        let filtroOrdiniCommessa = 'Tutti';
 
         function formattaEuro(numero) {
             if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
@@ -767,7 +778,7 @@
             else if (tabName === 'preventivi') { document.getElementById('tab-content-preventivi').className = "block space-y-4"; caricaPreventiviDiQuestaCommessa(); } 
             else if (tabName === 'rilievi') { document.getElementById('tab-content-rilievi').className = "block space-y-6"; caricaRilieviDiQuestaCommessa(); }
             else if (tabName === 'contratti') { document.getElementById('tab-content-contratti').className = "block space-y-4"; caricaContrattiDiQuestaCommessa(); } 
-            else if (tabName === 'ordini') { document.getElementById('tab-content-ordini').className = "block space-y-4"; caricaOrdiniDiQuestaCommessa(); } 
+            else if (tabName === 'ordini') { document.getElementById('tab-content-ordini').className = "block space-y-4 flex flex-col h-full"; caricaOrdiniDiQuestaCommessa(); } 
             else if (tabName === 'posa') { document.getElementById('tab-content-posa').className = "block space-y-4"; caricaPosaInterventi(); } 
             else if (tabName === 'fatture') { document.getElementById('tab-content-fatture').className = "block space-y-4"; caricaFattureDiQuestaCommessa(); }
         }
@@ -1242,6 +1253,22 @@
         }
 
         // ================= GESTIONE ORDINI FORNITORI =================
+        function cambiaSubTabOrdini(tab) {
+            filtroOrdiniCommessa = tab;
+            const tabs = ['Tutti', 'Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`subtab-ord-${t.replace(/ /g, '')}`);
+                if (btn) {
+                    if (t === tab) {
+                        btn.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors whitespace-nowrap";
+                    } else {
+                        btn.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors whitespace-nowrap";
+                    }
+                }
+            });
+            disegnaOrdiniCommessa();
+        }
+
         async function caricaFornitoriTendina() {
             const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
             if (fornitori) { const select = document.getElementById('form-ord-new-fornitore'); select.innerHTML = '<option value="">-- Seleziona --</option>'; fornitori.forEach(f => select.innerHTML += `<option value="${f.id}">${f.nome_azienda}</option>`); }
@@ -1320,19 +1347,40 @@
                 .eq('commessa_id', com.id)
                 .order('created_at', { ascending: false });
 
-            if (error || !ordini || ordini.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun ordine fornitore presente.</td></tr>'; 
+            if (error) { 
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-red-500">Errore di rete.</td></tr>'; 
                 return; 
             }
             
-            ordiniCommessaCache = ordini; 
-            let html = '';
-            ordini.forEach((ord, i) => {
+            ordiniCommessaCache = ordini || []; 
+            disegnaOrdiniCommessa();
+        }
+
+        function disegnaOrdiniCommessa() {
+            const tbody = document.getElementById('lista-ordini-commessa');
+            tbody.innerHTML = '';
+
+            const filtrati = ordiniCommessaCache.filter(ord => {
                 let statoPulito = ord.stato || 'Ordine inviato';
                 if(statoPulito === 'Inviato' || statoPulito === 'Richiesta Inviata') statoPulito = 'Ordine inviato';
                 if(statoPulito === 'Da controllare ed inviare' || statoPulito === 'Approvato ed Inviato' || statoPulito === 'Ordine confermato ed inviato al Fornitore') statoPulito = 'Conferma';
                 if(statoPulito === 'Merce Arrivata in Magazzino') statoPulito = 'Merce Arrivata';
                 
+                ord.statoPulito = statoPulito;
+                
+                if (filtroOrdiniCommessa === 'Tutti') return true;
+                return statoPulito === filtroOrdiniCommessa;
+            });
+
+            if (filtrati.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato per questa categoria.</td></tr>'; 
+                return; 
+            }
+
+            let html = '';
+            filtrati.forEach(ord => {
+                const originalIndex = ordiniCommessaCache.indexOf(ord);
+                const statoPulito = ord.statoPulito;
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore Extra'; 
                 
                 let descVisuale = ord.descrizione;
@@ -1342,6 +1390,7 @@
                 
                 let dataStatoStr = '--';
                 let labelData = 'Inserito';
+
                 if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
                     dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
                     labelData = 'Inviato';
@@ -1367,9 +1416,9 @@
                 }
 
                 let badgeClass = 'bg-gray-100 text-gray-600';
-                if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700'; 
-                if(statoPulito === 'In Modifica') badgeClass = 'bg-red-100 text-red-800 border border-red-200'; 
-                if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800'; 
+                if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700';
+                if(statoPulito === 'In Modifica') badgeClass = 'bg-red-100 text-red-800 border border-red-200';
+                if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800';
                 if(statoPulito === 'Merce Arrivata') badgeClass = 'bg-teal-100 text-teal-800';
                 
                 html += `
@@ -1381,7 +1430,7 @@
                             <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${statoPulito}</span>
                             ${stringaConsegna}
                         </td>
-                        <td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${i})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td>
+                        <td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${originalIndex})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td>
                     </tr>
                 `;
             });
@@ -1491,7 +1540,10 @@
                 lConferma.querySelector('label').innerText = "Data Invio Conferma";
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-presunta').classList.remove('hidden');
-                if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
+                
+                if(!document.getElementById('gest-ord-data-conferma').value) {
+                    document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
+                }
                 
                 azioniBox.innerHTML = `
                     <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
@@ -1505,7 +1557,10 @@
                 lConferma.querySelector('label').innerText = "Data Invio Conferma";
                 document.getElementById('box-ord-costo').classList.remove('hidden');
                 document.getElementById('box-ord-arrivo').classList.remove('hidden');
-                if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
+                
+                if(!document.getElementById('gest-ord-data-arrivo').value) {
+                    document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
+                }
                 
                 azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>`;
             }
@@ -1536,7 +1591,9 @@
             
             let fileUrl = null; 
             const fileInputUpdate = document.getElementById('gest-ord-file'); 
-            if (fileInputUpdate.files.length > 0) fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
+            if (fileInputUpdate.files.length > 0) {
+                fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
+            }
             
             let datiUpdate = { 
                 stato: statoPendenteOrdine, 
