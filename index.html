@@ -81,7 +81,7 @@
                         <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[9px] font-bold uppercase">Attesa Conf.</span>
                     </div>
                     <p class="text-2xl font-bold text-gray-900" id="kpi-ordini">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Ordini da confermare</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Ordini da confermare / Modificare</p>
                 </div>
 
                 <!-- NUOVO KPI: MERCE IN ARRIVO -->
@@ -91,7 +91,7 @@
                         <span class="px-2 py-1 bg-teal-100 text-teal-800 rounded text-[9px] font-bold uppercase">In Arrivo</span>
                     </div>
                     <p class="text-2xl font-bold text-gray-900" id="kpi-in-arrivo">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Merce in arrivo</p>
+                    <p class="text-[11px] text-gray-500 mt-1">Merce in arrivo / Confermato</p>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='fatturazione.html'">
@@ -166,24 +166,23 @@
             const { count: countContr } = await supabaseClient.from('contratti').select('*', { count: 'exact', head: true }).neq('stato', 'Confermato').neq('stato', 'Disdetto');
             document.getElementById('kpi-contratti').innerText = countContr || '0';
 
-            // KPI: Ordini in Attesa Conferma
+            // KPI: Ordini in Attesa Conferma (Include "Ordine inviato", "Inviato", "In Modifica")
             const { count: countOrd } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
-                .neq('stato', 'Ordine confermato ed inviato al Fornitore')
-                .neq('stato', 'Merce Arrivata in Magazzino');
+                .in('stato', ['Ordine inviato', 'Inviato', 'Richiesta Inviata', 'In Modifica']);
             document.getElementById('kpi-ordini').innerText = countOrd || '0';
 
             // KPI: Merce in Arrivo (Ordine confermato, ma non arrivato)
             const { count: countArrivo } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
-                .eq('stato', 'Ordine confermato ed inviato al Fornitore');
+                .in('stato', ['Conferma', 'Approvato ed Inviato', 'Ordine confermato ed inviato al Fornitore', 'Da controllare ed inviare']);
             document.getElementById('kpi-in-arrivo').innerText = countArrivo || '0';
 
             // KPI: Fatture NON Saldate (Qualsiasi tipo: Acconto o Saldo)
             const { count: countFatt } = await supabaseClient.from('fatture').select('*', { count: 'exact', head: true }).neq('stato', 'Pagata');
             document.getElementById('kpi-fatture').innerText = countFatt || '0';
 
-            // Commesse Recenti (FORMATTAZIONE AGGIORNATA)
+            // Commesse Recenti
             const divCommesse = document.getElementById('lista-commesse-recenti');
-            const { data: commesse } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('created_at', { ascending: false }).limit(6);
+            const { data: commesse } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('updated_at', { ascending: false }).limit(6);
 
             if (commesse && commesse.length > 0) {
                 let htmlCommesse = '';
