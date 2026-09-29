@@ -35,13 +35,14 @@
 
     <!-- SCHERMATA PRINCIPALE (ELENCO) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
+        <header class="p-8 pb-4 shrink-0">
             <h1 class="text-xl font-bold">Amministrazione & Incassi 💰</h1>
             <p class="text-sm text-gray-500 mt-1">Gestione richieste di acconto, emissione fatture e incassi</p>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
-            <div class="mb-6 flex justify-between items-end">
+        <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
+            
+            <div class="flex justify-between items-end shrink-0">
                 <div>
                     <h2 class="text-3xl font-bold tracking-tight">Registro Fatture / Acconti</h2>
                     <p class="text-sm text-gray-500 mt-1" id="conteggio-fatture">Caricamento in corso...</p>
@@ -51,16 +52,24 @@
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
+                <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
+                <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
+                <button onclick="cambiaTabFatture('Emessa / Inviata')" id="tab-fat-EmessaInviata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Emesse (In attesa)</button>
+                <button onclick="cambiaTabFatture('Pagata')" id="tab-fat-Pagata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Pagate / Incassate</button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-1 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4 shrink-0">
                     <div class="flex-1 relative">
                         <input type="text" id="input-ricerca" onkeyup="filtraFatture()" placeholder="Cerca per cliente, commessa o numero fattura..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-auto flex-1 no-scrollbar relative">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                        <thead class="bg-gray-50/90 backdrop-blur-sm text-xs uppercase font-semibold text-gray-500 border-b border-gray-100 sticky top-0 z-10">
                             <!-- NUOVO ORDINE COLONNE COME RICHIESTO -->
                             <tr>
                                 <th class="px-6 py-4">Cliente</th>
@@ -107,7 +116,6 @@
                 <span class="text-gray-400">&bull;</span> 
                 Importo Richiesto: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
                 
-                <!-- NUOVO BADGE: CONDIZIONE PAGAMENTO -->
                 <span class="text-gray-400 ml-4">&bull;</span> 
                 Condizione: <span id="scheda-sottotitolo-condizione" class="font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">N/D</span>
             </div>
@@ -279,16 +287,17 @@
         let fattureCorrenti = [];
         let fatturaAttivaIndex = null;
         let apertoDaCommessa = false; 
+        let filtroFattureCorrente = 'Tutte';
 
         let clientiGlobali = [];
         let commesseGlobali = [];
-        let pagamentiGlobali = []; // Array per le Condizioni di Pagamento
+        let pagamentiGlobali = [];
 
         const sequenzaStati = ['Da Emettere', 'Emessa / Inviata', 'Pagata'];
 
         document.addEventListener('DOMContentLoaded', async () => {
             await inizializzaDatiNuovaFattura();
-            await caricaPagamentiTendine(); // Carica da Impostazioni
+            await caricaPagamentiTendine();
             await caricaFatture();
 
             const urlParams = new URLSearchParams(window.location.search);
@@ -344,7 +353,67 @@
 
             fattureCorrenti = fats || [];
             document.getElementById('conteggio-fatture').innerText = `${fattureCorrenti.length} pratiche registrate`;
-            disegnaTabella(fattureCorrenti);
+            
+            aggiornaStileTabsFatture();
+            aggiornaVistaFatture();
+        }
+
+        function aggiornaStileTabsFatture() {
+            const tabs = [
+                { id: 'Tutte', label: 'Registro Completo' },
+                { id: 'Da Emettere', label: 'Da Emettere / Richieste' },
+                { id: 'Emessa / Inviata', label: 'Emesse (In attesa)' },
+                { id: 'Pagata', label: 'Pagate / Incassate' }
+            ];
+
+            let counts = { 'Tutte': fattureCorrenti.length, 'Da Emettere': 0, 'Emessa / Inviata': 0, 'Pagata': 0 };
+            
+            fattureCorrenti.forEach(f => {
+                let s = f.stato || 'Da Emettere';
+                if(s === 'Inviata' || s === 'Emessa') s = 'Emessa / Inviata';
+                f.statoPulito = s; 
+                if(counts[s] !== undefined) counts[s]++;
+            });
+
+            tabs.forEach(t => {
+                const cleanId = t.id.replace(/ /g, '').replace(/\//g, '');
+                const btn = document.getElementById('tab-fat-' + cleanId);
+                if (btn) {
+                    btn.innerHTML = `${t.label} <span class="ml-1 opacity-80">(${counts[t.id]})</span>`;
+                    if (t.id === filtroFattureCorrente) {
+                        btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center";
+                    } else {
+                        btn.className = "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center";
+                    }
+                }
+            });
+        }
+
+        function cambiaTabFatture(tab) {
+            filtroFattureCorrente = tab;
+            aggiornaStileTabsFatture();
+            aggiornaVistaFatture();
+        }
+
+        function aggiornaVistaFatture() {
+            const query = document.getElementById('input-ricerca').value.toLowerCase();
+            
+            const filtrati = fattureCorrenti.filter(f => {
+                const nomeCliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale.toLowerCase() : '';
+                const numCommessa = (f.commesse && f.commesse.numero) ? f.commesse.numero.toLowerCase() : '';
+                const numFattura = (f.numero) ? f.numero.toLowerCase() : '';
+                
+                const matchTesto = nomeCliente.includes(query) || numCommessa.includes(query) || numFattura.includes(query);
+                const matchTab = (filtroFattureCorrente === 'Tutte') || (f.statoPulito === filtroFattureCorrente);
+
+                return matchTesto && matchTab;
+            });
+
+            disegnaTabella(filtrati);
+        }
+
+        function filtraFatture() {
+            aggiornaVistaFatture();
         }
 
         function disegnaTabella(lista) {
@@ -352,43 +421,32 @@
             tbody.innerHTML = '';
             if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Nessuna fattura o acconto trovato.</td></tr>'; return; }
 
-            lista.forEach((f, index) => {
+            lista.forEach(f => {
+                const realIndex = fattureCorrenti.indexOf(f);
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.onclick = () => apriSchedaFattura(index);
+                tr.onclick = () => apriSchedaFattura(realIndex);
                 
-                const cantiere = f.commesse ? `${f.commesse.numero} ${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
+                const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
                 const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
                 const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2)}` : '--';
                 
-                // Formatta la data
                 const dataCreazione = f.created_at ? new Date(f.created_at).toLocaleDateString('it-IT') : '--';
 
                 let colorStato = 'bg-yellow-100 text-yellow-800'; 
-                if(f.stato === 'Emessa / Inviata' || f.stato === 'Inviata' || f.stato === 'Emessa') { f.stato = 'Emessa / Inviata'; colorStato = 'bg-blue-100 text-blue-700'; }
-                if(f.stato === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
+                if(f.statoPulito === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700';
+                if(f.statoPulito === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
 
-                // ORDINE LOGICO AGGIORNATO (Cliente per primo, con Data)
                 tr.innerHTML = `
                     <td class="px-6 py-4 text-gray-900 font-bold">${cliente}</td>
                     <td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td>
                     <td class="px-6 py-4 font-bold text-[#2e2a5b]">${f.numero}</td>
                     <td class="px-6 py-4 text-gray-500 text-xs">${dataCreazione}</td>
                     <td class="px-6 py-4 text-gray-900 font-bold">${importo}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${f.stato || 'Da Emettere'}</span></td>
+                    <td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${f.statoPulito}</span></td>
                 `;
                 tbody.appendChild(tr);
             });
-        }
-
-        function filtraFatture() {
-            const query = document.getElementById('input-ricerca').value.toLowerCase();
-            const filtrati = fattureCorrenti.filter(f => 
-                (f.numero && f.numero.toLowerCase().includes(query)) ||
-                (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale.toLowerCase().includes(query)) ||
-                (f.commesse && f.commesse.numero.toLowerCase().includes(query))
-            );
-            disegnaTabella(filtrati);
         }
 
         function apriSchedaFattura(index, fromUrl = false) {
@@ -420,7 +478,7 @@
             const f = fattureCorrenti[fatturaAttivaIndex];
             document.getElementById('scheda-titolo').innerText = f.numero;
             
-            const cantiere = f.commesse ? `${f.commesse.numero} ${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
+            const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
             const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
             const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2)}` : '0,00 €';
             
@@ -428,11 +486,9 @@
             document.getElementById('scheda-sottotitolo-cliente').innerText = cliente;
             document.getElementById('scheda-sottotitolo-valore').innerText = importo;
 
-            // Mostro Condizione Pagamento
             document.getElementById('scheda-sottotitolo-condizione').innerText = f.condizione_pagamento || 'N/D';
 
-            let statoPuro = f.stato || 'Da Emettere';
-            if(statoPuro === 'Inviata' || statoPuro === 'Emessa') statoPuro = 'Emessa / Inviata';
+            let statoPuro = f.statoPulito || 'Da Emettere';
 
             let colorStato = 'bg-yellow-100 text-yellow-800';
             if(statoPuro === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700';
@@ -625,9 +681,7 @@
                 }]);
 
                 chiudiModaleAzione();
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
-                caricaFatture();
+                caricaFatture(); // Ricarica tutto, aggiorna tabs e UI scheda
             } else { alert("Errore di sistema: " + error.message); }
 
             btn.innerText = "Conferma Azione"; btn.disabled = false;
@@ -731,8 +785,7 @@
                 f.condizione_pagamento = nuovoPagamento;
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: `Fatturazione corretta in: ${nuovoNumero} (€ ${nuovoImporto})`, autore: UTENTE_CORRENTE }]);
                 document.getElementById('modal-modifica-dati').classList.add('hidden');
-                aggiornaDatiSchedaUI();
-                caricaCronologia();
+                
                 caricaFatture(); 
             }
         }
