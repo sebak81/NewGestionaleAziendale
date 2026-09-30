@@ -67,7 +67,6 @@
                     </div>
                 </div>
                 
-                <!-- CONTENITORE PIPELINE SUDDIVISO PER STATO -->
                 <div id="contenitore-pipeline" class="p-6 space-y-8 bg-gray-50/30 overflow-y-auto no-scrollbar">
                     <p class="text-center text-gray-500 py-10">Caricamento pipeline...</p>
                 </div>
@@ -120,10 +119,14 @@
 
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note di Controllo e Diario</h3>
-                    <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                        <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto libero al preventivo..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
+                    
+                    <!-- BOX NOTA CON DATA RETROATTIVA -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <input type="text" id="input-nota-libera" placeholder="Aggiungi un appunto libero al preventivo..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
+
                     <div id="lista-cronologia" class="space-y-4 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
             </div>
@@ -146,7 +149,6 @@
                 <input type="hidden" id="azione-is-revision">
                 <input type="hidden" id="azione-is-jump">
 
-                <!-- AVVISO LAMPEGGIANTE ROSSO PER PREVENTIVO FIRMATO -->
                 <div id="box-avviso-firmato" class="hidden p-4 bg-red-50 border-2 border-red-500 text-red-700 rounded-xl text-center font-bold text-sm shadow-sm animate-pulse flex items-center justify-center gap-2">
                     <span class="text-lg">⚠️</span> Inserisci la scansione del preventivo firmato!
                 </div>
@@ -206,9 +208,9 @@
         </div>
     </div>
 
-    <!-- MODALE MODIFICA DATI BASE -->
+    <!-- MODALE MODIFICA DATI BASE (CON ELIMINAZIONE) -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
                 <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
                 <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
@@ -217,9 +219,12 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Nuovo Importo Attuale (€)</label>
                 <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
             </div>
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
-                <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
+            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="confermaEliminazionePreventivo()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Preventivo</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                    <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
+                </div>
             </div>
         </div>
     </div>
@@ -300,7 +305,6 @@
                 return; 
             }
 
-            // Definiamo i blocchi della pipeline con colori coordinati
             const sezioniPipeline = [
                 { id: 'Da Fare', titolo: '📝 Da Fare / Da Prezzare', bgHeader: 'bg-gray-100', border: 'border-gray-200', testCol: 'text-gray-700' },
                 { id: 'Stesura', titolo: '✍️ In Stesura Operativa', bgHeader: 'bg-yellow-100', border: 'border-yellow-200', testCol: 'text-yellow-800' },
@@ -316,7 +320,7 @@
                     return st === sez.id;
                 });
 
-                if (prevDellaSezione.length === 0) return; // Salta il blocco se vuoto per tenere pulita la pagina
+                if (prevDellaSezione.length === 0) return;
 
                 let htmlTabella = `
                 <div class="mb-8 last:mb-0">
@@ -339,7 +343,6 @@
                 `;
 
                 prevDellaSezione.forEach(p => {
-                    // Trova l'indice reale globale per l'apertura
                     const realIndex = preventiviCorrenti.findIndex(x => x.id === p.id);
 
                     const cantiereNomeStr = p.commesse && p.commesse.nome_cantiere ? `<br><span class="text-xs text-gray-400 font-normal">${p.commesse.nome_cantiere}</span>` : '';
@@ -430,6 +433,8 @@
             const statoPuro = p.stato && p.stato.trim() !== '' ? p.stato : 'Da Fare';
             document.getElementById('scheda-badge-stato').innerText = statoPuro;
             document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+
+            document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
 
             disegnaStepper(statoPuro);
             disegnaStoricoFile(p.file_url);
@@ -645,7 +650,9 @@
             btn.innerText = "Salvataggio..."; btn.disabled = true;
 
             let timestampFormattato = new Date().toISOString();
-            if (dataAzione !== new Date().toISOString().split('T')[0]) timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
+            if (dataAzione && dataAzione !== new Date().toISOString().split('T')[0]) {
+                timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString();
+            }
 
             let datiAggiornamento = { stato: nuovoStato };
             let nuovaRev = p.revisione || 0;
@@ -771,12 +778,45 @@
             }
         }
 
+        async function confermaEliminazionePreventivo() {
+            const p = preventiviCorrenti[preventivoAttivoIndex];
+            const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente il preventivo ${p.numero}.\nPer confermare, digita la parola ELIMINA qui sotto:`);
+            if (conferma !== 'ELIMINA') return;
+            
+            const { error } = await supabaseClient.from('preventivi').delete().eq('id', p.id);
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: p.commessa_id, azione: `🗑️ Eliminato preventivo ${p.numero} dal sistema.`, autore: UTENTE_CORRENTE }]);
+                document.getElementById('modal-modifica-dati').classList.add('hidden');
+                chiudiScheda();
+                caricaPreventivi();
+            } else {
+                alert("Errore durante l'eliminazione: " + error.message);
+            }
+        }
+
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera'); 
+            const dataNota = document.getElementById('data-nota-libera').value;
             const testo = inputNota.value; 
             if (!testo || testo.trim() === '') return;
-            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: preventiviCorrenti[preventivoAttivoIndex].commessa_id, azione: "Appunto Libero", nota: testo, autore: UTENTE_CORRENTE }]);
-            if (!error) { inputNota.value = ''; caricaCronologia(); } 
+
+            let timestamp = new Date().toISOString();
+            if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) {
+                timestamp = new Date(`${dataNota}T12:00:00Z`).toISOString();
+            }
+
+            const { error } = await supabaseClient.from('commesse_log').insert([{ 
+                commessa_id: preventiviCorrenti[preventivoAttivoIndex].commessa_id, 
+                azione: "Appunto Libero", 
+                nota: testo, 
+                autore: UTENTE_CORRENTE,
+                created_at: timestamp
+            }]);
+            
+            if (!error) { 
+                inputNota.value = ''; 
+                caricaCronologia(); 
+            } 
         }
 
         async function caricaCronologia() {
