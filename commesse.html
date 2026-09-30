@@ -150,10 +150,14 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
                     <p class="text-xs text-gray-500 mb-5">Questo registro include l'attivazione dei LED, le modifiche ai contratti e le note libere.</p>
-                    <div class="flex items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                        <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
+                    
+                    <!-- BOX NOTA CON DATA RETROATTIVA -->
+                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
+
                     <div id="lista-cronologia" class="space-y-4"></div>
                 </div>
             </div>
@@ -475,7 +479,7 @@
     <!-- MODALE: ESITO COLLAUDO / FINE LAVORI -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <div>
                     <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
                     <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
@@ -501,7 +505,7 @@
                         </label>
                         <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
                             <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione.</span></div>
+                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di resolution.</span></div>
                         </label>
                     </div>
                 </div>
@@ -837,6 +841,13 @@
                 window.location.href = `contratti.html?action=new&commessa_id=${com.id}`;
             }
         }
+        
+        function creaFatturaDaCommessa() {
+            if (commessaAttivaIndex !== null) {
+                const com = commesseCorrenti[commessaAttivaIndex];
+                window.location.href = `fatturazione.html?action=new&commessa_id=${com.id}`;
+            }
+        }
 
         async function calcolaValoriEconomici() {
             const com = commesseCorrenti[commessaAttivaIndex];
@@ -854,57 +865,6 @@
             document.getElementById('scheda-residuo').innerText = formattaEuro(totaleContratti);
             document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
         }
-
-        // ================= NUOVE FUNZIONI FATTURA =================
-        function apriModaleNuovaFattura() {
-            document.getElementById('form-nuova-fattura').reset();
-            document.getElementById('modal-nuova-fattura').classList.remove('hidden');
-        }
-        
-        function chiudiModaleNuovaFattura() {
-            document.getElementById('modal-nuova-fattura').classList.add('hidden');
-        }
-
-        document.getElementById('form-nuova-fattura').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const com = commesseCorrenti[commessaAttivaIndex];
-            const btn = document.getElementById('btn-salva-fattura');
-            btn.innerText = "Salvataggio...";
-            btn.disabled = true;
-
-            const numero = document.getElementById('fat-numero').value.trim();
-            const importo = document.getElementById('fat-importo').value;
-            const stato = document.getElementById('fat-stato').value;
-
-            const payload = {
-                commessa_id: com.id,
-                numero: numero,
-                importo: importo,
-                stato: stato
-            };
-
-            const { error } = await supabaseClient.from('fatture').insert([payload]);
-
-            if (!error) {
-                await supabaseClient.from('commesse_log').insert([{
-                    commessa_id: com.id,
-                    azione: `💶 Registrata richiesta/fattura: ${numero} (Importo: € ${importo} - ${stato})`,
-                    autore: UTENTE_CORRENTE
-                }]);
-
-                if (ledStati[3] === 0) await aggiornaLedDB(3, 1);
-
-                chiudiModaleNuovaFattura();
-                await caricaFattureDiQuestaCommessa();
-                await caricaCronologia(com.id);
-                await calcolaValoriEconomici();
-            } else {
-                alert("Errore salvataggio fattura: " + error.message);
-            }
-
-            btn.innerText = "Registra Pagamento";
-            btn.disabled = false;
-        });
 
         // ================= GESTIONE STEPPER LED =================
         function aggiornaDatiSchedaUI() {
@@ -930,6 +890,9 @@
             document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
             document.getElementById('scheda-sottotitolo-valore').innerText = "Calcolo in corso..."; 
 
+            // INIZIALIZZO LA DATA A OGGI PER IL DIARIO
+            document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
+
             disegnaStepperLed();
         }
 
@@ -941,7 +904,6 @@
             let fasiArr = [0,0,0,0,0,0,0];
             if (com.fasi_cantiere) {
                 let tempArr = com.fasi_cantiere.split(',').map(Number);
-                // Migrazione silente se l'array è ancora da 6 blocchi
                 if (tempArr.length === 6) {
                     tempArr.splice(2, 0, 0); 
                 }
@@ -1775,10 +1737,31 @@
 
         // --- GESTIONE NOTA MANUALE E DIARIO GLOBALE ---
         async function salvaNotaLibera() {
-            const inputNota = document.getElementById('input-nota-libera'); const testo = inputNota.value; if (!testo || testo.trim() === '') return; const com = commesseCorrenti[commessaAttivaIndex];
-            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: "Comunicazione / Appunto Manuale", nota: testo, autore: UTENTE_CORRENTE }]);
-            if (!error) { inputNota.value = ''; caricaCronologia(com.id); } else { alert("Errore salvataggio nota: " + error.message); }
+            const inputNota = document.getElementById('input-nota-libera'); 
+            const dataNota = document.getElementById('data-nota-libera').value;
+            const testo = inputNota.value; 
+            if (!testo || testo.trim() === '') return; 
+            const com = commesseCorrenti[commessaAttivaIndex];
+            
+            let timestamp = new Date().toISOString();
+            if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) {
+                timestamp = new Date(`${dataNota}T12:00:00Z`).toISOString();
+            }
+
+            const { error } = await supabaseClient.from('commesse_log').insert([{ 
+                commessa_id: com.id, 
+                azione: "Comunicazione / Appunto Manuale", 
+                nota: testo, 
+                autore: UTENTE_CORRENTE,
+                created_at: timestamp
+            }]);
+            
+            if (!error) { 
+                inputNota.value = ''; 
+                caricaCronologia(com.id); 
+            } else { alert("Errore salvataggio nota: " + error.message); }
         }
+        
         async function caricaCronologia(commessaId) {
             const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
             const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
