@@ -39,6 +39,7 @@
         </header>
 
         <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
+            
             <div class="flex justify-between items-end shrink-0">
                 <div>
                     <h2 class="text-3xl font-bold tracking-tight">Registro Fatture / Acconti</h2>
@@ -49,6 +50,7 @@
                 </button>
             </div>
 
+            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
                 <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
                 <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
@@ -84,6 +86,7 @@
         </div>
     </main>
 
+    <!-- SCHEDA DETTAGLIO FATTURA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
@@ -142,7 +145,7 @@
         </div>
     </div>
 
-    <!-- MODALE AZIONE FATTURA -->
+    <!-- MODALI AZIONI -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -181,7 +184,7 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVA FATTURA CON LOGICA A CASCATA -->
+    <!-- MODALE CREAZIONE NUOVA FATTURA -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -317,9 +320,18 @@
         let clientiGlobali = [];
         let commesseGlobali = [];
         let pagamentiGlobali = [];
-        let logsCorrenti = []; // Aggiunto per Log Segreto
+        let logsCorrenti = [];
 
         const sequenzaStati = ['Da Emettere', 'Emessa / Inviata', 'Pagata'];
+
+        function formattaEuro(numero) {
+            if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
+            const numFloat = parseFloat(numero);
+            const parti = numFloat.toFixed(2).split('.');
+            const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
+            const decimali = parti[1];
+            return `€ ${interi},${decimali}`;
+        }
 
         // ======================= FUNZIONI MODIFICA SEGRETA LOG =======================
         function apriModaleModificaLog(idStr) {
@@ -359,7 +371,6 @@
             const { error } = await supabaseClient.from('commesse_log').delete().eq('id', id);
             if (!error) { chiudiModaleModificaLog(); caricaCronologia(); } else { alert("Impossibile eliminare: " + error.message); }
         }
-        // =============================================================================
 
         document.addEventListener('DOMContentLoaded', async () => {
             await inizializzaDatiNuovaFattura();
@@ -391,11 +402,33 @@
         }
 
         async function caricaFatture() {
-            const { data: fats, error } = await supabaseClient.from('fatture').select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))').order('created_at', { ascending: false });
             const tbody = document.getElementById('tabella-fatture');
-            if (error) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore DB</td></tr>'; return; }
-            fattureCorrenti = fats || []; document.getElementById('conteggio-fatture').innerText = `${fattureCorrenti.length} pratiche registrate`;
-            aggiornaStileTabsFatture(); aggiornaVistaFatture();
+            
+            // IL FALLBACK CHE SALVA LA SITUAZIONE ANCHE SENZA RELAZIONI PERFETTE IN SUPABASE
+            let { data: fats, error } = await supabaseClient
+                .from('fatture')
+                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.warn("Relazione diretta fallita. Avvio il caricamento di emergenza a doppio passaggio...");
+                const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
+                if (err2) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4">Errore DB Server. Contatta l\'amministratore.</td></tr>'; return; }
+                const { data: allComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, clienti(nome_ragione_sociale)');
+                
+                fats = rawFats.map(f => {
+                    if (allComms) {
+                        const relCom = allComms.find(c => String(c.id) === String(f.commessa_id));
+                        if (relCom) f.commesse = relCom;
+                    }
+                    return f;
+                });
+            }
+
+            fattureCorrenti = fats || []; 
+            document.getElementById('conteggio-fatture').innerText = `${fattureCorrenti.length} pratiche registrate`;
+            aggiornaStileTabsFatture(); 
+            aggiornaVistaFatture();
         }
 
         function aggiornaStileTabsFatture() {
@@ -416,9 +449,10 @@
         function aggiornaVistaFatture() {
             const query = document.getElementById('input-ricerca').value.toLowerCase();
             const filtrati = fattureCorrenti.filter(f => {
-                const nomeCliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale.toLowerCase() : '';
-                const numCommessa = (f.commesse && f.commesse.numero) ? f.commesse.numero.toLowerCase() : '';
-                const numFattura = (f.numero) ? f.numero.toLowerCase() : '';
+                const nomeCliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? String(f.commesse.clienti.nome_ragione_sociale).toLowerCase() : '';
+                const numCommessa = (f.commesse && f.commesse.numero) ? String(f.commesse.numero).toLowerCase() : '';
+                const numFattura = (f.numero) ? String(f.numero).toLowerCase() : '';
+                
                 const matchTesto = nomeCliente.includes(query) || numCommessa.includes(query) || numFattura.includes(query);
                 const matchTab = (filtroFattureCorrente === 'Tutte') || (f.statoPulito === filtroFattureCorrente);
                 return matchTesto && matchTab;
@@ -434,13 +468,16 @@
             lista.forEach(f => {
                 const realIndex = fattureCorrenti.indexOf(f);
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer'; tr.onclick = () => apriSchedaFattura(realIndex);
+                
                 const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
-                const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
-                const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '--';
+                const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
+                const importo = f.importo ? formattaEuro(f.importo) : '--';
                 const dataCreazione = f.created_at ? new Date(f.created_at).toLocaleDateString('it-IT') : '--';
+                
                 let colorStato = 'bg-yellow-100 text-yellow-800'; 
                 if(f.statoPulito === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700';
                 if(f.statoPulito === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
+                
                 tr.innerHTML = `<td class="px-6 py-4 text-gray-900 font-bold">${cliente}</td><td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td><td class="px-6 py-4 font-bold text-[#2e2a5b]">${f.numero}</td><td class="px-6 py-4 text-gray-500 text-xs">${dataCreazione}</td><td class="px-6 py-4 text-gray-900 font-bold">${importo}</td><td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${f.statoPulito}</span></td>`;
                 tbody.appendChild(tr);
             });
@@ -460,8 +497,9 @@
         function aggiornaDatiSchedaUI() {
             const f = fattureCorrenti[fatturaAttivaIndex]; document.getElementById('scheda-titolo').innerText = f.numero;
             const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
-            const cliente = (f.commesse && f.commesse.clienti) ? f.commesse.clienti.nome_ragione_sociale : '--';
-            const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '0,00 €';
+            const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
+            const importo = f.importo ? formattaEuro(f.importo) : '0,00 €';
+            
             document.getElementById('scheda-sottotitolo-commessa').innerText = cantiere; document.getElementById('scheda-sottotitolo-cliente').innerText = cliente; document.getElementById('scheda-sottotitolo-valore').innerText = importo; document.getElementById('scheda-sottotitolo-condizione').innerText = f.condizione_pagamento || 'N/D';
             
             let statoPuro = f.statoPulito || 'Da Emettere';
@@ -539,7 +577,6 @@
             btn.innerText = "Conferma Azione"; btn.disabled = false;
         }
 
-        // 4. CREAZIONE NUOVA FATTURA (CON CASCATA E PAGAMENTI)
         function apriModaleNuovo(commessaPreselezionata = null) {
             document.getElementById('form-nuovo').reset();
             const selCliente = document.getElementById('nuovo-cliente'); selCliente.innerHTML = '<option value="">-- Seleziona Cliente --</option>'; clientiGlobali.forEach(c => selCliente.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`);
@@ -581,7 +618,6 @@
             if (!error) { document.getElementById('modal-modifica-dati').classList.add('hidden'); chiudiScheda(); caricaFatture(); } else { alert("Impossibile eliminare: " + error.message); }
         }
 
-        // 5. DIARIO
         async function salvaNotaLibera() {
             const inputNota = document.getElementById('input-nota-libera'); const dataNota = document.getElementById('data-nota-libera').value; const testo = inputNota.value; if (!testo || testo.trim() === '') return;
             const comId = fattureCorrenti[fatturaAttivaIndex].commessa_id; let timestamp = new Date().toISOString(); if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) { timestamp = new Date(`${dataNota}T12:00:00Z`).toISOString(); }
@@ -593,8 +629,7 @@
             const comId = fattureCorrenti[fatturaAttivaIndex].commessa_id; const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento...</p>';
             const { data: logs } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', comId).or('azione.ilike.%fattur%,azione.ilike.%incasso%,azione.ilike.%acconto%,azione.ilike.%pagament%,azione.ilike.%Nota Amm%').order('created_at', { ascending: false });
             if (!logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna nota presente.</p>'; return; }
-            logsCorrenti = logs; // SALVO I LOG IN MEMORIA
-            let html = '';
+            logsCorrenti = logs; let html = '';
             logs.forEach(log => {
                 const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                 const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
