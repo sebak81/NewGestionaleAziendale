@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3 ESSE - Commesse</title>
+    <title>3 ESSE - Fatturazione</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,7 +15,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
@@ -24,60 +23,60 @@
         <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
-            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
+            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
             <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
             <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
             <a href="ordini.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Ordini Fornitori</a>
-            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
+            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (ELENCO COMMESSE) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
-            <h1 class="text-xl font-bold">Commesse Operative 🏗️</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione cantieri e stato avanzamento lavori</p>
+        <header class="p-8 pb-4 shrink-0">
+            <h1 class="text-xl font-bold">Amministrazione & Incassi 💰</h1>
+            <p class="text-sm text-gray-500 mt-1">Gestione richieste di acconto, emissione fatture e incassi</p>
         </header>
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
-            <div class="mb-6 flex justify-between items-end">
+        <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
+            <div class="flex justify-between items-end shrink-0">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Commesse</h2>
-                    <p class="text-sm text-gray-500 mt-1" id="conteggio-commesse">Caricamento in corso...</p>
+                    <h2 class="text-3xl font-bold tracking-tight">Registro Fatture / Acconti</h2>
+                    <p class="text-sm text-gray-500 mt-1" id="conteggio-fatture">Caricamento in corso...</p>
                 </div>
-                <button onclick="apriModaleNuovaCommessa()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-                    <span>+</span> Nuova commessa
+                <button onclick="apriModaleNuovo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
+                    <span>+</span> Nuova Fattura
                 </button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
+                <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
+                <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
+                <button onclick="cambiaTabFatture('Emessa / Inviata')" id="tab-fat-EmessaInviata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Emesse (In attesa)</button>
+                <button onclick="cambiaTabFatture('Pagata')" id="tab-fat-Pagata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Pagate / Incassate</button>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-1 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4 shrink-0">
                     <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca-commesse" onkeyup="filtraCommesse()" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="filtraFatture()" placeholder="Cerca per cliente, commessa o numero fattura..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-auto flex-1 no-scrollbar relative">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                        <thead class="bg-gray-50/90 backdrop-blur-sm text-xs uppercase font-semibold text-gray-500 border-b border-gray-100 sticky top-0 z-10">
                             <tr>
-                                <th class="px-6 py-4">Numero & Sede</th>
-                                <th class="px-6 py-4">Cliente Principale</th>
-                                <th class="px-6 py-4">Nome Cantiere / Lavoro</th>
-                                <th class="px-6 py-4">Fase Corrente</th>
+                                <th class="px-6 py-4">Cliente</th>
+                                <th class="px-6 py-4">Commessa / Cantiere</th>
+                                <th class="px-6 py-4">Riferimento / N°</th>
+                                <th class="px-6 py-4">Data Generazione</th>
+                                <th class="px-6 py-4">Importo</th>
+                                <th class="px-6 py-4">Stato Pagamento</th>
                             </tr>
                         </thead>
-                        <tbody id="tabella-commesse" class="divide-y divide-gray-100">
+                        <tbody id="tabella-fatture" class="divide-y divide-gray-100">
+                            <tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Caricamento...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -85,21 +84,19 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO COMMESSA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
                 <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium">
-                    <span>&larr;</span> Torna a Commesse
+                    <span>&larr;</span> <span id="testo-btn-back">Torna a Elenco</span>
                 </button>
                 <div class="h-6 w-px bg-gray-300"></div>
                 <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">COM-0000/000</h2>
-                    <span id="scheda-badge-sede" class="hidden px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-[10px] font-bold uppercase tracking-wider border border-indigo-200"></span>
-                    <span id="scheda-badge-stato" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider">Stato</span>
+                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">FATT-000</h2>
+                    <span id="scheda-badge-stato" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Da Emettere</span>
                 </div>
             </div>
-            <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
+            <button onclick="apriModaleModificaDatiBase()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">
                 ✏️ Modifica Dati
             </button>
         </div>
@@ -107,178 +104,162 @@
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
             
             <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
-                <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> 
+                <span class="font-bold text-[#2e2a5b]">Rif. Commessa:</span> <span id="scheda-sottotitolo-commessa" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
-                <span class="font-bold text-[#2e2a5b]">Cantiere:</span> <span id="scheda-sottotitolo-cantiere" class="text-gray-900">...</span>
+                <span id="scheda-sottotitolo-cliente">Cliente</span>
                 <span class="text-gray-400">&bull;</span> 
-                Costi Fornitura: <span id="scheda-sottotitolo-costi" class="font-bold text-red-600">Calcolo...</span>
+                Importo Richiesto: <span id="scheda-sottotitolo-valore" class="font-bold text-gray-900">0,00 €</span>
                 <span class="text-gray-400">&bull;</span> 
-                Valore Contratto: <span id="scheda-sottotitolo-valore" class="font-bold text-emerald-700">Calcolo...</span>
+                Condizione: <span id="scheda-sottotitolo-condizione" class="font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">N/D</span>
             </div>
 
-            <!-- PULSANTONI LED AVANZAMENTO CANTIERE -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
-                    <span>Avanzamento Cantiere (Fasi Operative)</span>
-                    <span class="text-xs font-normal text-gray-400">Clicca sui LED per accenderli (In Corso) o completarli</span>
+                    <span>Avanzamento Pratica</span>
+                    <span class="text-xs font-normal text-gray-400">Clicca sui pallini per forzare un "salto" o retrodatare l'incasso</span>
                 </h3>
-                <div class="relative flex justify-between items-center w-full mb-4 px-4" id="stepper-container"></div>
+                <div class="relative flex justify-between items-center w-full max-w-3xl mx-auto mb-8 px-4" id="stepper-container"></div>
+                <div class="flex items-center justify-center gap-4 pt-4 border-t border-gray-100" id="stepper-azioni"></div>
             </div>
 
-            <!-- MENU TABS -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
-                <button onclick="cambiaTab('riepilogo')" id="tab-btn-riepilogo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">Riepilogo e Diario</button>
-                <button onclick="cambiaTab('preventivi')" id="tab-btn-preventivi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Preventivi</button>
-                <button onclick="cambiaTab('rilievi')" id="tab-btn-rilievi" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Rilievi Misure</button>
-                <button onclick="cambiaTab('contratti')" id="tab-btn-contratti" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Contratti</button>
-                <button onclick="cambiaTab('ordini')" id="tab-btn-ordini" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Ordini Fornitori</button>
-                <button onclick="cambiaTab('posa')" id="tab-btn-posa" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Posa & Interventi</button>
-                <button onclick="cambiaTab('fatture')" id="tab-btn-fatture" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Fatturazione</button>
-            </div>
-
-            <!-- CONTENUTO TAB 1: RIEPILOGO E DIARIO GLOBALE -->
-            <div id="tab-content-riepilogo" class="block space-y-6">
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col justify-center">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Incassato Reale (Fatture Pagate)</p>
-                        <p class="text-3xl font-bold text-emerald-600" id="scheda-incassato">€ 0,00</p>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border border-emerald-200 p-6 flex flex-col justify-center bg-emerald-50/30">
-                        <p class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-1">Valore Totale del Lavoro (Contratto)</p>
-                        <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">€ 0,00</p>
-                    </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full">
+                    <h3 class="text-base font-bold text-gray-800 mb-4 border-b border-gray-100 pb-2">Documenti e Ricevute</h3>
+                    <div id="lista-file-fattura" class="space-y-3 flex-1 overflow-y-auto no-scrollbar"></div>
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
-                    <p class="text-xs text-gray-500 mb-5">Questo registro include l'attivazione dei LED, le modifiche ai contratti e le note libere. <strong class="text-[#2e2a5b]">Doppio clic su un'icona o orario del log per modificarlo o eliminarlo.</strong></p>
-                    
+                <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-800 mb-2">Note Amministrative</h3>
                     <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <input type="text" id="input-nota-libera" placeholder="Aggiungi una comunicazione con il cliente o un appunto su questo cantiere..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi Nota</button>
+                        <input type="text" id="input-nota-libera" placeholder="Aggiungi una nota su questo incasso..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                        <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
-
-                    <div id="lista-cronologia" class="space-y-4"></div>
+                    <div id="lista-cronologia" class="space-y-4 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
             </div>
-
-            <!-- CONTENUTO TAB PREVENTIVI -->
-            <div id="tab-content-preventivi" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Preventivi Collegati</h3>
-                    <button onclick="creaPreventivoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Preventivo</button>
-                </div>
-                <div id="lista-preventivi-commessa" class="space-y-3"></div>
-            </div>
-
-            <!-- CONTENUTO TAB RILIEVI MISURE -->
-            <div id="tab-content-rilievi" class="hidden space-y-6">
-                
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Registro Rilievi e Sopralluoghi</h3>
-                    <button onclick="apriModaleRilievo()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuovo Rilievo</button>
-                </div>
-
-                <!-- MINI STEPPER RILIEVO -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
-                        <span>Avanzamento Rilievo Esecutivo</span>
-                        <span id="rilievo-badge-stato" class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider">Da Fare</span>
-                    </h3>
-                    <div class="relative flex justify-between items-center w-full max-w-md mx-auto mb-4 px-6" id="stepper-rilievo-container">
-                        <!-- Generato via JS -->
-                    </div>
-                </div>
-
-                <!-- LISTA ATTIVITA' DI RILIEVO -->
-                <div id="lista-rilievi-commessa" class="space-y-3">
-                    <p class="text-sm text-gray-500 italic py-2 text-center">Nessuna attività registrata.</p>
-                </div>
-            </div>
-
-            <!-- CONTENUTO TAB CONTRATTI -->
-            <div id="tab-content-contratti" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Contratti Esecutivi</h3>
-                    <button onclick="creaContrattoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Contratto</button>
-                </div>
-                <div id="lista-contratti-commessa" class="space-y-3"></div>
-            </div>
-
-            <!-- CONTENUTO TAB ORDINI -->
-            <div id="tab-content-ordini" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
-                    <a href="ordini.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai alla pagina globale Ordini &rarr;</a>
-                </div>
-                
-                <!-- SUB TABS CON SFONDO (Pillole) -->
-                <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-4 shrink-0">
-                    <button onclick="cambiaSubTabOrdini('Tutti')" id="subtab-ord-Tutti" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Ordini</button>
-                    <button onclick="cambiaSubTabOrdini('Ordine inviato')" id="subtab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Inviati</button>
-                    <button onclick="cambiaSubTabOrdini('In Modifica')" id="subtab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">In Modifica</button>
-                    <button onclick="cambiaSubTabOrdini('Conferma')" id="subtab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Confermati / In Arrivo</button>
-                    <button onclick="cambiaSubTabOrdini('Merce Arrivata')" id="subtab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Merce Arrivata</button>
-                </div>
-
-                <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                            <tr>
-                                <th class="px-4 py-3">Fornitore</th>
-                                <th class="px-4 py-3">Materiale</th>
-                                <th class="px-4 py-3">Data</th>
-                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
-                                <th class="px-4 py-3 text-center">Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100">
-                            <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-right">
-                    <button onclick="apriModaleNuovoOrdineDaCommessa()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded shadow-sm">+ Nuovo Ordine Fornitore</button>
-                </div>
-            </div>
-
-            <!-- CONTENUTO TAB POSA E INTERVENTI -->
-            <div id="tab-content-posa" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Registro Uscite e Posa in Opera</h3>
-                    <button onclick="apriModalePosa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuovo Intervento</button>
-                </div>
-                <div id="lista-interventi-posa" class="space-y-3"></div>
-            </div>
-
-            <!-- CONTENUTO TAB FATTURE -->
-            <div id="tab-content-fatture" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture (Pagamenti)</h3>
-                    <button onclick="creaFatturaDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuova Richiesta / Fattura</button>
-                </div>
-                <div id="lista-fatture-commessa" class="space-y-3"></div>
-            </div>
-
         </div>
     </div>
 
-    <!-- ================= MODALI A SCOMPARSA (Z-50) ================= -->
-
-    <!-- NUOVO MODALE: CONFERMA FASE LED -->
-    <div id="modal-conferma-fase" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden transform transition-all scale-100">
-            <div class="p-6 text-center space-y-4">
-                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner ring-4 ring-emerald-50">
-                    <span class="text-3xl text-emerald-500">✓</span>
+    <!-- MODALE AZIONE -->
+    <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="modale-azione-titolo">Azione</h3>
+                    <p class="text-xs text-gray-500" id="modale-azione-sub">...</p>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900">Confermi completamento?</h3>
-                <p class="text-sm text-gray-500">Stai per segnare come conclusa la fase operativa:<br><strong class="text-lg text-emerald-700 mt-2 block" id="nome-fase-popup">NOME FASE</strong></p>
+                <button type="button" onclick="chiudiModaleAzione()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
-            <div class="p-4 bg-gray-50 flex justify-center gap-3 border-t border-gray-100">
-                <button type="button" onclick="chiudiModaleConfermaFase()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors w-full">Annulla</button>
-                <button type="button" onclick="confermaFaseLed()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors w-full">Conferma Fine Lavorazione</button>
+            
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
+                <input type="hidden" id="azione-target-stato">
+                <input type="hidden" id="azione-is-jump">
+
+                <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <label class="block text-sm font-bold text-gray-800 mb-1" id="label-data">📅 Data dell'azione / incasso</label>
+                    <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
+                    <p class="text-[10px] text-gray-500 mt-1">Puoi modificare la data per allinearla a quella reale del bonifico.</p>
+                </div>
+
+                <div id="box-note">
+                    <label class="block text-sm font-bold text-gray-800 mb-1">Note (Opzionale)</label>
+                    <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Pagamento ricevuto su banca Intesa..."></textarea>
+                </div>
+
+                <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
+                    <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento (PDF/IMG)</label>
+                    <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CREAZIONE NUOVA FATTURA -->
+    <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Nuova Fattura / Acconto</h3>
+                    <p class="text-xs text-gray-500">Crea una richiesta di pagamento da inviare al cliente</p>
+                </div>
+                <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            
+            <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
+                <form id="form-nuovo" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
+                        <select id="nuovo-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">Caricamento clienti...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
+                        <select id="nuovo-commessa" required disabled class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">-- Seleziona prima un cliente --</option>
+                        </select>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
+                        <label class="block text-sm font-bold text-[#2e2a5b] mb-1">Condizione di Pagamento</label>
+                        <select id="nuovo-pagamento" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                            <option value="">Nessuna (Da definire)</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento / Numero *</label>
+                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Acconto o Fatt. 15">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Importo Richiesto (€) *</label>
+                            <input type="number" step="0.01" id="nuovo-importo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none" placeholder="0.00">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
+                <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
+                <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Richiesta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE MODIFICA DATI BASE E ELIMINA -->
+    <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+                <h3 class="text-lg font-bold text-gray-900">Modifica Dati</h3>
+                <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="bg-indigo-50 border border-indigo-100 p-3 rounded-lg mb-2">
+                    <label class="block text-sm font-bold text-[#2e2a5b] mb-1">Modifica Condizione Pagamento</label>
+                    <select id="mod-pagamento" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento</label>
+                        <input type="text" id="mod-numero" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-gray-800 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Importo (€)</label>
+                        <input type="number" step="0.01" id="mod-importo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg font-bold text-emerald-600 outline-none">
+                    </div>
+                </div>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="confermaEliminazioneFattura()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Definitivamente</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
+                    <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
+                </div>
             </div>
         </div>
     </div>
@@ -301,647 +282,4 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label>
-                    <textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione (Retroattiva)</label>
-                    <input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                </div>
-            </div>
-            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50">
-                <button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Record</button>
-                <div class="flex gap-2">
-                    <button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button>
-                    <button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: REGISTRA NUOVO RILIEVO MISURE -->
-    <div id="modal-rilievo-misure" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Attività Rilievo</h3>
-                    <p class="text-xs text-gray-500">Inserisci i dati dell'uscita e gli allegati</p>
-                </div>
-                <button type="button" onclick="chiudiModaleRilievo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
-                <form id="form-rilievo-misure" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">📅 Data *</label><input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico *</label><input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Es. Sebastiano"></div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-700 mb-1">Tipo Attività *</label>
-                            <select id="rilievo-input-tipo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
-                                <option value="Rilievo Preventivo">Rilievo Preventivo</option>
-                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
-                                <option value="Ricontrollo">Ricontrollo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche, Misure e Particolari</label><textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Annotazioni..."></textarea></div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto</label><input type="file" id="rilievo-input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-xs text-gray-600 cursor-pointer"></div>
-                </form>
-            </div>
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-                <button type="button" onclick="chiudiModaleRilievo()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
-                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Attività</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE ORDINE FORNITORE -->
-    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3><p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p></div>
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-gestisci-ordine" class="space-y-4">
-                    <input type="hidden" id="gest-ord-id">
-                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
-                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
-                        <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label><input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Revisione</label><div class="flex items-center"><input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold"><button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button></div></div>
-                        <div id="box-ord-data-conferma" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label><input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
-                        <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1"><label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label><input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3"><label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label><input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800"></div>
-                        <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
-                    </div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-between items-center bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="eliminaOrdineDaCommessa()" class="text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Ordine</button>
-                <div class="flex gap-3"><button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button><button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md">Salva Ordine</button></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: NUOVO ORDINE DA COMMESSA -->
-    <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Invia Nuova Richiesta Fornitore</h3></div>
-                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="text-gray-400 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-nuovo-ordine-commessa" class="space-y-4">
-                    <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3"><input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer"><label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label></div>
-                    <div class="grid grid-cols-1 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine / Richiesta *</label><input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento</label><select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: INSERIMENTO POSA/INTERVENTO -->
-    <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Registra Intervento di Posa</h3></div>
-                <button type="button" onclick="chiudiModalePosa()" class="text-gray-400 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-intervento-posa" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Intervento *</label><input type="date" id="posa-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Squadra / Posatore *</label><input type="text" id="posa-squadra" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div></div>
-                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Lavori eseguiti / Note</label><textarea id="posa-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Foto del lavoro</label><input type="file" id="posa-file" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModalePosa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
-                <button type="submit" form="form-intervento-posa" id="btn-salva-posa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Intervento</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: BASE COMMESSA NUOVA -->
-    <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Nuova Commessa</h3></div>
-                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-nuova-commessa" class="space-y-5">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale *</label>
-                            <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"></select>
-                            <div class="mt-2 flex items-center gap-2">
-                                <input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer">
-                                <label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label>
-                            </div>
-                        </div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero *</label><input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600"></div>
-                    </div>
-                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100"><label class="block text-sm font-bold text-[#2e2a5b] mb-1">Sede di Gestione *</label><select id="form-com-sede" required class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm outline-none"><option value="">Caricamento sedi...</option></select></div>
-                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                        <div class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Riferimento cantiere</label><input type="text" id="form-com-nome-cantiere" placeholder="Es. descrizione breve del cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div>
-                            <div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
-                            <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50"><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button>
-                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE: MODIFICA COMMESSA -->
-    <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div>
-                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-modifica-commessa" class="space-y-4">
-                    <input type="hidden" id="mod-com-id"> 
-                    <div class="pt-2 space-y-4">
-                        <div class="mb-4"><label class="block text-xs font-bold text-[#2e2a5b] mb-1">Sede di Gestione</label><select id="mod-com-sede" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></select></div>
-                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Riferimento cantiere</label><input type="text" id="mod-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div>
-                        <div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="mod-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
-                        <div class="grid grid-cols-12 gap-4 pt-2"><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Referente</label><input type="text" id="mod-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="mod-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="mod-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
-                    </div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0">
-                <button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Cantiere</button>
-                <div class="flex gap-3"><button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button><button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE NUOVA FATTURA DA COMMESSA -->
-    <div id="modal-nuova-fattura" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold text-gray-900">Registra Acconto / Fattura</h3></div>
-                <button type="button" onclick="chiudiModaleNuovaFattura()" class="text-gray-400 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
-                <form id="form-nuova-fattura" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Numero / Riferimento *</label><input type="text" id="fat-numero" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Importo (€) *</label><input type="number" step="0.01" id="fat-importo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Stato *</label>
-                        <select id="fat-stato" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
-                            <option value="Da Emettere">Da Emettere / Richiesta</option>
-                            <option value="Emessa / Inviata">Emessa / Inviata al cliente</option>
-                            <option value="Pagata">Pagata / Incassata</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
-                <button type="button" onclick="chiudiModaleNuovaFattura()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
-                <button type="submit" form="form-nuova-fattura" id="btn-salva-fattura" class="bg-[#2e2a5b] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Registra Pagamento</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ESITO COLLAUDO (Per completezza strutturale) -->
-    <div id="modal-esito-collaudo" class="hidden"></div>
-
-    <script src="config.js"></script>
-
-    <script>
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
-
-        let listaClientiCache = [];
-        let commesseCorrenti = []; 
-        let ordiniCommessaCache = [];
-        let sediGlobali = []; 
-        let totaleCommesse = 0; 
-        
-        let logsCorrenti = []; 
-
-        const sequenzaStati = [
-            'Preventivi', 'Rilievo Misure', 'Contratti', 'Pagamenti', 'Ordini', 'Posa', 'Conclusa'
-        ];
-        
-        let commessaAttivaIndex = null; 
-        let ledStati = [0,0,0,0,0,0,0];
-        let faseDaCompletare = null;
-        let filtroOrdiniCommessa = 'Tutti';
-
-        const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
-        let statoPendenteOrdine = '';
-
-        function formattaEuro(numero) {
-            if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
-            const numFloat = parseFloat(numero);
-            const parti = numFloat.toFixed(2).split('.');
-            const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
-            const decimali = parti[1];
-            return `€ ${interi},${decimali}`;
-        }
-
-        async function caricaFileSuStorage(file, prefisso) {
-            if (!file) return null;
-            const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-            const dataOggi = new Date().toISOString().split('T')[0];
-            const randomHash = Math.random().toString(36).substring(2, 6);
-            const fileName = `${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}_${randomHash}`;
-            
-            const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
-            if (error) { alert("Errore upload: " + error.message); return null; }
-            const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
-            return data.publicUrl;
-        }
-
-        // ======================= FUNZIONI MODIFICA SEGRETA LOG =======================
-        function apriModaleModificaLog(idStr) {
-            const logId = parseInt(idStr);
-            const log = logsCorrenti.find(l => l.id === logId);
-            if(!log) return;
-            document.getElementById('mod-log-id').value = log.id;
-            document.getElementById('mod-log-azione').value = log.azione || '';
-            document.getElementById('mod-log-nota').value = log.nota || '';
-            
-            if (log.created_at) {
-                const d = new Date(log.created_at);
-                d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-                document.getElementById('mod-log-data').value = d.toISOString().slice(0,16);
-            }
-            document.getElementById('modal-modifica-log').classList.remove('hidden');
-        }
-
-        function chiudiModaleModificaLog() { document.getElementById('modal-modifica-log').classList.add('hidden'); }
-
-        async function salvaModificaLog() {
-            const id = document.getElementById('mod-log-id').value;
-            const nuovaAzione = document.getElementById('mod-log-azione').value;
-            const nuovaNota = document.getElementById('mod-log-nota').value;
-            const nuovaData = document.getElementById('mod-log-data').value;
-
-            let timestamp = new Date().toISOString();
-            if (nuovaData) timestamp = new Date(nuovaData).toISOString();
-
-            const { error } = await supabaseClient.from('commesse_log').update({ azione: nuovaAzione, nota: nuovaNota || null, created_at: timestamp }).eq('id', id);
-            if (!error) { chiudiModaleModificaLog(); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore modifica log: " + error.message); }
-        }
-
-        async function eliminaLog() {
-            const id = document.getElementById('mod-log-id').value;
-            if (!confirm("ATTENZIONE: Vuoi eliminare definitivamente questa registrazione dal diario?")) return;
-            const { error } = await supabaseClient.from('commesse_log').delete().eq('id', id);
-            if (!error) { chiudiModaleModificaLog(); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Impossibile eliminare: " + error.message); }
-        }
-
-        // ======================= GESTIONE LISTA COMMESSE E TENDINE =======================
-        document.addEventListener('DOMContentLoaded', async () => { 
-            await popolaTendinaClienti(); 
-            await caricaSediTendina(); 
-            await caricaCommesse(); 
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const idToOpen = urlParams.get('id');
-            const action = urlParams.get('action');
-            const clienteId = urlParams.get('cliente_id');
-            const tabToOpen = urlParams.get('tab');
-
-            if (action === 'new') {
-                apriModaleNuovaCommessa();
-                if (clienteId) {
-                    const select = document.getElementById('form-com-cliente');
-                    select.value = clienteId;
-                    document.getElementById('check-copia-dati').checked = true;
-                    select.dispatchEvent(new Event('change'));
-                }
-            }
-
-            if (idToOpen) {
-                const index = commesseCorrenti.findIndex(c => String(c.id) === idToOpen);
-                if (index !== -1) {
-                    await apriSchedaCommessa(index);
-                    if (tabToOpen) cambiaTab(tabToOpen);
-                }
-            }
-        });
-
-        async function popolaTendinaClienti() {
-            const { data } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta, telefono, email').order('nome_ragione_sociale');
-            if (data) {
-                listaClientiCache = data;
-                const select = document.getElementById('form-com-cliente');
-                select.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
-                data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`);
-            }
-        }
-
-        async function caricaSediTendina() {
-            const { data } = await supabaseClient.from('sedi_aziendali').select('nome').order('nome');
-            if (data) {
-                sediGlobali = data;
-                const selNuovo = document.getElementById('form-com-sede');
-                const selModifica = document.getElementById('mod-com-sede');
-                selNuovo.innerHTML = '<option value="">-- Seleziona Sede --</option>';
-                selModifica.innerHTML = '<option value="">Nessuna sede specificata</option>';
-                data.forEach(s => {
-                    selNuovo.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
-                    selModifica.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
-                });
-            }
-        }
-
-        async function caricaCommesse() {
-            const { data: commesse, error } = await supabaseClient
-                .from('commesse')
-                .select('*, clienti(nome_ragione_sociale)')
-                .order('updated_at', { ascending: false, nullsFirst: false }); 
-
-            const tbody = document.getElementById('tabella-commesse');
-            if (error) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500">Errore DB</td></tr>'; return; }
-
-            const { data: preventiviTutti } = await supabaseClient.from('preventivi').select('commessa_id, id, stato');
-
-            commesseCorrenti = (commesse || []).map(com => {
-                const prevsCom = (preventiviTutti || []).filter(p => String(p.commessa_id) === String(com.id));
-                return { ...com, preventivi: prevsCom };
-            });
-
-            totaleCommesse = commesseCorrenti.length; 
-            document.getElementById('conteggio-commesse').innerText = `${commesseCorrenti.length} commesse in corso`;
-            disegnaListaCommesse(commesseCorrenti);
-        }
-
-        function disegnaListaCommesse(lista) {
-            const tbody = document.getElementById('tabella-commesse');
-            tbody.innerHTML = ''; 
-            if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessuna commessa</td></tr>'; return; }
-
-            lista.forEach(com => {
-                const index = commesseCorrenti.findIndex(c => c.id === com.id);
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
-                tr.addEventListener('click', () => apriSchedaCommessa(index)); 
-                
-                const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
-                const cantiere = com.nome_cantiere || '--';
-                const sedeTesto = com.sede_gestione ? `<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">${com.sede_gestione}</div>` : '';
-
-                let bgStato = 'bg-gray-100 text-gray-700';
-                if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
-                
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-semibold text-gray-900">${com.numero}${sedeTesto}</td>
-                    <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
-                    <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-                    <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivi'}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function filtraCommesse() {
-            const q = document.getElementById('input-ricerca-commesse').value.toLowerCase();
-            const filtrate = commesseCorrenti.filter(c => 
-                (c.numero && c.numero.toLowerCase().includes(q)) || 
-                (c.clienti && c.clienti.nome_ragione_sociale && c.clienti.nome_ragione_sociale.toLowerCase().includes(q))
-            );
-            disegnaListaCommesse(filtrate);
-        }
-
-        async function apriSchedaCommessa(index) {
-            try {
-                commessaAttivaIndex = index;
-                const com = commesseCorrenti[index];
-                
-                const { data: freshPrevs } = await supabaseClient.from('preventivi').select('id, stato').eq('commessa_id', com.id);
-                if (freshPrevs) com.preventivi = freshPrevs;
-
-                aggiornaDatiSchedaUI();
-                cambiaTab('riepilogo'); 
-                await caricaCronologia(com.id);
-
-                document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
-                document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } catch (err) {
-                alert("Errore nell'apertura della commessa: " + err.message);
-            }
-        }
-
-        function chiudiScheda() {
-            commessaAttivaIndex = null;
-            document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
-            document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
-            document.getElementById('vista-elenco').classList.remove('hidden');
-            document.getElementById('vista-elenco').classList.add('flex');
-            caricaCommesse(); 
-        }
-
-        function cambiaTab(tabName) {
-            const tabs = ['riepilogo', 'preventivi', 'rilievi', 'contratti', 'ordini', 'posa', 'fatture'];
-            tabs.forEach(t => {
-                document.getElementById(`tab-btn-${t}`).className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
-                document.getElementById(`tab-content-${t}`).className = "hidden";
-            });
-            document.getElementById(`tab-btn-${tabName}`).className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
-            
-            if (tabName === 'riepilogo') { document.getElementById('tab-content-riepilogo').className = "block space-y-6"; calcolaValoriEconomici(); } 
-            else if (tabName === 'preventivi') { document.getElementById('tab-content-preventivi').className = "block space-y-4"; caricaPreventiviDiQuestaCommessa(); } 
-            else if (tabName === 'rilievi') { document.getElementById('tab-content-rilievi').className = "block space-y-6"; caricaRilieviDiQuestaCommessa(); }
-            else if (tabName === 'contratti') { document.getElementById('tab-content-contratti').className = "block space-y-4"; caricaContrattiDiQuestaCommessa(); } 
-            else if (tabName === 'ordini') { document.getElementById('tab-content-ordini').className = "block space-y-4 flex flex-col h-full"; caricaOrdiniDiQuestaCommessa(); } 
-            else if (tabName === 'posa') { document.getElementById('tab-content-posa').className = "block space-y-4"; caricaPosaInterventi(); } 
-            else if (tabName === 'fatture') { document.getElementById('tab-content-fatture').className = "block space-y-4"; caricaFattureDiQuestaCommessa(); }
-        }
-
-        function creaPreventivoDaCommessa() { window.location.href = `preventivi.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
-        function creaContrattoDaCommessa() { window.location.href = `contratti.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
-        function creaFatturaDaCommessa() { window.location.href = `fatturazione.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
-
-        async function calcolaValoriEconomici() {
-            const com = commesseCorrenti[commessaAttivaIndex];
-            
-            // 1. Incassato Reale
-            const { data: fatture } = await supabaseClient.from('fatture').select('importo, stato').eq('commessa_id', com.id);
-            let totaleIncassato = 0; 
-            if(fatture) { fatture.forEach(f => { if(f.stato === 'Pagata' && f.importo) totaleIncassato += parseFloat(f.importo); }); }
-            document.getElementById('scheda-incassato').innerText = formattaEuro(totaleIncassato);
-
-            // 2. Valore Contratto / Lavoro
-            const { data: contratti } = await supabaseClient.from('contratti').select('valore_finale, stato').eq('commessa_id', com.id).neq('stato', 'Disdetto');
-            let totaleContratti = 0; 
-            if(contratti && contratti.length > 0) { 
-                contratti.forEach(c => { if(c.valore_finale) totaleContratti += parseFloat(c.valore_finale); }); 
-            } else {
-                const { data: preventivi } = await supabaseClient.from('preventivi').select('importo, stato').eq('commessa_id', com.id).neq('stato', 'Rifiutato');
-                if(preventivi && preventivi.length > 0) {
-                    preventivi.forEach(p => { if(p.importo) totaleContratti += parseFloat(p.importo); });
-                }
-            }
-            document.getElementById('scheda-residuo').innerText = formattaEuro(totaleContratti); 
-            document.getElementById('scheda-sottotitolo-valore').innerText = formattaEuro(totaleContratti);
-
-            // 3. Costi Fornitura (Ordini)
-            const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('costo_confermato').eq('commessa_id', com.id);
-            let totaleCosti = 0;
-            if(ordini) {
-                ordini.forEach(o => { if(o.costo_confermato) totaleCosti += parseFloat(o.costo_confermato); });
-            }
-            document.getElementById('scheda-sottotitolo-costi').innerText = formattaEuro(totaleCosti);
-        }
-
-        function aggiornaDatiSchedaUI() {
-            if(commessaAttivaIndex === null) return;
-            const com = commesseCorrenti[commessaAttivaIndex];
-            document.getElementById('scheda-titolo').innerText = com.numero;
-            
-            const bdgSede = document.getElementById('scheda-badge-sede');
-            if (com.sede_gestione) { bdgSede.innerText = com.sede_gestione; bdgSede.classList.remove('hidden'); } 
-            else { bdgSede.classList.add('hidden'); }
-
-            let colorStato = 'bg-blue-100 text-blue-800';
-            if (com.stato === 'Conclusa') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
-            if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
-            if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
-            
-            document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
-            document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivi';
-
-            const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
-            document.getElementById('scheda-sottotitolo-cliente').innerText = nomeCliente;
-            document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
-            document.getElementById('scheda-sottotitolo-valore').innerText = "Calcolo in corso..."; 
-            document.getElementById('scheda-sottotitolo-costi').innerText = "Calcolo in corso..."; 
-
-            document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
-
-            disegnaStepperLed();
-        }
-
-        function disegnaStepperLed() {
-            const com = commesseCorrenti[commessaAttivaIndex]; const container = document.getElementById('stepper-container'); container.innerHTML = '';
-            let fasiArr = [0,0,0,0,0,0,0];
-            if (com.fasi_cantiere) { let tempArr = com.fasi_cantiere.split(',').map(Number); if (tempArr.length === 6) { tempArr.splice(2, 0, 0); } fasiArr = tempArr; while(fasiArr.length < 7) fasiArr.push(0); }
-            ledStati = fasiArr;
-            const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full'; container.appendChild(bgLine);
-            sequenzaStati.forEach((stato, index) => {
-                const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform'; punto.onclick = () => gestisciClickLed(index); 
-                let val = fasiArr[index] || 0; let iconaHTML = ''; let textColor = 'text-gray-400';
-                if (val === 0) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">${index + 1}</div>`; textColor = 'text-gray-400'; } 
-                else if (val === 1) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-sky-500 text-white font-bold text-sm shadow-md ring-4 ring-sky-100">${index + 1}</div>`; textColor = 'text-sky-600 font-bold'; } 
-                else if (val === 2) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold ring-4 ring-emerald-100">✓</div>`; textColor = 'text-emerald-700 font-bold'; }
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>`; container.appendChild(punto);
-            });
-        }
-
-        async function gestisciClickLed(index) {
-            let val = ledStati[index];
-            if (val === 0) await aggiornaLedDB(index, 1);
-            else if (val === 1) { faseDaCompletare = index; document.getElementById('nome-fase-popup').innerText = sequenzaStati[index].toUpperCase(); document.getElementById('modal-conferma-fase').classList.remove('hidden'); } 
-            else if (val === 2) { if(confirm(`Vuoi annullare il completamento della fase "${sequenzaStati[index]}" e riportarla a stato inattivo?`)) await aggiornaLedDB(index, 0); }
-        }
-
-        function chiudiModaleConfermaFase() { faseDaCompletare = null; document.getElementById('modal-conferma-fase').classList.add('hidden'); }
-        async function confermaFaseLed() { if (faseDaCompletare !== null) { await aggiornaLedDB(faseDaCompletare, 2); chiudiModaleConfermaFase(); } }
-
-        async function aggiornaLedDB(index, nuovoValore) {
-            const com = commesseCorrenti[commessaAttivaIndex]; let nuoviStati = [...ledStati]; nuoviStati[index] = nuovoValore; const nuovaStringa = nuoviStati.join(',');
-            let nuovoStatoTestuale = 'Preventivi'; let found = false;
-            for (let i = nuoviStati.length - 1; i >= 0; i--) { if (nuoviStati[i] > 0) { nuovoStatoTestuale = sequenzaStati[i]; found = true; break; } }
-            if (!found) nuovoStatoTestuale = 'Preventivi';
-            const { error } = await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa, stato: nuovoStatoTestuale }).eq('id', com.id);
-            if (!error) {
-                let logMsg = ''; if(nuovoValore === 1) logMsg = `🔹 Iniziata fase: ${sequenzaStati[index]}`; if(nuovoValore === 2) logMsg = `✅ Completata fase: ${sequenzaStati[index]}`; if(nuovoValore === 0) logMsg = `Resettata fase: ${sequenzaStati[index]}`;
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, autore: UTENTE_CORRENTE }]);
-                com.fasi_cantiere = nuovaStringa; com.stato = nuovoStatoTestuale; ledStati = nuoviStati; aggiornaDatiSchedaUI(); caricaCronologia(com.id);
-            } else { alert("Errore aggiornamento fase: " + error.message); }
-        }
-
-        async function salvaNotaLibera() {
-            const inputNota = document.getElementById('input-nota-libera'); const dataNota = document.getElementById('data-nota-libera').value; const testo = inputNota.value; if (!testo || testo.trim() === '') return; 
-            let timestamp = new Date().toISOString(); if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) { timestamp = new Date(`${dataNota}T12:00:00Z`).toISOString(); }
-            const { error } = await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: "Comunicazione / Appunto Manuale", nota: testo, autore: UTENTE_CORRENTE, created_at: timestamp }]);
-            if (!error) { inputNota.value = ''; caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore salvataggio nota: " + error.message); }
-        }
-
-        async function caricaCronologia(commessaId) {
-            const divLog = document.getElementById('lista-cronologia'); divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
-            const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
-            if (error || !logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata.</p>'; return; }
-            logsCorrenti = logs; let html = '';
-            logs.forEach(log => {
-                const dateObj = new Date(log.created_at); const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
-                const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
-                const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>` : '';
-                let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
-                if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
-                if (log.azione.includes('Rilievo')) icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-blue-100 text-blue-700 text-xs ring-4 ring-blue-50">📐</div>';
-                let iconaContainer = `<div class="cursor-pointer hover:scale-125 transition-transform" ondblclick="apriModaleModificaLog('${log.id}')" title="Doppio clic per modificare">${icona}</div>`;
-                let pData = `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-[#2e2a5b] transition-colors" ondblclick="apriModaleModificaLog('${log.id}')" title="Doppio clic per modificare">${dataFormat}${autoreText}</p>`;
-                html += `<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">${iconaContainer}<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">${log.azione}</p>${pData}</div>${notaHtml}${fileHtml}</div></div>`;
-            }); 
-            divLog.innerHTML = html;
-        }
-
-        // --- GESTIONE MODIFICA E NUOVA COMMESSA ---
-        function apriModaleModifica() {
-            if (commessaAttivaIndex === null) return; const com = commesseCorrenti[commessaAttivaIndex]; document.getElementById('mod-com-id').value = com.id;
-            document.getElementById('mod-com-sede').value = com.sede_gestione || ''; document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || ''; document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || ''; document.getElementById('mod-com-citta').value = com.citta_cantiere || ''; document.getElementById('mod-com-referente').value = com.referente || ''; document.getElementById('mod-com-tel-referente').value = com.telefono_referente || ''; document.getElementById('mod-com-email-referente').value = com.email_referente || '';
-            document.getElementById('modal-modifica-commessa').classList.remove('hidden');
-        }
-        function chiudiModaleModifica() { document.getElementById('modal-modifica-commessa').classList.add('hidden'); }
-        document.getElementById('form-modifica-commessa').addEventListener('submit', async (e) => {
-            e.preventDefault(); const id = document.getElementById('mod-com-id').value;
-            const datiAggiornati = { sede_gestione: document.getElementById('mod-com-sede').value || null, nome_cantiere: document.getElementById('mod-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value, citta_cantiere: document.getElementById('mod-com-citta').value, referente: document.getElementById('mod-com-referente').value, telefono_referente: document.getElementById('mod-com-tel-referente').value, email_referente: document.getElementById('mod-com-email-referente').value };
-            const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
-            if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: `Dati anagrafici e operativi del cantiere aggiornati`, autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
-        });
-
-        function apriModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.remove('hidden'); const anno = new Date().getFullYear(); document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`; document.getElementById('check-copia-dati').checked = false; }
-        function chiudiModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.add('hidden'); document.getElementById('form-nuova-commessa').reset(); window.history.replaceState({}, document.title, window.location.pathname); }
-        
-        document.getElementById('check-copia-dati').addEventListener('change', () => {
-            const isChecked = document.getElementById('check-copia-dati').checked; const clienteId = document.getElementById('form-com-cliente').value;
-            if (isChecked && clienteId) { 
-                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId)); 
-                if (cliente) { document.getElementById('form-com-indirizzo').value = cliente.indirizzo || ''; document.getElementById('form-com-citta').value = cliente.citta || ''; document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || ''; document.getElementById('form-com-tel-referente').value = cliente.telefono || ''; document.getElementById('form-com-email-referente').value = cliente.email || ''; } 
-            } else if (!isChecked) { document.getElementById('form-com-indirizzo').value = ''; document.getElementById('form-com-citta').value = ''; document.getElementById('form-com-referente').value = ''; document.getElementById('form-com-tel-referente').value = ''; document.getElementById('form-com-email-referente').value = ''; }
-        });
-
-        document.getElementById('form-com-cliente').addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
-        document.getElementById('form-nuova-commessa').addEventListener('submit', async (e) => {
-            e.preventDefault(); const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivi', valore: null };
-            const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
-            if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
-        });
-
-        async function confermaEliminazioneCommessa() {
-            const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati (preventivi, rilievi, contratti, ordini, fatture, log, pose).\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
-            if (conferma !== 'ELIMINA') return;
-            const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
-            if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
-            await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
-            const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
-            if (!error) { alert(`Commessa ${com.numero} eliminata con successo.`); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
-        }
-    </script>
-</body>
-</html>
+                    <textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-
