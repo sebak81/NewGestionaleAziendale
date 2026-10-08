@@ -188,3 +188,359 @@
                 <div id="lista-rilievi-commessa" class="space-y-3">
                     <p class="text-sm text-gray-500 italic py-2 text-center">Nessuna attività registrata.</p>
                 </div>
+            </div>
+
+            <!-- CONTENUTO TAB CONTRATTI -->
+            <div id="tab-content-contratti" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Contratti Esecutivi</h3>
+                    <button onclick="creaContrattoDaCommessa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Aggiungi Nuovo Contratto</button>
+                </div>
+                <div id="lista-contratti-commessa" class="space-y-3"></div>
+            </div>
+
+            <!-- CONTENUTO TAB ORDINI -->
+            <div id="tab-content-ordini" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Ordini Fornitori del Cantiere</h3>
+                    <a href="ordini.html" class="text-sm font-semibold text-[#2e2a5b] hover:underline">Vai alla pagina globale Ordini &rarr;</a>
+                </div>
+                <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-4 shrink-0">
+                    <button onclick="cambiaSubTabOrdini('Tutti')" id="subtab-ord-Tutti" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Ordini</button>
+                    <button onclick="cambiaSubTabOrdini('Ordine inviato')" id="subtab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Inviati</button>
+                    <button onclick="cambiaSubTabOrdini('In Modifica')" id="subtab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">In Modifica</button>
+                    <button onclick="cambiaSubTabOrdini('Conferma')" id="subtab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Confermati / In Arrivo</button>
+                    <button onclick="cambiaSubTabOrdini('Merce Arrivata')" id="subtab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Merce Arrivata</button>
+                </div>
+                <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3">Fornitore</th>
+                                <th class="px-4 py-3">Materiale</th>
+                                <th class="px-4 py-3">Data</th>
+                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
+                                <th class="px-4 py-3 text-center">Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100">
+                            <tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Caricamento ordini in corso...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-right">
+                    <button onclick="apriModaleNuovoOrdineDaCommessa()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded shadow-sm">+ Nuovo Ordine Fornitore</button>
+                </div>
+            </div>
+
+            <!-- CONTENUTO TAB POSA E INTERVENTI -->
+            <div id="tab-content-posa" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Registro Uscite e Posa in Opera</h3>
+                    <button onclick="apriModalePosa()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuovo Intervento</button>
+                </div>
+                <div id="lista-interventi-posa" class="space-y-3"></div>
+            </div>
+
+            <!-- CONTENUTO TAB FATTURE -->
+            <div id="tab-content-fatture" class="hidden space-y-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Acconti & Fatture (Pagamenti)</h3>
+                    <button onclick="apriModaleNuovaFattura()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm">+ Nuova Richiesta / Fattura</button>
+                </div>
+                <div id="lista-fatture-commessa" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALI -->
+    <div id="modal-conferma-fase" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden">
+            <div class="p-6 text-center space-y-4">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner ring-4 ring-emerald-50"><span class="text-3xl text-emerald-500">✓</span></div>
+                <h3 class="text-xl font-bold text-gray-900">Confermi completamento?</h3>
+                <p class="text-sm text-gray-500">Stai per segnare come conclusa la fase operativa:<br><strong class="text-lg text-emerald-700 mt-2 block" id="nome-fase-popup">NOME FASE</strong></p>
+            </div>
+            <div class="p-4 bg-gray-50 flex justify-center gap-3 border-t border-gray-100">
+                <button type="button" onclick="chiudiModaleConfermaFase()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors w-full">Annulla</button>
+                <button type="button" onclick="confermaFaseLed()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors w-full">Conferma Fine Lavorazione</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3>
+                    <p class="text-xs text-gray-500">Modalità Amministratore</p>
+                </div>
+                <button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="mod-log-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata (Titolo)</label>
+                    <input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label>
+                    <textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione (Retroattiva)</label>
+                    <input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                </div>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50">
+                <button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Record</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button>
+                    <button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-rilievo-misure" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold text-gray-900" id="modal-rilievo-titolo">Registra Attività Rilievo</h3></div>
+                <button type="button" onclick="chiudiModaleRilievo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
+                <form id="form-rilievo-misure" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">📅 Data *</label><input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico *</label><input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Es. Sebastiano"></div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Tipo Attività *</label>
+                            <select id="rilievo-input-tipo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
+                                <option value="Rilievo Preventivo">Rilievo Preventivo</option>
+                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
+                                <option value="Ricontrollo">Ricontrollo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche, Misure e Particolari</label><textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Annotazioni..."></textarea></div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto</label><input type="file" id="rilievo-input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-xs text-gray-600 cursor-pointer"></div>
+                </form>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="chiudiModaleRilievo()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button>
+                <button type="submit" form="form-rilievo-misure" id="btn-salva-rilievo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Attività</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3><p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">Fornitore: ...</p></div>
+                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-gestisci-ordine" class="space-y-4">
+                    <input type="hidden" id="gest-ord-id">
+                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
+                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label><input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Revisione</label><div class="flex items-center"><input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold"><button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button></div></div>
+                        <div id="box-ord-data-conferma" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label><input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
+                        <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1"><label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label><input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3"><label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label><input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800"></div>
+                        <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+                    </div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-between items-center bg-white rounded-b-2xl shrink-0">
+                <button type="button" onclick="eliminaOrdineDaCommessa()" class="text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Ordine</button>
+                <div class="flex gap-3"><button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100">Annulla</button><button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md">Salva Ordine</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold">Invia Nuova Richiesta Fornitore</h3></div>
+                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-nuovo-ordine-commessa" class="space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3"><input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer"><label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label></div>
+                    <div class="grid grid-cols-1 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine / Richiesta *</label><input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento</label><select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
+                <button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold">Registra Intervento di Posa</h3></div>
+                <button type="button" onclick="chiudiModalePosa()" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-intervento-posa" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Intervento *</label><input type="date" id="posa-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Squadra / Posatore *</label><input type="text" id="posa-squadra" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Lavori eseguiti / Note</label><textarea id="posa-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Foto del lavoro</label><input type="file" id="posa-file" accept=".pdf,.jpg,.jpeg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModalePosa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button>
+                <button type="submit" form="form-intervento-posa" id="btn-salva-posa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Intervento</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold">Nuova Commessa</h3></div>
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-nuova-commessa" class="space-y-5">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale *</label>
+                            <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"></select>
+                            <div class="mt-2 flex items-center gap-2">
+                                <input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer">
+                                <label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label>
+                            </div>
+                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero *</label><input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600"></div>
+                    </div>
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100"><label class="block text-sm font-bold text-[#2e2a5b] mb-1">Sede di Gestione *</label><select id="form-com-sede" required class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm outline-none"><option value="">Caricamento sedi...</option></select></div>
+                    <div class="p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                        <div class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700 mb-1">Riferimento cantiere</label><input type="text" id="form-com-nome-cantiere" placeholder="Es. descrizione breve del cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div>
+                            <div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
+                            <div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50"><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button>
+                <button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div>
+                <button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar">
+                <form id="form-modifica-commessa" class="space-y-4">
+                    <input type="hidden" id="mod-com-id"> 
+                    <div class="pt-2 space-y-4">
+                        <div class="mb-4"><label class="block text-xs font-bold text-[#2e2a5b] mb-1">Sede di Gestione</label><select id="mod-com-sede" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></select></div>
+                        <div><label class="block text-xs font-medium text-gray-500 mb-1">Riferimento cantiere</label><input type="text" id="mod-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div>
+                        <div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="mod-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
+                        <div class="grid grid-cols-12 gap-4 pt-2"><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Referente</label><input type="text" id="mod-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="mod-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="mod-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div>
+                    </div>
+                </form>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Cantiere</button>
+                <div class="flex gap-3"><button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button><button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-nuova-fattura" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div><h3 class="text-lg font-bold text-gray-900">Registra Acconto / Fattura</h3></div>
+                <button type="button" onclick="chiudiModaleNuovaFattura()" class="text-gray-400 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
+                <form id="form-nuova-fattura" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Numero / Riferimento *</label><input type="text" id="fat-numero" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Importo (€) *</label><input type="number" step="0.01" id="fat-importo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">Stato *</label>
+                        <select id="fat-stato" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
+                            <option value="Da Emettere">Da Emettere / Richiesta</option>
+                            <option value="Emessa / Inviata">Emessa / Inviata al cliente</option>
+                            <option value="Pagata">Pagata / Incassata</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
+                <button type="button" onclick="chiudiModaleNuovaFattura()" class="px-5 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
+                <button type="submit" form="form-nuova-fattura" id="btn-salva-fattura" class="bg-[#2e2a5b] text-white px-6 py-2 rounded-lg text-sm font-bold shadow-sm">Registra Pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Registra Esito Collaudo</h3>
+                    <p class="text-xs text-gray-500">Definisci l'avanzamento della commessa post-posa</p>
+                </div>
+                <button type="button" onclick="chiudiModaleCollaudo()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto no-scrollbar space-y-6">
+                <div>
+                    <label class="block text-sm font-bold text-gray-800 mb-3">Qual è l'esito dei lavori in cantiere?</label>
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza a "Conclusa". Il cliente è pronto per la fattura finale.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
+                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa resta in "Posa" ma viene segnalato l'incompleto.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                            <div><span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span><span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza/Ripristino". Serve riordinare del materiale.</span></div>
+                        </label>
+                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
+                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione.</span></div>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo</label>
+                    <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
+                </div>
+            </div>
+            <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
+                <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
+                <button type="button" onclick="salvaEsitoCollaudo()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma Esito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARICAMENTO CONFIG E MOTORE LOGICO ESTERNO -->
+    <script src="config.js"></script>
+    <script src="commesse.js"></script>
+</body>
+</html>
