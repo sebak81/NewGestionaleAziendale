@@ -49,7 +49,6 @@
                 </button>
             </div>
 
-            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
                 <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
                 <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
@@ -133,20 +132,17 @@
                 <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Note Amministrative</h3>
                     <p class="text-xs text-gray-500 mb-4"><strong class="text-[#2e2a5b]">Doppio clic su un'icona o orario del log per modificarlo o eliminarlo.</strong></p>
-                    
                     <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
                         <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <input type="text" id="input-nota-libera" placeholder="Aggiungi una nota su questo incasso..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm whitespace-nowrap">Aggiungi Nota</button>
                     </div>
-
                     <div id="lista-cronologia" class="space-y-4 max-h-80 overflow-y-auto no-scrollbar"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODALI AZIONI -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -185,7 +181,6 @@
         </div>
     </div>
 
-    <!-- MODALE CREAZIONE NUOVA FATTURA -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -198,6 +193,7 @@
             
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
                         <select id="nuovo-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
@@ -239,7 +235,6 @@
         </div>
     </div>
 
-    <!-- MODALE MODIFICA DATI BASE E ELIMINA -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
@@ -272,7 +267,6 @@
         </div>
     </div>
 
-    <!-- MODALE SEGRETO: MODIFICA LOG DIARIO -->
     <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -311,7 +305,7 @@
 
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
+        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar')?.innerText || "Sistema";
 
         let fattureCorrenti = [];
         let fatturaAttivaIndex = null;
@@ -330,7 +324,7 @@
             const numFloat = parseFloat(numero);
             const parti = numFloat.toFixed(2).split('.');
             const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
-            const decimali = parti[1];
+            const decimali = parti[1] || '00';
             return `€ ${interi},${decimali}`;
         }
 
@@ -339,7 +333,7 @@
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
             const dataOggi = new Date().toISOString().split('T')[0];
             const randomHash = Math.random().toString(36).substring(2, 6);
-            const fileName = `${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}_${randomHash}`;
+            const fileName = `\${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}_${randomHash}`;
             
             const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
             if (error) { alert("Errore upload: " + error.message); return null; }
@@ -419,28 +413,37 @@
         async function caricaFatture() {
             const tbody = document.getElementById('tabella-fatture');
             
+            // TENTATIVO 1: JOIN DIRETTA
             let { data: fats, error } = await supabaseClient
                 .from('fatture')
-                .select('*, commesse(id, numero, nome_cantiere, clienti(nome_ragione_sociale))')
+                .select('*, commesse(id, numero, nome_cantiere, cliente_id, clienti(nome_ragione_sociale))')
                 .order('created_at', { ascending: false });
 
+            // TENTATIVO 2: FALLBACK MANUALE A 3 LIVELLI SE MANCA LA FOREIGN KEY
             if (error) {
-                console.warn("Relazione diretta fallita. Avvio il caricamento di emergenza a doppio passaggio...");
+                console.warn("Join Supabase fallito, avvio incrocio dati manuale...");
                 const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
                 if (err2) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
-                const { data: allComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, clienti(nome_ragione_sociale)');
                 
-                fats = rawFats.map(f => {
-                    if (allComms) {
-                        const relCom = allComms.find(c => String(c.id) === String(f.commessa_id));
-                        if (relCom) f.commesse = relCom;
+                const { data: rawComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id');
+                const { data: rawClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
+                
+                fats = (rawFats || []).map(f => {
+                    if (rawComms) {
+                        let relCom = rawComms.find(c => String(c.id) === String(f.commessa_id));
+                        if (relCom) {
+                            if (rawClienti) {
+                                relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id));
+                            }
+                            f.commesse = relCom;
+                        }
                     }
                     return f;
                 });
             }
 
             fattureCorrenti = fats || []; 
-            document.getElementById('conteggio-fatture').innerText = `${fattureCorrenti.length} pratiche registrate`;
+            document.getElementById('conteggio-fatture').innerText = `\${fattureCorrenti.length} pratiche registrate`;
             aggiornaStileTabsFatture(); 
             aggiornaVistaFatture();
         }
@@ -451,7 +454,7 @@
             fattureCorrenti.forEach(f => { let s = f.stato || 'Da Emettere'; if(s === 'Inviata' || s === 'Emessa') s = 'Emessa / Inviata'; f.statoPulito = s; if(counts[s] !== undefined) counts[s]++; });
             tabs.forEach(t => {
                 const cleanId = t.id.replace(/ /g, '').replace(/\//g, ''); const btn = document.getElementById('tab-fat-' + cleanId);
-                if (btn) { btn.innerHTML = `${t.label} <span class="ml-1 opacity-80">(${counts[t.id]})</span>`;
+                if (btn) { btn.innerHTML = `\${t.label} <span class="ml-1 opacity-80">(\${counts[t.id]})</span>`;
                     if (t.id === filtroFattureCorrente) btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center";
                     else btn.className = "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center";
                 }
@@ -485,14 +488,14 @@
                 
                 const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
                 const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
-                const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '--';
+                const importo = f.importo ? `€ \${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '--';
                 const dataCreazione = f.created_at ? new Date(f.created_at).toLocaleDateString('it-IT') : '--';
                 
                 let colorStato = 'bg-yellow-100 text-yellow-800'; 
                 if(f.statoPulito === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700';
                 if(f.statoPulito === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
                 
-                tr.innerHTML = `<td class="px-6 py-4 text-gray-900 font-bold">${cliente}</td><td class="px-6 py-4 text-gray-600 text-xs">${cantiere}</td><td class="px-6 py-4 font-bold text-[#2e2a5b]">${f.numero}</td><td class="px-6 py-4 text-gray-500 text-xs">${dataCreazione}</td><td class="px-6 py-4 text-gray-900 font-bold">${importo}</td><td class="px-6 py-4"><span class="px-3 py-1 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${f.statoPulito}</span></td>`;
+                tr.innerHTML = `<td class="px-6 py-4 text-gray-900 font-bold">\${cliente}</td><td class="px-6 py-4 text-gray-600 text-xs">\${cantiere}</td><td class="px-6 py-4 font-bold text-[#2e2a5b]">\${f.numero}</td><td class="px-6 py-4 text-gray-500 text-xs">\${dataCreazione}</td><td class="px-6 py-4 text-gray-900 font-bold">\${importo}</td><td class="px-6 py-4"><span class="px-3 py-1 \${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">\${f.statoPulito}</span></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -504,7 +507,7 @@
         }
 
         function chiudiScheda() {
-            if (apertoDaCommessa) { window.location.href = `commesse.html?id=${fattureCorrenti[fatturaAttivaIndex].commessa_id}`; return; }
+            if (apertoDaCommessa) { window.location.href = `commesse.html?id=\${fattureCorrenti[fatturaAttivaIndex].commessa_id}`; return; }
             fatturaAttivaIndex = null; document.getElementById('vista-scheda').classList.replace('flex', 'hidden'); document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
         }
 
@@ -512,14 +515,14 @@
             const f = fattureCorrenti[fatturaAttivaIndex]; document.getElementById('scheda-titolo').innerText = f.numero;
             const cantiere = f.commesse ? `${f.commesse.numero}${f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : ''}` : '--';
             const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
-            const importo = f.importo ? `€ ${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '0,00 €';
+            const importo = f.importo ? `€ \${parseFloat(f.importo).toFixed(2).replace('.', ',')}` : '0,00 €';
             
             document.getElementById('scheda-sottotitolo-commessa').innerText = cantiere; document.getElementById('scheda-sottotitolo-cliente').innerText = cliente; document.getElementById('scheda-sottotitolo-valore').innerText = importo; document.getElementById('scheda-sottotitolo-condizione').innerText = f.condizione_pagamento || 'N/D';
             
             let statoPuro = f.statoPulito || 'Da Emettere';
             let colorStato = 'bg-yellow-100 text-yellow-800'; if(statoPuro === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700'; if(statoPuro === 'Pagata') colorStato = 'bg-emerald-100 text-emerald-800';
             
-            document.getElementById('scheda-badge-stato').innerText = statoPuro; document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+            document.getElementById('scheda-badge-stato').innerText = statoPuro; document.getElementById('scheda-badge-stato').className = `px-3 py-1 \${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
             document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
 
             disegnaStepper(statoPuro); disegnaStoricoFile(f.file_url);
@@ -530,8 +533,8 @@
             if(!urls_csv || urls_csv.trim() === '') { div.innerHTML = '<p class="text-sm text-gray-500 italic">Nessun documento caricato nello storico.</p>'; return; }
             const urls = urls_csv.split(',').filter(x => x.trim() !== ''); let html = '';
             urls.forEach((url, i) => {
-                let nameVisuale = `Documento ${i+1}`; let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200'; let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
-                html += `<a href="${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border ${colorBox} hover:shadow-md transition-shadow group"><div class="text-2xl ${iconaColor} group-hover:scale-110 transition-transform">📄</div><div class="flex-1"><p class="text-sm font-bold text-gray-900">${nameVisuale}</p><p class="text-[10px] text-gray-500">Clicca per aprire</p></div><div class="text-gray-400 font-bold">&rarr;</div></a>`;
+                let nameVisuale = `Documento \${i+1}`; let colorBox = (i === urls.length - 1) ? 'bg-emerald-50 border-emerald-200' : 'bg-gray-50 border-gray-200'; let iconaColor = (i === urls.length - 1) ? 'text-emerald-600' : 'text-gray-500';
+                html += `<a href="\${url.trim()}" target="_blank" class="flex items-center gap-3 p-3 rounded-lg border \${colorBox} hover:shadow-md transition-shadow group"><div class="text-2xl \${iconaColor} group-hover:scale-110 transition-transform">📄</div><div class="flex-1"><p class="text-sm font-bold text-gray-900">\${nameVisuale}</p><p class="text-[10px] text-gray-500">Clicca per aprire</p></div><div class="text-gray-400 font-bold">&rarr;</div></a>`;
             }); div.innerHTML = html;
         }
 
@@ -541,11 +544,11 @@
             const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full'; container.appendChild(bgLine);
             sequenzaStati.forEach((stato, index) => {
                 const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-2 bg-white px-2 sm:px-4 z-10 cursor-pointer hover:scale-110 transition-transform'; punto.onclick = () => saltoStato(stato); 
-                let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">${index + 1}</div>`;
-                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`; } else if (index === idxCalcolato) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 ring-blue-100 text-white font-bold text-sm shadow-lg ring-4">${index + 1}</div>`; }
+                let iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">\${index + 1}</div>`;
+                if (index < idxCalcolato || (idxCalcolato === sequenzaStati.length -1 && index === idxCalcolato)) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md">✓</div>`; } else if (index === idxCalcolato) { iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-blue-500 ring-blue-100 text-white font-bold text-sm shadow-lg ring-4">\${index + 1}</div>`; }
                 let textColor = (index <= idxCalcolato || idxCalcolato === sequenzaStati.length -1) ? 'text-gray-900 font-bold' : 'text-gray-400';
                 punto.innerHTML = `
-                    ${iconaHTML}
+                    \${iconaHTML}
                     <span class="text-[9px] sm:text-xs uppercase tracking-wider text-center w-20 leading-tight ${textColor}">${stato}</span>
                 `;
                 container.appendChild(punto);
@@ -555,13 +558,13 @@
 
         function saltoStato(nuovoStato) {
             let statoPuro = fattureCorrenti[fatturaAttivaIndex].stato || 'Da Emettere'; if(statoPuro === 'Inviata' || statoPuro === 'Emessa') statoPuro = 'Emessa / Inviata';
-            if (statoPuro === nuovoStato) return; if (confirm(`Vuoi forzare lo stato fatturazione a: ${nuovoStato.toUpperCase()}?`)) { preparaAzione(nuovoStato, true); }
+            if (statoPuro === nuovoStato) return; if (confirm(`Vuoi forzare lo stato fatturazione a: \${nuovoStato.toUpperCase()}?`)) { preparaAzione(nuovoStato, true); }
         }
 
         function preparaAzione(nuovoStato, isJump = false) {
             document.getElementById('azione-target-stato').value = nuovoStato; document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO'; document.getElementById('azione-data').value = new Date().toISOString().split('T')[0]; document.getElementById('azione-note').value = ''; document.getElementById('azione-file').value = '';
             const titolo = document.getElementById('modale-azione-titolo'); const sub = document.getElementById('modale-azione-sub'); const labelData = document.getElementById('label-data'); const labelFile = document.getElementById('label-file');
-            if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura di Cortesia (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = `Aggiorna a: ${nuovoStato.toUpperCase()}`; sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
+            if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura di Cortesia (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = `Aggiorna a: \${nuovoStato.toUpperCase()}`; sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
             document.getElementById('modal-azione').classList.remove('hidden');
         }
 
@@ -573,11 +576,10 @@
             btn.innerText = "Salvataggio..."; btn.disabled = true;
 
             let timestampFormattato = new Date().toISOString(); const dataOggi = new Date().toISOString().split('T')[0];
-            if (dataAzione && dataAzione !== dataOggi) { timestampFormattato = new Date(`${dataAzione}T12:00:00Z`).toISOString(); }
+            if (dataAzione && dataAzione !== dataOggi) { timestampFormattato = new Date(`\${dataAzione}T12:00:00Z`).toISOString(); }
 
             let fileUrl = null; if (fileInput.files.length > 0) { btn.innerText = "Caricamento File..."; fileUrl = await caricaFileSuStorage(fileInput.files[0], 'FATT'); }
             let datiAggiornamento = { stato: nuovoStato }; if (fileUrl) { let urlCorrente = f.file_url || ''; datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl; }
-            
             const { error } = await supabaseClient.from('fatture').update(datiAggiornamento).eq('id', f.id);
             if (!error) {
                 f.stato = nuovoStato; if(fileUrl) f.file_url = datiAggiornamento.file_url;
