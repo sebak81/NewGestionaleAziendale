@@ -49,6 +49,7 @@
                 </button>
             </div>
 
+            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
                 <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
                 <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
@@ -143,6 +144,7 @@
         </div>
     </div>
 
+    <!-- MODALI AZIONI -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -181,6 +183,7 @@
         </div>
     </div>
 
+    <!-- MODALE CREAZIONE NUOVA FATTURA -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -235,6 +238,7 @@
         </div>
     </div>
 
+    <!-- MODALE MODIFICA DATI BASE E ELIMINA -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
@@ -267,6 +271,7 @@
         </div>
     </div>
 
+    <!-- MODALE SEGRETO: MODIFICA LOG DIARIO -->
     <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -580,6 +585,7 @@
 
             let fileUrl = null; if (fileInput.files.length > 0) { btn.innerText = "Caricamento File..."; fileUrl = await caricaFileSuStorage(fileInput.files[0], 'FATT'); }
             let datiAggiornamento = { stato: nuovoStato }; if (fileUrl) { let urlCorrente = f.file_url || ''; datiAggiornamento.file_url = urlCorrente ? urlCorrente + ',' + fileUrl : fileUrl; }
+            
             const { error } = await supabaseClient.from('fatture').update(datiAggiornamento).eq('id', f.id);
             if (!error) {
                 f.stato = nuovoStato; if(fileUrl) f.file_url = datiAggiornamento.file_url;
