@@ -30,15 +30,6 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -75,7 +66,8 @@
                                 <th class="px-6 py-4">Fase Corrente</th>
                             </tr>
                         </thead>
-                        <tbody id="tabella-commesse" class="divide-y divide-gray-100"></tbody>
+                        <tbody id="tabella-commesse" class="divide-y divide-gray-100">
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -101,7 +93,6 @@
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            
             <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -141,6 +132,7 @@
                         <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">€ 0,00</p>
                     </div>
                 </div>
+
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
                     <p class="text-xs text-gray-500 mb-5">Questo registro include l'attivazione dei LED, le modifiche ai contratti e le note libere. <strong class="text-[#2e2a5b]">Doppio clic su un'icona o orario del log per modificarlo o eliminarlo.</strong></p>
@@ -204,9 +196,7 @@
                         <tbody id="lista-ordini-commessa" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
-                <div class="text-right">
-                    <button onclick="apriModaleNuovoOrdineDaCommessa()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded shadow-sm">+ Nuovo Ordine Fornitore</button>
-                </div>
+                <div class="text-right"><button onclick="apriModaleNuovoOrdineDaCommessa()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded shadow-sm">+ Nuovo Ordine Fornitore</button></div>
             </div>
 
             <div id="tab-content-posa" class="hidden space-y-4">
@@ -227,6 +217,7 @@
         </div>
     </div>
 
+    <!-- MODALI -->
     <div id="modal-conferma-fase" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden">
             <div class="p-6 text-center space-y-4">
@@ -249,9 +240,9 @@
             </div>
             <div class="p-6 space-y-4">
                 <input type="hidden" id="mod-log-id">
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata (Titolo)</label><input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]"></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label><textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></textarea></div>
-                <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione</label><input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata (Titolo)</label><input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none"></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label><textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></textarea></div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione</label><input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50">
                 <button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Record</button>
@@ -272,18 +263,12 @@
             <div class="p-6 overflow-y-auto no-scrollbar space-y-4">
                 <form id="form-rilievo-misure" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">📅 Data *</label><input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico *</label><input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Es. Sebastiano"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Tipo Attività *</label>
-                            <select id="rilievo-input-tipo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
-                                <option value="Rilievo Preventivo">Rilievo Preventivo</option>
-                                <option value="Rilievo Esecutive">Rilievo Esecutive</option>
-                                <option value="Ricontrollo">Ricontrollo</option>
-                            </select>
-                        </div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">📅 Data *</label><input type="date" id="rilievo-input-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">👤 Tecnico *</label><input type="text" id="rilievo-input-tecnico" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Tipo Attività *</label><select id="rilievo-input-tipo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"><option value="Rilievo Preventivo">Rilievo Preventivo</option><option value="Rilievo Esecutive">Rilievo Esecutive</option><option value="Ricontrollo">Ricontrollo</option></select></div>
                     </div>
-                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche, Misure e Particolari</label><textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none" placeholder="Annotazioni..."></textarea></div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto</label><input type="file" id="rilievo-input-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="w-full text-xs text-gray-600 cursor-pointer"></div>
+                    <div><label class="block text-xs font-bold text-gray-700 mb-1">Note Tecniche</label><textarea id="rilievo-input-note" rows="3" class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></textarea></div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50"><label class="block text-xs font-bold text-gray-800 mb-1">Allega Documenti o Foto</label><input type="file" id="rilievo-input-file" accept=".pdf,.jpg,.png" class="w-full text-xs text-gray-600 cursor-pointer"></div>
                 </form>
             </div>
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl">
@@ -311,12 +296,12 @@
                         <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label><input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
                         <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Revisione</label><div class="flex items-center"><input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold"><button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button></div></div>
                         <div id="box-ord-data-conferma" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label><input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
+                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
                         <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1"><label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label><input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700"></div>
                         <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3"><label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label><input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800"></div>
                         <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                     </div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-between items-center bg-white rounded-b-2xl shrink-0">
@@ -335,7 +320,7 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo-ordine-commessa" class="space-y-4">
                     <div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3"><input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer"><label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione / Assistenza Post-Posa</label></div>
-                    <div class="grid grid-cols-1 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine / Richiesta *</label><input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento</label><select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div></div>
+                    <div class="grid grid-cols-1 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine *</label><input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Contratto di Riferimento</label><select id="form-ord-contratto-rif" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                 </form>
@@ -379,10 +364,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale *</label>
                             <select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"></select>
-                            <div class="mt-2 flex items-center gap-2">
-                                <input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer">
-                                <label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label>
-                            </div>
+                            <div class="mt-2 flex items-center gap-2"><input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer"><label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label></div>
                         </div>
                         <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero *</label><input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600"></div>
                     </div>
@@ -456,6 +438,7 @@
         </div>
     </div>
 
+    <!-- ESITO COLLAUDO (Per completezza strutturale) -->
     <div id="modal-esito-collaudo" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -471,26 +454,15 @@
                     <div class="space-y-3">
                         <label class="flex items-start gap-3 p-3 border border-emerald-200 bg-emerald-50 rounded-lg cursor-pointer hover:bg-emerald-100 transition-colors">
                             <input type="radio" name="esito_strada" value="1" class="mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza a "Conclusa". Il cliente è pronto per la fattura finale.</span></div>
+                            <div><span class="block font-bold text-emerald-800 text-sm">🟢 Strada 1: Lavoro Completato a Regola d'Arte</span><span class="block text-xs text-emerald-600 mt-0.5">La commessa avanza a "Conclusa".</span></div>
                         </label>
                         <label class="flex items-start gap-3 p-3 border border-yellow-200 bg-yellow-50 rounded-lg cursor-pointer hover:bg-yellow-100 transition-colors">
                             <input type="radio" name="esito_strada" value="2" class="mt-1 w-4 h-4 text-yellow-600 focus:ring-yellow-500 border-gray-300">
-                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve (Finiture/Mancanze minori)</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa resta in "Posa" ma viene segnalato l'incompleto.</span></div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 border border-orange-200 bg-orange-50 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="3" class="mt-1 w-4 h-4 text-orange-600 focus:ring-orange-500 border-gray-300">
-                            <div><span class="block font-bold text-orange-800 text-sm">🟠 Strada 3: Grave o Non Conformità Materiali</span><span class="block text-xs text-orange-600 mt-0.5">La commessa si sposta in "Assistenza/Ripristino". Serve riordinare del materiale.</span></div>
-                        </label>
-                        <label class="flex items-start gap-3 p-3 border border-red-200 bg-red-50 rounded-lg cursor-pointer hover:bg-red-100 transition-colors">
-                            <input type="radio" name="esito_strada" value="4" class="mt-1 w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                            <div><span class="block font-bold text-red-800 text-sm">🔴 Strada 4: Contestazione del Cliente</span><span class="block text-xs text-red-600 mt-0.5">La commessa va in "Contestazione". Blocco totale in attesa di risoluzione.</span></div>
+                            <div><span class="block font-bold text-yellow-800 text-sm">🟡 Strada 2: Incompleto Lieve</span><span class="block text-xs text-yellow-600 mt-0.5">La commessa resta in "Posa" ma viene segnalato l'incompleto.</span></div>
                         </label>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo</label>
-                    <textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Specifica cosa manca, cosa è rovinato o il motivo della contestazione..."></textarea>
-                </div>
+                <div><label class="block text-sm font-medium text-gray-700 mb-1">Dettagli / Note sul Collaudo</label><textarea id="collaudo-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm"></textarea></div>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleCollaudo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors">Annulla</button>
