@@ -74,7 +74,6 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO COMMESSA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
@@ -90,7 +89,6 @@
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            
             <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
@@ -130,7 +128,6 @@
                         <p class="text-3xl font-bold text-gray-900" id="scheda-residuo">€ 0,00</p>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-base font-bold text-gray-800 mb-2">Fascicolo Commessa & Registro Comunicazioni</h3>
                     <p class="text-xs text-gray-500 mb-5">Questo registro include l'attivazione dei LED, le modifiche ai contratti e le note libere. <strong class="text-[#2e2a5b]">Doppio clic su un'icona o orario del log per modificarlo o eliminarlo.</strong></p>
@@ -186,7 +183,7 @@
         </div>
     </div>
 
-    <!-- MODALI DI SERVIZIO -->
+    <!-- MODALI -->
     <div id="modal-conferma-fase" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col overflow-hidden"><div class="p-6 text-center space-y-4"><div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-2 shadow-inner ring-4 ring-emerald-50"><span class="text-3xl text-emerald-500">✓</span></div><h3 class="text-xl font-bold text-gray-900">Confermi completamento?</h3><p class="text-sm text-gray-500">Stai per segnare come conclusa la fase operativa:<br><strong class="text-lg text-emerald-700 mt-2 block" id="nome-fase-popup">NOME FASE</strong></p></div><div class="p-4 bg-gray-50 flex justify-center gap-3 border-t border-gray-100"><button type="button" onclick="chiudiModaleConfermaFase()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-200 w-full">Annulla</button><button type="button" onclick="confermaFaseLed()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md w-full">Conferma Fine Lavorazione</button></div></div></div>
     
     <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50"><div><h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3><p class="text-xs text-gray-500">Modalità Amministratore</p></div><button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 space-y-4"><input type="hidden" id="mod-log-id"><div><label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata</label><input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold outline-none"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera</label><textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></textarea></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Data (Retroattiva)</label><input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div></div><div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50"><button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800">🗑️ Elimina Record</button><div class="flex gap-2"><button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button><button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button></div></div></div></div>
@@ -221,16 +218,26 @@
                                 <option value="Ricevuta / Pagamento">Ricevuta / Pagamento</option>
                             </select>
                         </div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Numero / Riferimento *</label><input type="text" id="fat-numero" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div>
-                        <div><label class="block text-xs font-bold text-gray-700 mb-1">Importo (€) *</label><input type="number" step="0.01" id="fat-importo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-700 mb-1">Stato *</label>
-                        <select id="fat-stato" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
-                            <option value="Da Emettere">Da Emettere / Richiesta</option>
-                            <option value="Emessa / Inviata">Emessa / Inviata al cliente</option>
-                            <option value="Pagata">Pagata / Incassata</option>
-                        </select>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Data Documento *</label>
+                            <input type="date" id="fat-data" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none text-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Numero / Rif. *</label>
+                            <input type="text" id="fat-numero" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Importo ivato (€) *</label>
+                            <input type="number" step="0.01" id="fat-importo" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">Stato *</label>
+                            <select id="fat-stato" required class="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none">
+                                <option value="Da Emettere">Da Emettere / Richiesta</option>
+                                <option value="Emessa / Inviata">Emessa / Inviata al cliente</option>
+                                <option value="Pagata">Pagata / Incassata</option>
+                            </select>
+                        </div>
                     </div>
                 </form>
             </div>
