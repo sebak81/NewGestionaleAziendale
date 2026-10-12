@@ -21,7 +21,6 @@ let filtroOrdiniCommessa = 'Tutti';
 const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
 let statoPendenteOrdine = '';
 
-// ================= INIT GLOBALE =================
 document.addEventListener('DOMContentLoaded', async () => { 
     const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
     if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
@@ -64,7 +63,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// ================= UTILITY E FILE =================
 function formattaEuro(numero) {
     if (!numero || isNaN(parseFloat(numero))) return '€ 0,00';
     const numFloat = parseFloat(numero);
@@ -87,7 +85,6 @@ async function caricaFileSuStorage(file, prefisso) {
     return data.publicUrl;
 }
 
-// ================= MODIFICA SEGRETA DIARIO =================
 function apriModaleModificaLog(idStr) {
     const logId = parseInt(idStr);
     const log = logsCorrenti.find(l => l.id === logId);
@@ -132,7 +129,6 @@ async function eliminaLog() {
     } else { alert("Impossibile eliminare: " + error.message); }
 }
 
-// ================= ESITO COLLAUDO =================
 function chiudiModaleCollaudo() { document.getElementById('modal-esito-collaudo').classList.add('hidden'); }
 
 async function salvaEsitoCollaudo() {
@@ -165,7 +161,6 @@ async function salvaEsitoCollaudo() {
     } else { alert("Errore durante il salvataggio: " + error.message); }
 }
 
-// ================= GESTIONE LISTA COMMESSE =================
 async function popolaTendinaClienti() {
     const { data } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta, telefono, email').order('nome_ragione_sociale');
     if (data) {
@@ -259,7 +254,6 @@ function filtraCommesse() {
     disegnaListaCommesse(filtrate);
 }
 
-// ================= SCHEDA COMMESSA E TABS =================
 async function apriSchedaCommessa(index) {
     try {
         commessaAttivaIndex = index;
@@ -308,7 +302,6 @@ function cambiaTab(tabName) {
 function creaPreventivoDaCommessa() { window.location.href = 'preventivi.html?action=new&commessa_id=' + commesseCorrenti[commessaAttivaIndex].id; }
 function creaContrattoDaCommessa() { window.location.href = 'contratti.html?action=new&commessa_id=' + commesseCorrenti[commessaAttivaIndex].id; }
 
-// ================= RIEPILOGO, LED E LOG =================
 async function calcolaValoriEconomici() {
     const com = commesseCorrenti[commessaAttivaIndex];
     
@@ -659,7 +652,7 @@ async function caricaFattureDiQuestaCommessa() {
 
         let nomePuro = fat.stato || 'Da Emettere';
         if (nomePuro === 'Inviata' || nomePuro === 'Emessa') nomePuro = 'Emessa / Inviata';
-
+        
         const tipoBadge = fat.tipo_documento ? '<div class="text-[10px] text-gray-500 uppercase mt-0.5">' + fat.tipo_documento + '</div>' : '';
 
         html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span>' + tipoBadge + '<span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
@@ -670,6 +663,8 @@ async function caricaFattureDiQuestaCommessa() {
 function apriModaleNuovaFattura() { 
     const form = document.getElementById('form-nuova-fattura');
     if (form) form.reset(); 
+    const inpData = document.getElementById('fat-data');
+    if (inpData) inpData.value = new Date().toISOString().split('T')[0];
     const mod = document.getElementById('modal-nuova-fattura');
     if (mod) mod.classList.remove('hidden'); 
 }
@@ -838,7 +833,6 @@ function apriModaleGestioneOrdine(indexMemoria) {
     document.getElementById('gest-ord-data-presunta').value = ord.data_presunta_consegna || ''; 
     document.getElementById('gest-ord-data-arrivo').value = ord.data_arrivo_merce || ''; 
     
-    // CORREZIONE DESCRIZIONE:
     document.getElementById('gest-ord-annotazioni').value = ord.descrizione || ord.annotazioni || ''; 
     
     document.getElementById('gest-ord-file').value = ''; 
@@ -1019,8 +1013,10 @@ function inizializzaListeners() {
     legaSubmit('form-nuova-fattura', async (e) => {
         e.preventDefault(); const com = commesseCorrenti[commessaAttivaIndex]; const btn = document.getElementById('btn-salva-fattura'); btn.innerText = "Salvataggio..."; btn.disabled = true;
         const tipoDoc = document.getElementById('fat-tipo') ? document.getElementById('fat-tipo').value : 'Fattura';
+        const dataEmissione = document.getElementById('fat-data').value;
         const numero = document.getElementById('fat-numero').value.trim(); const importo = document.getElementById('fat-importo').value; const stato = document.getElementById('fat-stato').value;
-        const payload = { commessa_id: com.id, tipo_documento: tipoDoc, numero: numero, importo: importo, stato: stato };
+        
+        const payload = { commessa_id: com.id, tipo_documento: tipoDoc, data_emissione: dataEmissione, numero: numero, importo: importo, stato: stato };
         const { error } = await supabaseClient.from('fatture').insert([payload]);
         if (!error) {
             await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '💶 Registrata richiesta di ' + tipoDoc + ': ' + numero + ' (€ ' + importo + ' - ' + stato + ')', autore: UTENTE_CORRENTE }]);
