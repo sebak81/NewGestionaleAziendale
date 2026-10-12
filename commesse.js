@@ -26,9 +26,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
     if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
 
-    await popolaTendinaClienti(); 
-    await caricaSediTendina(); 
-    await caricaCommesse(); 
+    inizializzaListeners();
+
+    try {
+        await popolaTendinaClienti(); 
+        await caricaSediTendina(); 
+        await caricaCommesse(); 
+    } catch(err) {
+        console.error("Errore durante il download dal database:", err);
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const idToOpen = urlParams.get('id');
@@ -56,8 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (tabToOpen) cambiaTab(tabToOpen);
         }
     }
-
-    inizializzaListeners();
 });
 
 // ================= UTILITY E FILE =================
@@ -656,7 +660,9 @@ async function caricaFattureDiQuestaCommessa() {
         let nomePuro = fat.stato || 'Da Emettere';
         if (nomePuro === 'Inviata' || nomePuro === 'Emessa') nomePuro = 'Emessa / Inviata';
 
-        html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span><span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
+        const tipoBadge = fat.tipo_documento ? '<div class="text-[10px] text-gray-500 uppercase mt-0.5">' + fat.tipo_documento + '</div>' : '';
+
+        html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span>' + tipoBadge + '<span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
     });
     divLista.innerHTML = html;
 }
@@ -959,8 +965,9 @@ function chiudiModaleNuovaCommessa() {
     window.history.replaceState({}, document.title, window.location.pathname); 
 }
 
-// ================= EVENT LISTENERS DEI FORM =================
+// ================= EVENT LISTENERS DEI FORM (INIT) =================
 function inizializzaListeners() {
+    
     const legaSubmit = (idForm, funzioneHandler) => {
         const form = document.getElementById(idForm);
         if (form) form.addEventListener('submit', funzioneHandler);
@@ -984,7 +991,7 @@ function inizializzaListeners() {
         e.preventDefault(); 
         const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivi', valore: null };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
-        if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
+        if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
 
     legaSubmit('form-modifica-commessa', async (e) => {
@@ -992,7 +999,7 @@ function inizializzaListeners() {
         const id = document.getElementById('mod-com-id').value;
         const datiAggiornati = { sede_gestione: document.getElementById('mod-com-sede').value || null, nome_cantiere: document.getElementById('mod-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value, citta_cantiere: document.getElementById('mod-com-citta').value, referente: document.getElementById('mod-com-referente').value, telefono_referente: document.getElementById('mod-com-tel-referente').value, email_referente: document.getElementById('mod-com-email-referente').value };
         const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
-        if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: `Dati anagrafici e operativi del cantiere aggiornati`, autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
+        if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: 'Dati anagrafici e operativi del cantiere aggiornati', autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
     });
 
     legaSubmit('form-intervento-posa', async (e) => {
@@ -1002,7 +1009,7 @@ function inizializzaListeners() {
         const nuovoInt = { commessa_id: com.id, data_intervento: document.getElementById('posa-data').value, posatore: document.getElementById('posa-squadra').value, note: document.getElementById('posa-note').value || null, file_url: fileUrl };
         const { error } = await supabaseClient.from('interventi_posa').insert([nuovoInt]);
         if (!error) { 
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Registrato intervento di posa in cantiere da: ${nuovoInt.posatore}`, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
+            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: 'Registrato intervento di posa in cantiere da: ' + nuovoInt.posatore, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
             if(ledStati[5] === 0) await aggiornaLedDB(5, 1);
             chiudiModalePosa(); caricaPosaInterventi(); caricaCronologia(com.id); 
         } else { alert("Errore posa: " + error.message); }
@@ -1011,11 +1018,12 @@ function inizializzaListeners() {
 
     legaSubmit('form-nuova-fattura', async (e) => {
         e.preventDefault(); const com = commesseCorrenti[commessaAttivaIndex]; const btn = document.getElementById('btn-salva-fattura'); btn.innerText = "Salvataggio..."; btn.disabled = true;
+        const tipoDoc = document.getElementById('fat-tipo') ? document.getElementById('fat-tipo').value : 'Fattura';
         const numero = document.getElementById('fat-numero').value.trim(); const importo = document.getElementById('fat-importo').value; const stato = document.getElementById('fat-stato').value;
-        const payload = { commessa_id: com.id, numero: numero, importo: importo, stato: stato };
+        const payload = { commessa_id: com.id, tipo_documento: tipoDoc, numero: numero, importo: importo, stato: stato };
         const { error } = await supabaseClient.from('fatture').insert([payload]);
         if (!error) {
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `💶 Registrata richiesta/fattura: ${numero} (Importo: € ${importo} - ${stato})`, autore: UTENTE_CORRENTE }]);
+            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '💶 Registrata richiesta di ' + tipoDoc + ': ' + numero + ' (€ ' + importo + ' - ' + stato + ')', autore: UTENTE_CORRENTE }]);
             if (ledStati[3] === 0) await aggiornaLedDB(3, 1);
             chiudiModaleNuovaFattura(); await caricaFattureDiQuestaCommessa(); await caricaCronologia(com.id); await calcolaValoriEconomici();
         } else { alert("Errore salvataggio fattura: " + error.message); }
@@ -1028,13 +1036,12 @@ function inizializzaListeners() {
         btnSubmit.innerText = "Salvataggio..."; btnSubmit.disabled = true;
         let fileUrl = null; const fileInputUpdate = document.getElementById('gest-ord-file'); if (fileInputUpdate.files.length > 0) fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
         
-        // CORREZIONE DESCRIZIONE: Leggiamo da descrizione per scrivere in descrizione!
         let datiUpdate = { stato: statoPendenteOrdine, costo_confermato: document.getElementById('gest-ord-costo-conf').value || null, data_ordine: document.getElementById('gest-ord-data-ordine').value || null, data_conferma: document.getElementById('gest-ord-data-conferma').value || null, data_presunta_consegna: document.getElementById('gest-ord-data-presunta').value || null, revisione: document.getElementById('gest-ord-revisione').value, data_arrivo_merce: document.getElementById('gest-ord-data-arrivo').value || null, descrizione: document.getElementById('gest-ord-annotazioni').value || null };
         
         if(fileUrl) datiUpdate.file_url = (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') ? ordOriginale.file_url + ',' + fileUrl : fileUrl;
         const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
         if (!error) {
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Ordine a ${nomeFornitore} aggiornato in: ${statoPendenteOrdine.toUpperCase()}`, nota: datiUpdate.descrizione, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
+            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: 'Ordine a ' + nomeFornitore + ' aggiornato in: ' + statoPendenteOrdine.toUpperCase(), nota: datiUpdate.descrizione, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
             if (statoPendenteOrdine === 'Merce Arrivata') {
                 const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato, commessa_id').eq('commessa_id', com.id);
                 if (tuttiOrdini && tuttiOrdini.length > 0) {
@@ -1051,12 +1058,12 @@ function inizializzaListeners() {
         e.preventDefault(); const btnSubmit = document.getElementById('btn-salva-nuovo-ordine-commessa'); const idContratto = document.getElementById('form-ord-contratto-rif').value; const dataOrdine = document.getElementById('form-ord-new-data').value; const com = commesseCorrenti[commessaAttivaIndex];
         btnSubmit.innerText = "Salvataggio..."; btnSubmit.disabled = true;
         const isSostituzione = document.getElementById('form-ord-sostituzione').checked; let testoDescrizione = document.getElementById('form-ord-new-descrizione').value;
-        if (isSostituzione) testoDescrizione = `[SOSTITUZIONE/ASSISTENZA] ${testoDescrizione}`;
+        if (isSostituzione) testoDescrizione = '[SOSTITUZIONE/ASSISTENZA] ' + testoDescrizione;
         const nuovoOrdine = { commessa_id: com.id, contratto_id: idContratto ? idContratto : null, fornitore_id: document.getElementById('form-ord-new-fornitore').value, data_ordine: dataOrdine, descrizione: testoDescrizione, stato: 'Ordine inviato', revisione: 0 };
         const { data, error } = await supabaseClient.from('ordini_fornitori').insert([nuovoOrdine]).select('*, fornitori(nome_azienda)');
         if (!error) {
             const nomeFornitore = data[0].fornitori ? data[0].fornitori.nome_azienda : 'Fornitore'; const labelAssistenza = isSostituzione ? ' ⚠️ (In Sostituzione / Post-Posa)' : '';
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `Creato Ordine Inviato a: ${nomeFornitore}${labelAssistenza}`, autore: UTENTE_CORRENTE }]);
+            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: 'Creato Ordine Inviato a: ' + nomeFornitore + labelAssistenza, autore: UTENTE_CORRENTE }]);
             if(ledStati[4] === 0) await aggiornaLedDB(4, 1);
             chiudiModaleNuovoOrdineDaCommessa(); caricaOrdiniDiQuestaCommessa(); caricaCronologia(com.id);
         } else { alert("Errore ordine: " + error.message); }
@@ -1070,10 +1077,20 @@ function inizializzaListeners() {
         const payload = { commessa_id: com.id, stato: 'Eseguito', tipo_rilievo: tipoRilievo, data_rilievo: dataRilievo, tecnico: tecnico, note: note || null, file_url: nuovoFileUrl };
         const { error } = await supabaseClient.from('rilievi_misure').insert([payload]);
         if (!error) {
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: `📐 Inserita uscita: ${tipoRilievo} (Tecnico: ${tecnico})`, nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
+            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '📐 Inserita uscita: ' + tipoRilievo + ' (Tecnico: ' + tecnico + ')', nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
             if (tipoRilievo === 'Rilievo Esecutive') { if(ledStati[1] !== 2) await aggiornaLedDB(1, 2); } else { if(ledStati[1] === 0) await aggiornaLedDB(1, 1); }
             chiudiModaleRilievo(); await caricaRilieviDiQuestaCommessa(); await caricaCronologia(com.id);
         } else { alert("Errore salvataggio rilievo misure: " + error.message); }
         btn.innerText = "Salva Attività"; btn.disabled = false;
     });
+}
+
+async function confermaEliminazioneCommessa() {
+    const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt('ATTENZIONE: Stai per eliminare definitivamente la commessa ' + com.numero + ' e TUTTI i dati ad essa collegati.\n\nPer confermare, digita la parola ELIMINA qui sotto:');
+    if (conferma !== 'ELIMINA') return;
+    const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
+    if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
+    await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
+    const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
+    if (!error) { alert('Commessa eliminata con successo.'); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
