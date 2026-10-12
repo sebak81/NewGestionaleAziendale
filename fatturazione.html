@@ -15,7 +15,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
@@ -33,7 +32,6 @@
         </nav>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE (ELENCO) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4 shrink-0">
             <h1 class="text-xl font-bold">Amministrazione & Incassi 💰</h1>
@@ -51,7 +49,6 @@
                 </button>
             </div>
 
-            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-2">
                 <button onclick="cambiaTabFatture('Tutte')" id="tab-fat-Tutte" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Completo</button>
                 <button onclick="cambiaTabFatture('Da Emettere')" id="tab-fat-DaEmettere" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Da Emettere / Richieste</button>
@@ -87,7 +84,6 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO FATTURA -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
@@ -118,7 +114,6 @@
                 Condizione: <span id="scheda-sottotitolo-condizione" class="font-bold text-indigo-700 bg-white px-2 py-0.5 rounded border border-indigo-200">N/D</span>
             </div>
 
-            <!-- STEPPER PALLINI FATTURA -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-base font-bold text-gray-800 mb-6 flex justify-between items-center">
                     <span>Avanzamento Pratica</span>
@@ -148,7 +143,7 @@
         </div>
     </div>
 
-    <!-- MODALI AZIONI E INSERIMENTO -->
+    <!-- MODALI AZIONI -->
     <div id="modal-azione" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
@@ -158,23 +153,28 @@
                 </div>
                 <button type="button" onclick="chiudiModaleAzione()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
             </div>
+            
             <div class="p-6 overflow-y-auto no-scrollbar space-y-5">
                 <input type="hidden" id="azione-target-stato">
                 <input type="hidden" id="azione-is-jump">
+
                 <div id="box-data" class="bg-gray-50 p-3 rounded-lg border border-gray-200">
                     <label class="block text-sm font-bold text-gray-800 mb-1" id="label-data">📅 Data dell'azione / incasso</label>
                     <input type="date" id="azione-data" required class="w-full sm:w-1/2 px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm font-bold text-[#2e2a5b]">
                     <p class="text-[10px] text-gray-500 mt-1">Puoi modificare la data per allinearla a quella reale del bonifico.</p>
                 </div>
+
                 <div id="box-note">
                     <label class="block text-sm font-bold text-gray-800 mb-1">Note (Opzionale)</label>
                     <textarea id="azione-note" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#2e2a5b] outline-none text-sm" placeholder="Es. Pagamento ricevuto su banca Intesa..."></textarea>
                 </div>
+
                 <div id="box-file" class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                     <label class="block text-sm font-bold text-gray-800 mb-2" id="label-file">Allega Documento (PDF/IMG)</label>
                     <input type="file" id="azione-file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
                 </div>
             </div>
+            
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-white rounded-b-2xl shrink-0">
                 <button type="button" onclick="chiudiModaleAzione()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors">Annulla</button>
                 <button type="button" onclick="eseguiAzione()" id="btn-conferma-azione" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-colors">Conferma</button>
@@ -182,6 +182,7 @@
         </div>
     </div>
 
+    <!-- MODALE CREAZIONE NUOVA FATTURA (AGGIORNATO CON IL TIPO) -->
     <div id="modal-nuovo" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
@@ -191,30 +192,44 @@
                 </div>
                 <button type="button" onclick="chiudiModaleNuovo()" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
+            
             <div class="p-6 space-y-4 overflow-y-auto no-scrollbar">
                 <form id="form-nuovo" class="space-y-4">
+                    
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Cliente *</label>
                         <select id="nuovo-cliente" onchange="filtraCommessePerCliente()" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                             <option value="">Caricamento clienti...</option>
                         </select>
                     </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Commessa / Cantiere di Riferimento *</label>
                         <select id="nuovo-commessa" required disabled class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                             <option value="">-- Seleziona prima un cliente --</option>
                         </select>
                     </div>
+
                     <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-lg">
                         <label class="block text-sm font-bold text-[#2e2a5b] mb-1">Condizione di Pagamento</label>
                         <select id="nuovo-pagamento" class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
                             <option value="">Nessuna (Da definire)</option>
                         </select>
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Documento *</label>
+                            <select id="nuovo-tipo" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#2e2a5b] outline-none">
+                                <option value="Fattura di Acconto">Fattura di Acconto</option>
+                                <option value="Fattura di Saldo">Fattura di Saldo</option>
+                                <option value="Fattura Unica">Fattura Unica</option>
+                                <option value="Pagamento / Ricevuta">Pagamento / Ricevuta</option>
+                            </select>
+                        </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Riferimento / Numero *</label>
-                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Acconto o Fatt. 15">
+                            <input type="text" id="nuovo-numero" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. 15">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Importo Richiesto (€) *</label>
@@ -223,6 +238,7 @@
                     </div>
                 </form>
             </div>
+            
             <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-white shrink-0">
                 <button type="button" onclick="chiudiModaleNuovo()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200">Annulla</button>
                 <button type="submit" form="form-nuovo" id="btn-salva-nuovo" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-sm">Genera Richiesta</button>
@@ -258,41 +274,6 @@
                 <div class="flex gap-2">
                     <button type="button" onclick="document.getElementById('modal-modifica-dati').classList.add('hidden')" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-gray-100">Annulla</button>
                     <button type="button" onclick="salvaModificaDati()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE SEGRETO: MODIFICA LOG DIARIO -->
-    <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3>
-                    <p class="text-xs text-gray-500">Modalità Amministratore</p>
-                </div>
-                <button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 space-y-4">
-                <input type="hidden" id="mod-log-id">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata (Titolo)</label>
-                    <input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label>
-                    <textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione (Retroattiva)</label>
-                    <input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                </div>
-            </div>
-            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50">
-                <button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Record</button>
-                <div class="flex gap-2">
-                    <button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button>
-                    <button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button>
                 </div>
             </div>
         </div>
