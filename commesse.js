@@ -8,6 +8,7 @@ let UTENTE_CORRENTE = "Sistema";
 let listaClientiCache = [];
 let commesseCorrenti = []; 
 let ordiniCommessaCache = [];
+let rilieviCommessaCache = [];
 let sediGlobali = []; 
 let totaleCommesse = 0; 
 let logsCorrenti = []; 
@@ -353,6 +354,7 @@ function aggiornaDatiSchedaUI() {
     document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
 
     disegnaStepperLed();
+    disegnaStepperRilievo(); // Chiamata aggiunta per sincronizzare lo stepper del rilievo
 }
 
 function disegnaStepperLed() {
@@ -396,6 +398,50 @@ function disegnaStepperLed() {
         punto.innerHTML = iconaHTML + '<span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ' + textColor + '">' + stato + '</span>';
         container.appendChild(punto);
     });
+}
+
+function disegnaStepperRilievo() {
+    const container = document.getElementById('stepper-rilievo-container');
+    const badge = document.getElementById('rilievo-badge-stato');
+    if(!container || !badge) return;
+    
+    let val = ledStati[1] || 0;
+    
+    if(val === 2) {
+        badge.innerText = 'Eseguito';
+        badge.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
+    } else if(val === 1) {
+        badge.innerText = 'In Lavorazione';
+        badge.className = 'px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold uppercase tracking-wider';
+    } else {
+        badge.innerText = 'Da Fare';
+        badge.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
+    }
+
+    let bgLine = (val === 2) ? 'bg-emerald-200' : 'bg-gray-200';
+    let html = '<div class="absolute top-1/2 left-0 w-full h-1 ' + bgLine + ' -z-10 -translate-y-1/2 rounded-full"></div>';
+
+    let p1Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">1</div>';
+    let p1Text = '<span class="text-xs uppercase tracking-wider text-gray-400">In Lavorazione</span>';
+    if(val === 1) {
+        p1Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div>';
+        p1Text = '<span class="text-xs font-bold uppercase tracking-wider text-blue-700">In Lavorazione</span>';
+    } else if(val === 2) {
+        p1Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div>';
+        p1Text = '<span class="text-xs uppercase tracking-wider text-gray-500">In Lavorazione</span>';
+    }
+
+    let p2Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div>';
+    let p2Text = '<span class="text-xs uppercase tracking-wider text-gray-400">Eseguito</span>';
+    if(val === 2) {
+        p2Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div>';
+        p2Text = '<span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Eseguito</span>';
+    }
+
+    html += '<div class="flex flex-col items-center gap-2 bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="gestisciClickLed(1)">' + p1Icon + p1Text + '</div>';
+    html += '<div class="flex flex-col items-center gap-2 bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="gestisciClickLed(1)">' + p2Icon + p2Text + '</div>';
+    
+    container.innerHTML = html;
 }
 
 async function gestisciClickLed(index) {
@@ -524,26 +570,17 @@ async function caricaRilieviDiQuestaCommessa() {
 
     const { data: rilievi, error } = await supabaseClient.from('rilievi_misure').select('*').eq('commessa_id', com.id).order('data_rilievo', { ascending: false });
 
-    const hasEsecutivo = rilievi && rilievi.some(r => r.tipo_rilievo === 'Rilievo Esecutive');
-    const badgeStato = document.getElementById('rilievo-badge-stato');
-    const containerStepper = document.getElementById('stepper-rilievo-container');
-
-    if (hasEsecutivo) {
-        badgeStato.innerText = 'Rilievo Eseguito'; badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
-        containerStepper.innerHTML = '<div class="absolute top-1/2 left-0 w-full h-1 bg-emerald-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div><span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div><span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span></div>';
-    } else {
-        badgeStato.innerText = 'Da Fare'; badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
-        containerStepper.innerHTML = '<div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div><span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div><span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span></div>';
-    }
-
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB.</p>'; return; }
-    if (!rilievi || rilievi.length === 0) {
+    
+    rilieviCommessaCache = rilievi || [];
+
+    if (rilieviCommessaCache.length === 0) {
         divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-4 text-center">Nessuna attività registrata. Clicca su "+ Nuovo Rilievo" per iniziare.</p>';
         return;
     }
 
     let html = '';
-    rilievi.forEach(ril => {
+    rilieviCommessaCache.forEach(ril => {
         const dataSplit = ril.data_rilievo ? ril.data_rilievo.split('-') : ['','','']; 
         const dataIta = ril.data_rilievo ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
         const tipo = ril.tipo_rilievo || 'Rilievo Misure';
@@ -556,12 +593,35 @@ async function caricaRilieviDiQuestaCommessa() {
         const note = ril.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + ril.note + '</p>' : ''; 
         const btnFile = ril.file_url ? '<a href="' + ril.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>' : '';
         
-        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 ' + colorBadge + ' rounded-full text-xs font-bold">' + tipo + '</span><span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ' + (ril.tecnico || '--') + '</span></div><button onclick="eliminaRilievo(' + ril.id + ')" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button></div>' + note + ' ' + btnFile + '</div>';
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 ' + colorBadge + ' rounded-full text-xs font-bold">' + tipo + '</span><span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ' + (ril.tecnico || '--') + '</span></div><div class="flex items-center gap-2"><button onclick="apriModaleRilievo(' + ril.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaRilievo(' + ril.id + ')" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button></div></div>' + note + ' ' + btnFile + '</div>';
     });
     divLista.innerHTML = html;
 }
 
-function apriModaleRilievo() { document.getElementById('form-rilievo-misure').reset(); document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0]; document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE; document.getElementById('modal-rilievo-misure').classList.remove('hidden'); }
+function apriModaleRilievo(idStr = null) { 
+    const form = document.getElementById('form-rilievo-misure');
+    if(form) form.reset(); 
+    
+    document.getElementById('rilievo-id').value = '';
+    document.getElementById('modal-rilievo-titolo').innerText = 'Registra Attività Rilievo';
+
+    if (idStr) {
+        document.getElementById('modal-rilievo-titolo').innerText = 'Modifica Rilievo';
+        const ril = rilieviCommessaCache.find(r => r.id == idStr);
+        if(ril) {
+            document.getElementById('rilievo-id').value = ril.id;
+            document.getElementById('rilievo-input-data').value = ril.data_rilievo || '';
+            document.getElementById('rilievo-input-tecnico').value = ril.tecnico || '';
+            document.getElementById('rilievo-input-tipo').value = ril.tipo_rilievo || 'Rilievo Preventivo';
+            document.getElementById('rilievo-input-note').value = ril.note || '';
+        }
+    } else {
+        document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0]; 
+        document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE; 
+    }
+    
+    document.getElementById('modal-rilievo-misure').classList.remove('hidden'); 
+}
 function chiudiModaleRilievo() { document.getElementById('modal-rilievo-misure').classList.add('hidden'); }
 
 async function eliminaRilievo(id) {
@@ -652,7 +712,7 @@ async function caricaFattureDiQuestaCommessa() {
 
         let nomePuro = fat.stato || 'Da Emettere';
         if (nomePuro === 'Inviata' || nomePuro === 'Emessa') nomePuro = 'Emessa / Inviata';
-        
+
         const tipoBadge = fat.tipo_documento ? '<div class="text-[10px] text-gray-500 uppercase mt-0.5">' + fat.tipo_documento + '</div>' : '';
 
         html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span>' + tipoBadge + '<span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
@@ -924,7 +984,6 @@ async function caricaPosaInterventi() {
     }); 
     divLista.innerHTML = html;
 }
-
 function apriModalePosa() { document.getElementById('form-intervento-posa').reset(); document.getElementById('posa-data').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-intervento-posa').classList.remove('hidden'); }
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
 async function eliminaPosa(id) { if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; await supabaseClient.from('interventi_posa').delete().eq('id', id); caricaPosaInterventi(); }
@@ -959,7 +1018,7 @@ function chiudiModaleNuovaCommessa() {
     window.history.replaceState({}, document.title, window.location.pathname); 
 }
 
-// ================= EVENT LISTENERS DEI FORM (INIT) =================
+// ================= EVENT LISTENERS DEI FORM =================
 function inizializzaListeners() {
     
     const legaSubmit = (idForm, funzioneHandler) => {
@@ -1067,26 +1126,49 @@ function inizializzaListeners() {
     });
 
     legaSubmit('form-rilievo-misure', async (e) => {
-        e.preventDefault(); const com = commesseCorrenti[commessaAttivaIndex]; const btn = document.getElementById('btn-salva-rilievo'); btn.innerText = "Salvataggio..."; btn.disabled = true;
-        const dataRilievo = document.getElementById('rilievo-input-data').value; const tecnico = document.getElementById('rilievo-input-tecnico').value.trim(); const note = document.getElementById('rilievo-input-note').value.trim(); const tipoRilievo = document.getElementById('rilievo-input-tipo').value; const fileInput = document.getElementById('rilievo-input-file');
-        let nuovoFileUrl = null; if (fileInput.files.length > 0) { btn.innerText = "Caricamento file..."; nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO'); }
-        const payload = { commessa_id: com.id, stato: 'Eseguito', tipo_rilievo: tipoRilievo, data_rilievo: dataRilievo, tecnico: tecnico, note: note || null, file_url: nuovoFileUrl };
-        const { error } = await supabaseClient.from('rilievi_misure').insert([payload]);
-        if (!error) {
-            await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '📐 Inserita uscita: ' + tipoRilievo + ' (Tecnico: ' + tecnico + ')', nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
-            if (tipoRilievo === 'Rilievo Esecutive') { if(ledStati[1] !== 2) await aggiornaLedDB(1, 2); } else { if(ledStati[1] === 0) await aggiornaLedDB(1, 1); }
+        e.preventDefault(); 
+        const com = commesseCorrenti[commessaAttivaIndex]; 
+        const btn = document.getElementById('btn-salva-rilievo'); 
+        btn.innerText = "Salvataggio..."; btn.disabled = true;
+        
+        const idModifica = document.getElementById('rilievo-id').value;
+        const dataRilievo = document.getElementById('rilievo-input-data').value; 
+        const tecnico = document.getElementById('rilievo-input-tecnico').value.trim(); 
+        const note = document.getElementById('rilievo-input-note').value.trim(); 
+        const tipoRilievo = document.getElementById('rilievo-input-tipo').value; 
+        const fileInput = document.getElementById('rilievo-input-file');
+        
+        let nuovoFileUrl = null; 
+        if (fileInput.files.length > 0) { 
+            btn.innerText = "Caricamento file..."; 
+            nuovoFileUrl = await caricaFileSuStorage(fileInput.files[0], 'RILIEVO'); 
+        }
+        
+        const payload = { commessa_id: com.id, stato: 'Eseguito', tipo_rilievo: tipoRilievo, data_rilievo: dataRilievo, tecnico: tecnico, note: note || null };
+        if (nuovoFileUrl) payload.file_url = nuovoFileUrl;
+
+        let erroreDB = null;
+
+        if (idModifica) {
+            const { error } = await supabaseClient.from('rilievi_misure').update(payload).eq('id', idModifica);
+            erroreDB = error;
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '✏️ Modificato rilievo: ' + tipoRilievo, nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
+            }
+        } else {
+            const { error } = await supabaseClient.from('rilievi_misure').insert([payload]);
+            erroreDB = error;
+            if (!error) {
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '📐 Inserita uscita: ' + tipoRilievo + ' (Tecnico: ' + tecnico + ')', nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
+                if (tipoRilievo === 'Rilievo Esecutive') { if(ledStati[1] !== 2) await aggiornaLedDB(1, 2); } else { if(ledStati[1] === 0) await aggiornaLedDB(1, 1); }
+            }
+        }
+
+        if (!erroreDB) {
             chiudiModaleRilievo(); await caricaRilieviDiQuestaCommessa(); await caricaCronologia(com.id);
-        } else { alert("Errore salvataggio rilievo misure: " + error.message); }
+        } else { 
+            alert("Errore salvataggio rilievo misure: " + erroreDB.message); 
+        }
         btn.innerText = "Salva Attività"; btn.disabled = false;
     });
-}
-
-async function confermaEliminazioneCommessa() {
-    const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt('ATTENZIONE: Stai per eliminare definitivamente la commessa ' + com.numero + ' e TUTTI i dati ad essa collegati.\n\nPer confermare, digita la parola ELIMINA qui sotto:');
-    if (conferma !== 'ELIMINA') return;
-    const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
-    if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
-    await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
-    const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
-    if (!error) { alert('Commessa eliminata con successo.'); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
