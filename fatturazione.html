@@ -31,18 +31,9 @@
             <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
-    <!-- SCHERMATA PRINCIPALE -->
+    <!-- SCHERMATA PRINCIPALE (ELENCO) -->
     <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="p-8 pb-4 shrink-0">
             <h1 class="text-xl font-bold">Amministrazione & Incassi 💰</h1>
@@ -239,6 +230,7 @@
         </div>
     </div>
 
+    <!-- MODALE MODIFICA DATI BASE E ELIMINA -->
     <div id="modal-modifica-dati" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
@@ -271,7 +263,42 @@
         </div>
     </div>
 
-    <!-- CARICAMENTO CONFIG E MOTORE LOGICO FATTURAZIONE -->
+    <!-- MODALE SEGRETO: MODIFICA LOG DIARIO -->
+    <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3>
+                    <p class="text-xs text-gray-500">Modalità Amministratore</p>
+                </div>
+                <button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div class="p-6 space-y-4">
+                <input type="hidden" id="mod-log-id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata (Titolo)</label>
+                    <input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera / Appunto</label>
+                    <textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Data Registrazione (Retroattiva)</label>
+                    <input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none focus:ring-2 focus:ring-[#2e2a5b]">
+                </div>
+            </div>
+            <div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50">
+                <button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Record</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button>
+                    <button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARICAMENTO CONFIG E MOTORE LOGICO ESTERNO -->
     <script src="config.js"></script>
     <script src="fatturazione.js"></script>
 </body>
