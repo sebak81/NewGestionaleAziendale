@@ -67,7 +67,7 @@ function formattaEuro(numero) {
     const parti = numFloat.toFixed(2).split('.');
     const interi = parti[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'"); 
     const decimali = parti[1] || '00';
-    return `€ ${interi},${decimali}`;
+    return '€ ' + interi + ',' + decimali;
 }
 
 async function caricaFileSuStorage(file, prefisso) {
@@ -75,7 +75,7 @@ async function caricaFileSuStorage(file, prefisso) {
     const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
     const dataOggi = new Date().toISOString().split('T')[0];
     const randomHash = Math.random().toString(36).substring(2, 6);
-    const fileName = `${prefisso}_${dataOggi}_${Date.now()}_${cleanFileName}_${randomHash}`;
+    const fileName = prefisso + '_' + dataOggi + '_' + Date.now() + '_' + cleanFileName + '_' + randomHash;
     
     const { error } = await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
     if (error) { alert("Errore upload: " + error.message); return null; }
@@ -138,18 +138,17 @@ async function salvaEsitoCollaudo() {
     
     const valoreEsito = radioEsito.value;
     const note = document.getElementById('collaudo-note').value;
-    let nuovoStatoCommessa = '';
-    let logAzione = '';
+    let nuovoStatoCommessa = ''; let logAzione = '';
 
     if (valoreEsito === '1') {
-        nuovoStatoCommessa = 'Conclusa'; logAzione = `✅ Collaudo Positivo: Lavoro completato a regola d'arte.`;
+        nuovoStatoCommessa = 'Conclusa'; logAzione = '✅ Collaudo Positivo: Lavoro completato a regola d\'arte.';
         if(ledStati[6] !== 2) await aggiornaLedDB(6, 2); 
     } else if (valoreEsito === '2') {
-        nuovoStatoCommessa = 'Posa'; logAzione = `🟡 Collaudo Parziale: Finiture o mancanze lievi segnalate.`;
+        nuovoStatoCommessa = 'Posa'; logAzione = '🟡 Collaudo Parziale: Finiture o mancanze lievi segnalate.';
     } else if (valoreEsito === '3') {
-        nuovoStatoCommessa = 'In Assistenza / Ripristino'; logAzione = `🟠 Collaudo Negativo (Grave/Non Conformità): Passaggio in assistenza.`;
+        nuovoStatoCommessa = 'In Assistenza / Ripristino'; logAzione = '🟠 Collaudo Negativo (Grave/Non Conformità): Passaggio in assistenza.';
     } else if (valoreEsito === '4') {
-        nuovoStatoCommessa = 'Contestazione'; logAzione = `🔴 CONTESTAZIONE APERTA dal cliente al collaudo.`;
+        nuovoStatoCommessa = 'Contestazione'; logAzione = '🔴 CONTESTAZIONE APERTA dal cliente al collaudo.';
     }
 
     const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStatoCommessa }).eq('id', com.id);
@@ -170,7 +169,7 @@ async function popolaTendinaClienti() {
         const select = document.getElementById('form-com-cliente');
         if(select) {
             select.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
-            data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nome_ragione_sociale}</option>`);
+            data.forEach(c => select.innerHTML += '<option value="' + c.id + '">' + c.nome_ragione_sociale + '</option>');
         }
     }
 }
@@ -184,8 +183,8 @@ async function caricaSediTendina() {
         if(selNuovo) selNuovo.innerHTML = '<option value="">-- Seleziona Sede --</option>';
         if(selModifica) selModifica.innerHTML = '<option value="">Nessuna sede specificata</option>';
         data.forEach(s => {
-            if(selNuovo) selNuovo.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
-            if(selModifica) selModifica.innerHTML += `<option value="${s.nome}">${s.nome}</option>`;
+            if(selNuovo) selNuovo.innerHTML += '<option value="' + s.nome + '">' + s.nome + '</option>';
+            if(selModifica) selModifica.innerHTML += '<option value="' + s.nome + '">' + s.nome + '</option>';
         });
     }
 }
@@ -194,7 +193,6 @@ async function caricaCommesse() {
     let { data: commesse, error } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('updated_at', { ascending: false, nullsFirst: false }); 
     const tbody = document.getElementById('tabella-commesse');
     
-    // Fallback di emergenza
     if (error) { 
         const { data: rawCommesse } = await supabaseClient.from('commesse').select('*').order('created_at', { ascending: false });
         if (!rawCommesse) return;
@@ -214,7 +212,7 @@ async function caricaCommesse() {
 
     totaleCommesse = commesseCorrenti.length; 
     const lblCount = document.getElementById('conteggio-commesse');
-    if(lblCount) lblCount.innerText = `${commesseCorrenti.length} commesse in corso`;
+    if(lblCount) lblCount.innerText = commesseCorrenti.length + ' commesse in corso';
     disegnaListaCommesse(commesseCorrenti);
 }
 
@@ -232,19 +230,17 @@ function disegnaListaCommesse(lista) {
         
         const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
         const cantiere = com.nome_cantiere || '--';
-        const sedeTesto = com.sede_gestione ? `<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">${com.sede_gestione}</div>` : '';
+        const sedeTesto = com.sede_gestione ? '<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">' + com.sede_gestione + '</div>' : '';
 
         let bgStato = 'bg-gray-100 text-gray-700';
         if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
         if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 font-bold';
         if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 font-bold';
         
-        tr.innerHTML = `
-            <td class="px-6 py-4 font-semibold text-gray-900">${com.numero} ${sedeTesto}</td>
-            <td class="px-6 py-4 text-gray-600">${nomeCliente}</td>
-            <td class="px-6 py-4 text-gray-600 font-medium">${cantiere}</td>
-            <td class="px-6 py-4"><span class="px-3 py-1 ${bgStato} rounded-full text-[10px] uppercase tracking-wider">${com.stato || 'Preventivi'}</span></td>
-        `;
+        tr.innerHTML = '<td class="px-6 py-4 font-semibold text-gray-900">' + com.numero + ' ' + sedeTesto + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600">' + nomeCliente + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600 font-medium">' + cantiere + '</td>' +
+                       '<td class="px-6 py-4"><span class="px-3 py-1 ' + bgStato + ' rounded-full text-[10px] uppercase tracking-wider">' + (com.stato || 'Preventivi') + '</span></td>';
         tbody.appendChild(tr);
     });
 }
@@ -287,13 +283,13 @@ function chiudiScheda() {
 function cambiaTab(tabName) {
     const tabs = ['riepilogo', 'preventivi', 'rilievi', 'contratti', 'ordini', 'posa', 'fatture'];
     tabs.forEach(t => {
-        const btn = document.getElementById(`tab-btn-${t}`);
-        const cnt = document.getElementById(`tab-content-${t}`);
+        const btn = document.getElementById('tab-btn-' + t);
+        const cnt = document.getElementById('tab-content-' + t);
         if(btn) btn.className = "px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors";
         if(cnt) cnt.className = "hidden";
     });
     
-    const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+    const activeBtn = document.getElementById('tab-btn-' + tabName);
     if(activeBtn) activeBtn.className = "px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors";
     
     if (tabName === 'riepilogo') { document.getElementById('tab-content-riepilogo').className = "block space-y-6"; calcolaValoriEconomici(); } 
@@ -305,11 +301,10 @@ function cambiaTab(tabName) {
     else if (tabName === 'fatture') { document.getElementById('tab-content-fatture').className = "block space-y-4"; caricaFattureDiQuestaCommessa(); }
 }
 
-function creaPreventivoDaCommessa() { window.location.href = `preventivi.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
-function creaContrattoDaCommessa() { window.location.href = `contratti.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
-function creaFatturaDaCommessa() { window.location.href = `fatturazione.html?action=new&commessa_id=${commesseCorrenti[commessaAttivaIndex].id}`; }
+function creaPreventivoDaCommessa() { window.location.href = 'preventivi.html?action=new&commessa_id=' + commesseCorrenti[commessaAttivaIndex].id; }
+function creaContrattoDaCommessa() { window.location.href = 'contratti.html?action=new&commessa_id=' + commesseCorrenti[commessaAttivaIndex].id; }
 
-// ================= RIEPILOGO E LED =================
+// ================= RIEPILOGO, LED E LOG =================
 async function calcolaValoriEconomici() {
     const com = commesseCorrenti[commessaAttivaIndex];
     
@@ -349,7 +344,7 @@ function aggiornaDatiSchedaUI() {
     if(com.stato === 'In Assistenza / Ripristino') colorStato = 'bg-orange-100 text-orange-800 border border-orange-300';
     if(com.stato === 'Contestazione') colorStato = 'bg-red-100 text-red-800 border border-red-300 animate-pulse';
     
-    document.getElementById('scheda-badge-stato').className = `px-3 py-1 ${colorStato} rounded-full text-xs font-bold uppercase tracking-wider`;
+    document.getElementById('scheda-badge-stato').className = 'px-3 py-1 ' + colorStato + ' rounded-full text-xs font-bold uppercase tracking-wider';
     document.getElementById('scheda-badge-stato').innerText = com.stato || 'Preventivi';
 
     const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
@@ -391,20 +386,17 @@ function disegnaStepperLed() {
         let textColor = 'text-gray-400';
 
         if (val === 0) {
-            iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">${index + 1}</div>`;
+            iconaHTML = '<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-50 text-gray-400 border border-gray-200">' + (index + 1) + '</div>';
             textColor = 'text-gray-400';
         } else if (val === 1) { 
-            iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-sky-500 text-white font-bold text-sm shadow-md ring-4 ring-sky-100">${index + 1}</div>`;
+            iconaHTML = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-sky-500 text-white font-bold text-sm shadow-md ring-4 ring-sky-100">' + (index + 1) + '</div>';
             textColor = 'text-sky-600 font-bold';
         } else if (val === 2) {
-            iconaHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold ring-4 ring-emerald-100">✓</div>`;
+            iconaHTML = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold ring-4 ring-emerald-100">✓</div>';
             textColor = 'text-emerald-700 font-bold';
         }
 
-        punto.innerHTML = `
-            ${iconaHTML}
-            <span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ${textColor}">${stato}</span>
-        `;
+        punto.innerHTML = iconaHTML + '<span class="text-[9px] sm:text-[11px] uppercase tracking-wider text-center w-16 sm:w-20 leading-tight ' + textColor + '">' + stato + '</span>';
         container.appendChild(punto);
     });
 }
@@ -418,7 +410,7 @@ async function gestisciClickLed(index) {
         document.getElementById('modal-conferma-fase').classList.remove('hidden');
     } 
     else if (val === 2) {
-        if(confirm(`Vuoi annullare il completamento della fase "${sequenzaStati[index]}" e riportarla a stato inattivo?`)) {
+        if(confirm('Vuoi annullare il completamento della fase "' + sequenzaStati[index] + '" e riportarla a stato inattivo?')) {
             await aggiornaLedDB(index, 0);
         }
     }
@@ -457,9 +449,9 @@ async function aggiornaLedDB(index, nuovoValore) {
 
     if (!error) {
         let logMsg = '';
-        if(nuovoValore === 1) logMsg = `🔹 Iniziata fase: ${sequenzaStati[index]}`;
-        if(nuovoValore === 2) logMsg = `✅ Completata fase: ${sequenzaStati[index]}`;
-        if(nuovoValore === 0) logMsg = `Resettata fase: ${sequenzaStati[index]}`;
+        if(nuovoValore === 1) logMsg = '🔹 Iniziata fase: ' + sequenzaStati[index];
+        if(nuovoValore === 2) logMsg = '✅ Completata fase: ' + sequenzaStati[index];
+        if(nuovoValore === 0) logMsg = 'Resettata fase: ' + sequenzaStati[index];
         
         await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, autore: UTENTE_CORRENTE }]);
         
@@ -481,7 +473,7 @@ async function salvaNotaLibera() {
     
     let timestamp = new Date().toISOString(); 
     if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) { 
-        timestamp = new Date(`${dataNota}T12:00:00Z`).toISOString(); 
+        timestamp = new Date(dataNota + 'T12:00:00Z').toISOString(); 
     }
     const { error } = await supabaseClient.from('commesse_log').insert([{ 
         commessa_id: comId, 
@@ -511,18 +503,18 @@ async function caricaCronologia(commessaId) {
     logs.forEach(log => {
         const dateObj = new Date(log.created_at); 
         const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
-        const autoreText = log.autore ? `&bull; 👤 ${log.autore}` : '';
-        const notaHtml = log.nota ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"${log.nota}"</p>` : '';
-        const fileHtml = log.file_url ? `<a href="${log.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>` : '';
+        const autoreText = log.autore ? '&bull; 👤 ' + log.autore : '';
+        const notaHtml = log.nota ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"' + log.nota + '"</p>' : '';
+        const fileHtml = log.file_url ? '<a href="' + log.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>' : '';
         
         let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1.5 ring-4 ring-indigo-50"></div>';
         if (log.azione === "Comunicazione / Appunto Manuale") icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-xs ring-4 ring-emerald-50">💬</div>';
         if (log.azione.includes('Rilievo')) icona = '<div class="w-5 h-5 rounded flex items-center justify-center bg-blue-100 text-blue-700 text-xs ring-4 ring-blue-50">📐</div>';
         
-        let iconaContainer = `<div class="cursor-pointer hover:scale-125 transition-transform" ondblclick="apriModaleModificaLog('${log.id}')" title="Doppio clic per modificare">${icona}</div>`;
-        let pData = `<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-[#2e2a5b] transition-colors" ondblclick="apriModaleModificaLog('${log.id}')" title="Doppio clic per modificare">${dataFormat} ${autoreText}</p>`;
+        let iconaContainer = '<div class="cursor-pointer hover:scale-125 transition-transform" ondblclick="apriModaleModificaLog(\'' + log.id + '\')" title="Doppio clic per modificare">' + icona + '</div>';
+        let pData = '<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-[#2e2a5b] transition-colors" ondblclick="apriModaleModificaLog(\'' + log.id + '\')" title="Doppio clic per modificare">' + dataFormat + ' ' + autoreText + '</p>';
         
-        html += `<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">${iconaContainer}<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">${log.azione}</p>${pData}</div>${notaHtml}${fileHtml}</div></div>`;
+        html += '<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">' + iconaContainer + '<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">' + log.azione + '</p>' + pData + '</div>' + notaHtml + fileHtml + '</div></div>';
     }); 
     divLog.innerHTML = html;
 }
@@ -541,10 +533,10 @@ async function caricaRilieviDiQuestaCommessa() {
 
     if (hasEsecutivo) {
         badgeStato.innerText = 'Rilievo Eseguito'; badgeStato.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold uppercase tracking-wider';
-        containerStepper.innerHTML = `<div class="absolute top-1/2 left-0 w-full h-1 bg-emerald-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div><span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div><span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span></div>`;
+        containerStepper.innerHTML = '<div class="absolute top-1/2 left-0 w-full h-1 bg-emerald-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-md text-sm font-bold">✓</div><span class="text-xs uppercase tracking-wider text-gray-500">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div><span class="text-xs font-bold uppercase tracking-wider text-emerald-700">Rilievo Eseguito</span></div>';
     } else {
         badgeStato.innerText = 'Da Fare'; badgeStato.className = 'px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-bold uppercase tracking-wider';
-        containerStepper.innerHTML = `<div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div><span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div><span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span></div>`;
+        containerStepper.innerHTML = '<div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-blue-500 text-white shadow-lg ring-4 ring-blue-100">1</div><span class="text-xs font-bold uppercase tracking-wider text-gray-900">Da Fare</span></div><div class="flex flex-col items-center gap-2 bg-white px-3 z-10"><div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm bg-gray-100 text-gray-400 border-2 border-gray-200">2</div><span class="text-xs uppercase tracking-wider text-gray-400">Rilievo Eseguito</span></div>';
     }
 
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB.</p>'; return; }
@@ -556,7 +548,7 @@ async function caricaRilieviDiQuestaCommessa() {
     let html = '';
     rilievi.forEach(ril => {
         const dataSplit = ril.data_rilievo ? ril.data_rilievo.split('-') : ['','','']; 
-        const dataIta = ril.data_rilievo ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
+        const dataIta = ril.data_rilievo ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
         const tipo = ril.tipo_rilievo || 'Rilievo Misure';
         
         let colorBadge = 'bg-gray-100 text-gray-700';
@@ -564,23 +556,10 @@ async function caricaRilieviDiQuestaCommessa() {
         if (tipo === 'Rilievo Preventivo') colorBadge = 'bg-blue-100 text-blue-800';
         if (tipo === 'Ricontrollo') colorBadge = 'bg-orange-100 text-orange-800';
 
-        const note = ril.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${ril.note}</p>` : ''; 
-        const btnFile = ril.file_url ? `<a href="${ril.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>` : '';
+        const note = ril.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + ril.note + '</p>' : ''; 
+        const btnFile = ril.file_url ? '<a href="' + ril.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>' : '';
         
-        html += `
-            <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3">
-                <div class="flex justify-between items-start">
-                    <div>
-                        <span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span>
-                        <span class="ml-2 px-2 py-0.5 ${colorBadge} rounded-full text-xs font-bold">${tipo}</span>
-                        <span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ${ril.tecnico || '--'}</span>
-                    </div>
-                    <button onclick="eliminaRilievo(${ril.id})" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button>
-                </div>
-                ${note} 
-                ${btnFile}
-            </div>
-        `;
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 ' + colorBadge + ' rounded-full text-xs font-bold">' + tipo + '</span><span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ' + (ril.tecnico || '--') + '</span></div><button onclick="eliminaRilievo(' + ril.id + ')" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button></div>' + note + ' ' + btnFile + '</div>';
     });
     divLista.innerHTML = html;
 }
@@ -621,19 +600,7 @@ async function caricaPreventiviDiQuestaCommessa() {
         if(prev.stato === 'Accettato') colorStato = 'bg-emerald-100 text-emerald-800 font-bold';
         if(prev.stato === 'Rifiutato') colorStato = 'bg-red-100 text-red-800';
 
-        html += `
-            <div onclick="window.location.href='preventivi.html?id=${prev.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
-                <div>
-                    <div class="flex items-center gap-3 mb-1">
-                        <span class="font-bold text-[#2e2a5b] group-hover:underline">${prev.numero}</span>
-                        <span class="px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.${rev}</span>
-                        <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] uppercase tracking-wider">${prev.stato || 'Da Fare'}</span>
-                    </div>
-                    <p class="text-xs text-gray-500">Creato il: ${dataIta} &bull; Importo: <strong class="text-gray-900">${importo}</strong></p>
-                </div>
-                <div class="text-gray-400 font-bold ml-4">&rarr;</div>
-            </div>
-        `;
+        html += '<div onclick="window.location.href=\'preventivi.html?id=' + prev.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + prev.numero + '</span><span class="px-1.5 py-0.5 bg-gray-200 text-gray-700 rounded text-[9px] font-bold">REV.' + rev + '</span><span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] uppercase tracking-wider">' + (prev.stato || 'Da Fare') + '</span></div><p class="text-xs text-gray-500">Creato il: ' + dataIta + ' &bull; Importo: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
     });
     divLista.innerHTML = html;
 }
@@ -660,18 +627,7 @@ async function caricaContrattiDiQuestaCommessa() {
         if (con.stato === 'Inviato') colorStato = 'bg-blue-100 text-blue-700';
         if (con.stato === 'Confermato') colorStato = 'bg-emerald-100 text-emerald-800';
 
-        html += `
-            <div onclick="window.location.href='contratti.html?id=${con.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
-                <div>
-                    <div class="flex items-center gap-3 mb-1">
-                        <span class="font-bold text-[#2e2a5b] group-hover:underline">${con.numero}</span>
-                        <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${con.stato || 'Da Fare'}</span>
-                    </div>
-                    <p class="text-xs text-gray-500">Valore Finale: <strong class="text-gray-900">${importo}</strong></p>
-                </div>
-                <div class="text-gray-400 font-bold ml-4">&rarr;</div>
-            </div>
-        `;
+        html += '<div onclick="window.location.href=\'contratti.html?id=' + con.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + con.numero + '</span><span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + (con.stato || 'Da Fare') + '</span></div><p class="text-xs text-gray-500">Valore Finale: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
     });
     divLista.innerHTML = html;
 }
@@ -700,20 +656,20 @@ async function caricaFattureDiQuestaCommessa() {
         let nomePuro = fat.stato || 'Da Emettere';
         if (nomePuro === 'Inviata' || nomePuro === 'Emessa') nomePuro = 'Emessa / Inviata';
 
-        html += `
-            <div onclick="window.location.href='fatturazione.html?id=${fat.id}'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group">
-                <div>
-                    <div class="flex items-center gap-3 mb-1">
-                        <span class="font-bold text-[#2e2a5b] group-hover:underline">${fat.numero}</span>
-                        <span class="px-2 py-0.5 ${colorStato} rounded-full text-[10px] font-bold uppercase tracking-wider">${nomePuro}</span>
-                    </div>
-                    <p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">${importo}</strong></p>
-                </div>
-                <div class="text-gray-400 font-bold ml-4">&rarr;</div>
-            </div>
-        `;
+        html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span><span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo Richiesto: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
     });
     divLista.innerHTML = html;
+}
+
+function apriModaleNuovaFattura() { 
+    const form = document.getElementById('form-nuova-fattura');
+    if (form) form.reset(); 
+    const mod = document.getElementById('modal-nuova-fattura');
+    if (mod) mod.classList.remove('hidden'); 
+}
+function chiudiModaleNuovaFattura() { 
+    const mod = document.getElementById('modal-nuova-fattura');
+    if (mod) mod.classList.add('hidden'); 
 }
 
 // ================= GESTIONE ORDINI FORNITORI =================
@@ -745,7 +701,7 @@ function aggiornaStileTabsOrdini() {
     tabs.forEach(t => {
         const btn = document.getElementById('subtab-ord-' + t.id.replace(/ /g, ''));
         if (btn) {
-            btn.innerHTML = `${t.label} <span class="ml-1 opacity-80">(${counts[t.id]})</span>`;
+            btn.innerHTML = t.label + ' <span class="ml-1 opacity-80">(' + counts[t.id] + ')</span>';
             if (t.id === filtroOrdiniCommessa) {
                 btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center";
             } else {
@@ -757,7 +713,7 @@ function aggiornaStileTabsOrdini() {
 
 async function caricaFornitoriTendina() {
     const { data: fornitori } = await supabaseClient.from('fornitori').select('id, nome_azienda').order('nome_azienda');
-    if (fornitori) { const select = document.getElementById('form-ord-new-fornitore'); select.innerHTML = '<option value="">-- Seleziona --</option>'; fornitori.forEach(f => select.innerHTML += `<option value="${f.id}">${f.nome_azienda}</option>`); }
+    if (fornitori) { const select = document.getElementById('form-ord-new-fornitore'); select.innerHTML = '<option value="">-- Seleziona --</option>'; fornitori.forEach(f => select.innerHTML += '<option value="' + f.id + '">' + f.nome_azienda + '</option>'); }
 }
 
 async function apriModaleNuovoOrdineDaCommessa() {
@@ -767,7 +723,7 @@ async function apriModaleNuovoOrdineDaCommessa() {
     selectContratti.innerHTML = '<option value="">-- Nessun Contratto / Extra --</option>';
     const { data: contratti } = await supabaseClient.from('contratti').select('id, numero').eq('commessa_id', com.id);
     if(contratti && contratti.length > 0) { 
-        contratti.forEach(c => selectContratti.innerHTML += `<option value="${c.id}">${c.numero}</option>`); 
+        contratti.forEach(c => selectContratti.innerHTML += '<option value="' + c.id + '">' + c.numero + '</option>'); 
     }
     
     if(document.getElementById('form-ord-new-fornitore').options.length <= 1) await caricaFornitoriTendina();
@@ -826,7 +782,7 @@ function disegnaOrdiniCommessa() {
         const statoPulito = ord.statoPulito;
         const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore Extra'; 
         
-        let descVisuale = ord.descrizione;
+        let descVisuale = ord.descrizione || '';
         if (descVisuale && descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
             descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
         }
@@ -838,12 +794,12 @@ function disegnaOrdiniCommessa() {
         else if (statoPulito === 'Conferma' && ord.data_conferma) { dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT'); labelData = 'Confermato'; } 
         else if (statoPulito === 'Merce Arrivata' && ord.data_arrivo_merce) { dataStatoStr = new Date(ord.data_arrivo_merce).toLocaleDateString('it-IT'); labelData = 'Arrivato'; } 
         else if (ord.created_at) { dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT'); labelData = 'Creato'; }
-        const htmlDataCella = `<div class="font-bold text-gray-900">${dataStatoStr}</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">${labelData}</div>`;
+        const htmlDataCella = '<div class="font-bold text-gray-900">' + dataStatoStr + '</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">' + labelData + '</div>';
 
         let stringaConsegna = '<span class="text-gray-400 text-xs">Consegna non definita</span>';
         if (ord.data_presunta_consegna) {
             const d = ord.data_presunta_consegna.split('-');
-            stringaConsegna = `<span class="text-gray-600 text-xs">Consegna: <strong>${d[2]}/${d[1]}/${d[0]}</strong></span>`;
+            stringaConsegna = '<span class="text-gray-600 text-xs">Consegna: <strong>' + d[2] + '/' + d[1] + '/' + d[0] + '</strong></span>';
         }
 
         let badgeClass = 'bg-gray-100 text-gray-600';
@@ -852,18 +808,7 @@ function disegnaOrdiniCommessa() {
         if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800';
         if(statoPulito === 'Merce Arrivata') badgeClass = 'bg-teal-100 text-teal-800';
         
-        html += `
-            <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
-                <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
-                <td class="px-4 py-3">${htmlDataCella}</td>
-                <td class="px-4 py-3 w-40">
-                    <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${statoPulito}</span>
-                    <div class="mt-1">${stringaConsegna}</div>
-                </td>
-                <td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(${originalIndex})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td>
-            </tr>
-        `;
+        html += '<tr class="hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-900">' + fornitoreNome + '</td><td class="px-4 py-3 text-gray-700 text-xs">' + descVisuale + '</td><td class="px-4 py-3">' + htmlDataCella + '</td><td class="px-4 py-3 w-40"><span class="px-2 py-1 ' + badgeClass + ' rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">' + statoPulito + '</span><div class="mt-1">' + stringaConsegna + '</div></td><td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(' + originalIndex + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️</button></td></tr>';
     });
     tbody.innerHTML = html;
 }
@@ -873,7 +818,7 @@ function apriModaleGestioneOrdine(indexMemoria) {
     const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
     
     document.getElementById('gest-ord-id').value = ord.id; 
-    document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore}`;
+    document.getElementById('sottotitolo-gestione-ordine').innerText = 'Gestione per: ' + nomeFornitore;
     
     let statoPartenza = ord.stato || 'Ordine inviato';
     if(statoPartenza === 'Inviato' || statoPartenza === 'Richiesta Inviata') statoPartenza = 'Ordine inviato';
@@ -887,7 +832,7 @@ function apriModaleGestioneOrdine(indexMemoria) {
     document.getElementById('gest-ord-data-presunta').value = ord.data_presunta_consegna || ''; 
     document.getElementById('gest-ord-data-arrivo').value = ord.data_arrivo_merce || ''; 
     
-    // CORREZIONE DESCRIZIONE: 
+    // CORREZIONE DESCRIZIONE:
     document.getElementById('gest-ord-annotazioni').value = ord.descrizione || ord.annotazioni || ''; 
     
     document.getElementById('gest-ord-file').value = ''; 
@@ -910,55 +855,42 @@ function impostaStatoPendenteOrdine(nuovoStato) {
     sequenzaStatiOrdine.forEach((stato, index) => {
         const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
         
-        let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
+        let iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">' + (index + 1) + '</div>';
         if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
-            iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
+            iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>';
         } else if (index === currentIdx) {
             let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100';
-            iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center ${col} text-white font-bold text-[10px] shadow-md ring-2">${index + 1}</div>`;
+            iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>';
         }
         
         let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
         if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
 
-        punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`; 
+        punto.innerHTML = iconaHTML + '<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ' + textColor + '">' + stato + '</span>'; 
         container.appendChild(punto);
     });
     
-    // Gestione visibilità
     document.getElementById('box-ord-data-conferma').classList.add('hidden');
     document.getElementById('box-ord-costo').classList.add('hidden');
     document.getElementById('box-ord-presunta').classList.add('hidden');
     document.getElementById('box-ord-arrivo').classList.add('hidden');
 
     if (statoPendenteOrdine === 'Ordine inviato') {
-        azioniBox.innerHTML = `
-            <div class="flex-1"></div>
-            <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button>
-            <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
-        `;
+        azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'In Modifica') {
-        azioniBox.innerHTML = `
-            <button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
-            <div class="flex-1"></div>
-            <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
-        `;
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Ordine inviato\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'Conferma') {
         const lConferma = document.getElementById('box-ord-data-conferma');
         lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-presunta').classList.remove('hidden');
         if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
-        azioniBox.innerHTML = `
-            <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
-            <div class="flex-1"></div>
-            <button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>
-        `;
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Merce Arrivata\')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>';
     } else if (statoPendenteOrdine === 'Merce Arrivata') {
         const lConferma = document.getElementById('box-ord-data-conferma');
         lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-arrivo').classList.remove('hidden');
         if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
-        azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>`;
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>';
     }
 }
 
@@ -986,9 +918,9 @@ async function caricaPosaInterventi() {
     
     let html = '';
     interventi.forEach(int => {
-        const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; const dataIta = int.data_intervento ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
-        const note = int.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${int.note}</p>` : ''; const btnFile = int.file_url ? `<a href="${int.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>` : '';
-        html += `<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">${int.posatore}</span></div><button onclick="eliminaPosa(${int.id})" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div>${note} ${btnFile}</div>`;
+        const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; const dataIta = int.data_intervento ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
+        const note = int.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + int.note + '</p>' : ''; const btnFile = int.file_url ? '<a href="' + int.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>' : '';
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">' + int.posatore + '</span></div><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div>' + note + ' ' + btnFile + '</div>';
     }); 
     divLista.innerHTML = html;
 }
@@ -1017,7 +949,7 @@ function chiudiModaleModifica() { document.getElementById('modal-modifica-commes
 function apriModaleNuovaCommessa() { 
     document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
     const anno = new Date().getFullYear(); 
-    document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`; 
+    document.getElementById('form-com-numero').value = 'COM-' + anno + '/' + (totaleCommesse + 1).toString().padStart(3, '0'); 
     document.getElementById('check-copia-dati').checked = false; 
 }
 
@@ -1027,9 +959,8 @@ function chiudiModaleNuovaCommessa() {
     window.history.replaceState({}, document.title, window.location.pathname); 
 }
 
-// ================= EVENT LISTENERS DEI FORM (INIT) =================
+// ================= EVENT LISTENERS DEI FORM =================
 function inizializzaListeners() {
-    
     const legaSubmit = (idForm, funzioneHandler) => {
         const form = document.getElementById(idForm);
         if (form) form.addEventListener('submit', funzioneHandler);
@@ -1097,7 +1028,7 @@ function inizializzaListeners() {
         btnSubmit.innerText = "Salvataggio..."; btnSubmit.disabled = true;
         let fileUrl = null; const fileInputUpdate = document.getElementById('gest-ord-file'); if (fileInputUpdate.files.length > 0) fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF');
         
-        // CORREZIONE DESCRIZIONE:
+        // CORREZIONE DESCRIZIONE: Leggiamo da descrizione per scrivere in descrizione!
         let datiUpdate = { stato: statoPendenteOrdine, costo_confermato: document.getElementById('gest-ord-costo-conf').value || null, data_ordine: document.getElementById('gest-ord-data-ordine').value || null, data_conferma: document.getElementById('gest-ord-data-conferma').value || null, data_presunta_consegna: document.getElementById('gest-ord-data-presunta').value || null, revisione: document.getElementById('gest-ord-revisione').value, data_arrivo_merce: document.getElementById('gest-ord-data-arrivo').value || null, descrizione: document.getElementById('gest-ord-annotazioni').value || null };
         
         if(fileUrl) datiUpdate.file_url = (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') ? ordOriginale.file_url + ',' + fileUrl : fileUrl;
@@ -1145,14 +1076,4 @@ function inizializzaListeners() {
         } else { alert("Errore salvataggio rilievo misure: " + error.message); }
         btn.innerText = "Salva Attività"; btn.disabled = false;
     });
-}
-
-async function confermaEliminazioneCommessa() {
-    const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati.\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
-    if (conferma !== 'ELIMINA') return;
-    const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
-    if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
-    await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
-    const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
-    if (!error) { alert(`Commessa eliminata con successo.`); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
