@@ -123,14 +123,17 @@ async function caricaPagamentiTendine() {
 async function caricaFatture() {
     const tbody = document.getElementById('tabella-fatture');
     
+    // TENTATIVO 1: JOIN DIRETTA
     let { data: fats, error } = await supabaseClient
         .from('fatture')
         .select('*, commesse(id, numero, nome_cantiere, cliente_id, clienti(nome_ragione_sociale))')
         .order('created_at', { ascending: false });
 
+    // TENTATIVO 2: FALLBACK MANUALE (Incrocio dati se manca la relazione)
     if (error) {
+        console.warn("Join Supabase fallito, avvio incrocio dati manuale...");
         const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
-        if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
+        if (err2) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
         
         const { data: rawComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id');
         const { data: rawClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
@@ -139,7 +142,9 @@ async function caricaFatture() {
             if (rawComms) {
                 let relCom = rawComms.find(c => String(c.id) === String(f.commessa_id));
                 if (relCom) {
-                    if (rawClienti) { relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id)); }
+                    if (rawClienti) {
+                        relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id));
+                    }
                     f.commesse = relCom;
                 }
             }
@@ -148,8 +153,7 @@ async function caricaFatture() {
     }
 
     fattureCorrenti = fats || []; 
-    const lblCount = document.getElementById('conteggio-fatture');
-    if(lblCount) lblCount.innerText = fattureCorrenti.length + ' pratiche registrate';
+    document.getElementById('conteggio-fatture').innerText = fattureCorrenti.length + ' pratiche registrate';
     aggiornaStileTabsFatture(); 
     aggiornaVistaFatture();
 }
@@ -175,6 +179,7 @@ function aggiornaVistaFatture() {
         const nomeCliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? String(f.commesse.clienti.nome_ragione_sociale).toLowerCase() : '';
         const numCommessa = (f.commesse && f.commesse.numero) ? String(f.commesse.numero).toLowerCase() : '';
         const numFattura = (f.numero) ? String(f.numero).toLowerCase() : '';
+        
         const matchTesto = nomeCliente.includes(query) || numCommessa.includes(query) || numFattura.includes(query);
         const matchTab = (filtroFattureCorrente === 'Tutte') || (f.statoPulito === filtroFattureCorrente);
         return matchTesto && matchTab;
@@ -196,7 +201,9 @@ function disegnaTabella(lista) {
         const cantiere = f.commesse ? (f.commesse.numero + ' ' + (f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : '')) : '--';
         const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
         const importo = f.importo ? '€ ' + parseFloat(f.importo).toFixed(2).replace('.', ',') : '--';
-        const dataCreazione = f.created_at ? new Date(f.created_at).toLocaleDateString('it-IT') : '--';
+        
+        let rawData = f.data_emissione || f.created_at;
+        const dataCreazione = rawData ? new Date(rawData).toLocaleDateString('it-IT') : '--';
         
         let colorStato = 'bg-yellow-100 text-yellow-800'; 
         if(f.statoPulito === 'Emessa / Inviata') colorStato = 'bg-blue-100 text-blue-700';
@@ -209,6 +216,7 @@ function disegnaTabella(lista) {
     });
 }
 
+// ================= SCHEDA FATTURA E LED =================
 function apriSchedaFattura(index, fromUrl = false) {
     fatturaAttivaIndex = index; aggiornaDatiSchedaUI(); caricaCronologia();
     document.getElementById('vista-elenco').classList.replace('flex', 'hidden'); document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -267,13 +275,13 @@ function disegnaStepper(statoAttuale) {
 
 function saltoStato(nuovoStato) {
     let statoPuro = fattureCorrenti[fatturaAttivaIndex].stato || 'Da Emettere'; if(statoPuro === 'Inviata' || statoPuro === 'Emessa') statoPuro = 'Emessa / Inviata';
-    if (statoPuro === nuovoStato) return; if (confirm('Vuoi forzare lo stato a: ' + nuovoStato.toUpperCase() + '?')) { preparaAzione(nuovoStato, true); }
+    if (statoPuro === nuovoStato) return; if (confirm('Vuoi forzare lo stato fatturazione a: ' + nuovoStato.toUpperCase() + '?')) { preparaAzione(nuovoStato, true); }
 }
 
 function preparaAzione(nuovoStato, isJump = false) {
     document.getElementById('azione-target-stato').value = nuovoStato; document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO'; document.getElementById('azione-data').value = new Date().toISOString().split('T')[0]; document.getElementById('azione-note').value = ''; document.getElementById('azione-file').value = '';
     const titolo = document.getElementById('modale-azione-titolo'); const sub = document.getElementById('modale-azione-sub'); const labelData = document.getElementById('label-data'); const labelFile = document.getElementById('label-file');
-    if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = 'Aggiorna a: ' + nuovoStato.toUpperCase(); sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
+    if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura di Cortesia (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = 'Aggiorna a: ' + nuovoStato.toUpperCase(); sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
     document.getElementById('modal-azione').classList.remove('hidden');
 }
 
@@ -293,7 +301,7 @@ async function eseguiAzione() {
     const { error } = await supabaseClient.from('fatture').update(datiAggiornamento).eq('id', f.id);
     if (!error) {
         f.stato = nuovoStato; if(fileUrl) f.file_url = datiAggiornamento.file_url;
-        let testoLog = ''; if(nuovoStato === 'Emessa / Inviata') testoLog = 'Inviata richiesta: ' + f.numero; else if(nuovoStato === 'Pagata') testoLog = '💰 Incasso registrato per: ' + f.numero + ' (€ ' + f.importo + ')'; else testoLog = 'Stato fattura ' + f.numero + ' riportato a: ' + nuovoStato;
+        let testoLog = ''; if(nuovoStato === 'Emessa / Inviata') testoLog = 'Inviata richiesta fattura/acconto: ' + f.numero; else if(nuovoStato === 'Pagata') testoLog = '💰 Incasso registrato per: ' + f.numero + ' (€ ' + f.importo + ')'; else testoLog = 'Stato fattura ' + f.numero + ' riportato a: ' + nuovoStato;
         if(note) testoLog += ' Note: "' + note + '"';
         await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE, created_at: timestampFormattato }]);
         chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaFatture(); 
@@ -304,6 +312,10 @@ async function eseguiAzione() {
 // ================= CREAZIONE FATTURE DA LISTA GLOBALE =================
 function apriModaleNuovo(commessaPreselezionata = null) {
     const form = document.getElementById('form-nuovo'); if (form) form.reset();
+    
+    const inpData = document.getElementById('nuovo-data');
+    if(inpData) inpData.value = new Date().toISOString().split('T')[0];
+
     const selCliente = document.getElementById('nuovo-cliente'); 
     if(selCliente) {
         selCliente.innerHTML = '<option value="">-- Seleziona Cliente --</option>'; 
@@ -336,7 +348,7 @@ function apriModaleModificaDatiBase() {
 async function salvaModificaDati() {
     const f = fattureCorrenti[fatturaAttivaIndex]; const nuovoNumero = document.getElementById('mod-numero').value; const nuovoImporto = document.getElementById('mod-importo').value; const nuovoPagamento = document.getElementById('mod-pagamento').value || null;
     const { error } = await supabaseClient.from('fatture').update({ numero: nuovoNumero, importo: nuovoImporto, condizione_pagamento: nuovoPagamento }).eq('id', f.id);
-    if (!error) { f.numero = nuovoNumero; f.importo = nuovoImporto; f.condizione_pagamento = nuovoPagamento; await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: `Fatturazione corretta in: ${nuovoNumero} (€ ${nuovoImporto})`, autore: UTENTE_CORRENTE }]); document.getElementById('modal-modifica-dati').classList.add('hidden'); aggiornaDatiSchedaUI(); caricaCronologia(); caricaFatture(); }
+    if (!error) { f.numero = nuovoNumero; f.importo = nuovoImporto; f.condizione_pagamento = nuovoPagamento; await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: 'Fatturazione corretta in: ' + nuovoNumero + ' (€ ' + nuovoImporto + ')', autore: UTENTE_CORRENTE }]); document.getElementById('modal-modifica-dati').classList.add('hidden'); aggiornaDatiSchedaUI(); caricaCronologia(); caricaFatture(); }
 }
 
 async function confermaEliminazioneFattura() {
@@ -376,17 +388,21 @@ function inizializzaListenersForm() {
         formNuovo.addEventListener('submit', async (e) => {
             e.preventDefault();
             const tipo = document.getElementById('nuovo-tipo').value;
+            const dataEmissione = document.getElementById('nuovo-data').value;
+            const num = document.getElementById('nuovo-numero').value;
+            const imp = document.getElementById('nuovo-importo').value;
             const dati = { 
                 commessa_id: document.getElementById('nuovo-commessa').value, 
                 tipo_documento: tipo,
-                numero: document.getElementById('nuovo-numero').value, 
-                importo: document.getElementById('nuovo-importo').value, 
+                data_emissione: dataEmissione,
+                numero: num, 
+                importo: imp, 
                 condizione_pagamento: document.getElementById('nuovo-pagamento').value || null, 
                 stato: 'Da Emettere' 
             };
             const { error } = await supabaseClient.from('fatture').insert([dati]);
             if (!error) { 
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: 'Generata nuova richiesta di ' + tipo + ': ' + dati.numero + ' (€ ' + dati.importo + ')', autore: UTENTE_CORRENTE }]); 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: 'Generata nuova richiesta di ' + tipo + ': ' + num + ' (€ ' + imp + ')', autore: UTENTE_CORRENTE }]); 
                 chiudiModaleNuovo(); 
                 caricaFatture(); 
             } else { alert("Errore salvataggio: " + error.message); }
