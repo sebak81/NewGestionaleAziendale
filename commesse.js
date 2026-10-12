@@ -21,13 +21,21 @@ let filtroOrdiniCommessa = 'Tutti';
 const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
 let statoPendenteOrdine = '';
 
+// ================= INIT GLOBALE =================
 document.addEventListener('DOMContentLoaded', async () => { 
     const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
     if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
 
-    await popolaTendinaClienti(); 
-    await caricaSediTendina(); 
-    await caricaCommesse(); 
+    // FONDAMENTALE: Accende subito tutti i form e le caselline, prima ancora di scaricare i dati!
+    inizializzaListeners();
+
+    try {
+        await popolaTendinaClienti(); 
+        await caricaSediTendina(); 
+        await caricaCommesse(); 
+    } catch(err) {
+        console.error("Errore durante il download dal database:", err);
+    }
 
     const urlParams = new URLSearchParams(window.location.search);
     const idToOpen = urlParams.get('id');
@@ -55,8 +63,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (tabToOpen) cambiaTab(tabToOpen);
         }
     }
-
-    inizializzaListeners();
 });
 
 // ================= UTILITY E FILE =================
@@ -160,7 +166,7 @@ async function salvaEsitoCollaudo() {
     } else { alert("Errore durante il salvataggio: " + error.message); }
 }
 
-// ================= LISTA COMMESSE E TENDINE =================
+// ================= GESTIONE LISTA COMMESSE =================
 async function popolaTendinaClienti() {
     const { data } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta, telefono, email').order('nome_ragione_sociale');
     if (data) {
@@ -192,12 +198,11 @@ async function caricaCommesse() {
     let { data: commesse, error } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('updated_at', { ascending: false, nullsFirst: false }); 
     const tbody = document.getElementById('tabella-commesse');
     
+    // Fallback di emergenza
     if (error) { 
-        console.warn("Relazione diretta clienti fallita. Avvio fallback di emergenza...");
         const { data: rawCommesse, error: err2 } = await supabaseClient.from('commesse').select('*').order('created_at', { ascending: false });
-        if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500 font-bold">Errore di comunicazione col Server Database</td></tr>'; return; }
+        if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-red-500 font-bold">Errore di comunicazione col Database</td></tr>'; return; }
         const { data: allClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
-        
         commesse = rawCommesse.map(com => {
             if (allClienti) com.clienti = allClienti.find(c => String(c.id) === String(com.cliente_id));
             return com;
@@ -586,12 +591,7 @@ async function caricaRilieviDiQuestaCommessa() {
 
 function apriModaleRilievo() { document.getElementById('form-rilievo-misure').reset(); document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0]; document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE; document.getElementById('modal-rilievo-misure').classList.remove('hidden'); }
 function chiudiModaleRilievo() { document.getElementById('modal-rilievo-misure').classList.add('hidden'); }
-
-async function eliminaRilievo(id) {
-    if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return;
-    await supabaseClient.from('rilievi_misure').delete().eq('id', id);
-    caricaRilieviDiQuestaCommessa();
-}
+async function eliminaRilievo(id) { if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return; await supabaseClient.from('rilievi_misure').delete().eq('id', id); caricaRilieviDiQuestaCommessa(); }
 
 // ================= PREVENTIVI E CONTRATTI =================
 async function caricaPreventiviDiQuestaCommessa() {
@@ -675,7 +675,6 @@ async function caricaContrattiDiQuestaCommessa() {
     divLista.innerHTML = html;
 }
 
-// ================= GESTIONE FATTURE DA COMMESSA =================
 async function caricaFattureDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-fatture-commessa');
@@ -716,15 +715,8 @@ async function caricaFattureDiQuestaCommessa() {
     divLista.innerHTML = html;
 }
 
-function apriModaleNuovaFattura() { document.getElementById('form-nuova-fattura').reset(); document.getElementById('modal-nuova-fattura').classList.remove('hidden'); }
-function chiudiModaleNuovaFattura() { document.getElementById('modal-nuova-fattura').classList.add('hidden'); }
-
 // ================= GESTIONE ORDINI FORNITORI =================
-function cambiaSubTabOrdini(tab) {
-    filtroOrdiniCommessa = tab;
-    aggiornaStileTabsOrdini();
-    disegnaOrdiniCommessa();
-}
+function cambiaSubTabOrdini(tab) { filtroOrdiniCommessa = tab; aggiornaStileTabsOrdini(); disegnaOrdiniCommessa(); }
 
 function aggiornaStileTabsOrdini() {
     const tabs = [
@@ -767,7 +759,7 @@ async function apriModaleNuovoOrdineDaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const selectContratti = document.getElementById('form-ord-contratto-rif');
     
-    selectContratti.innerHTML = '<option value="">-- Nessun Contratto / Extra (Facoltativo) --</option>';
+    selectContratti.innerHTML = '<option value="">-- Nessun Contratto / Extra --</option>';
     const { data: contratti } = await supabaseClient.from('contratti').select('id, numero').eq('commessa_id', com.id);
     if(contratti && contratti.length > 0) { 
         contratti.forEach(c => selectContratti.innerHTML += `<option value="${c.id}">${c.numero}</option>`); 
@@ -834,13 +826,25 @@ function disegnaOrdiniCommessa() {
             descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
         }
         
-        let dataStatoStr = '--'; let labelData = 'Inserito';
+        let dataStatoStr = '--';
+        let labelData = 'Inserito';
 
-        if (statoPulito === 'Ordine inviato' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Inviato'; } 
-        else if (statoPulito === 'In Modifica' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Da Modificare'; } 
-        else if (statoPulito === 'Conferma' && ord.data_conferma) { dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT'); labelData = 'Confermato'; } 
-        else if (statoPulito === 'Merce Arrivata' && ord.data_arrivo_merce) { dataStatoStr = new Date(ord.data_arrivo_merce).toLocaleDateString('it-IT'); labelData = 'Arrivato'; } 
-        else if (ord.created_at) { dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT'); labelData = 'Creato'; }
+        if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
+            dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
+            labelData = 'Inviato';
+        } else if (statoPulito === 'In Modifica' && ord.data_ordine) {
+            dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
+            labelData = 'Da Modificare';
+        } else if (statoPulito === 'Conferma' && ord.data_conferma) {
+            dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT');
+            labelData = 'Confermato';
+        } else if (statoPulito === 'Merce Arrivata' && ord.data_arrivo_merce) {
+            dataStatoStr = new Date(ord.data_arrivo_merce).toLocaleDateString('it-IT');
+            labelData = 'Arrivato';
+        } else if (ord.created_at) {
+            dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT');
+            labelData = 'Creato';
+        }
         const htmlDataCella = `<div class="font-bold text-gray-900">${dataStatoStr}</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">${labelData}</div>`;
 
         let stringaConsegna = '<span class="text-gray-400 text-xs">Consegna non definita</span>';
@@ -909,6 +913,7 @@ function impostaStatoPendenteOrdine(nuovoStato) {
     
     sequenzaStatiOrdine.forEach((stato, index) => {
         const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
+        
         let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
         if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
             iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
@@ -916,6 +921,7 @@ function impostaStatoPendenteOrdine(nuovoStato) {
             let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100';
             iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center ${col} text-white font-bold text-[10px] shadow-md ring-2">${index + 1}</div>`;
         }
+        
         let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
         if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
 
@@ -973,60 +979,39 @@ async function eliminaOrdineDaCommessa() {
 
 // ================= GESTIONE POSA IN OPERA =================
 async function caricaPosaInterventi() {
-    const com = commesseCorrenti[commessaAttivaIndex]; 
-    const divLista = document.getElementById('lista-interventi-posa'); 
-    divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
-    
+    const com = commesseCorrenti[commessaAttivaIndex]; const divLista = document.getElementById('lista-interventi-posa'); divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
     const { data: interventi, error } = await supabaseClient.from('interventi_posa').select('*').eq('commessa_id', com.id).order('data_intervento', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB posa.</p>'; return; }
     if (!interventi || interventi.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun intervento registrato. Aggiungilo quando vai in cantiere!</p></div>'; return; }
-    
     let html = '';
     interventi.forEach(int => {
         const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; const dataIta = int.data_intervento ? `${dataSplit[2]}/${dataSplit[1]}/${dataSplit[0]}` : '--';
         const note = int.note ? `<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">${int.note}</p>` : ''; const btnFile = int.file_url ? `<a href="${int.file_url}" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>` : '';
         html += `<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ${dataIta}</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">${int.posatore}</span></div><button onclick="eliminaPosa(${int.id})" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div>${note} ${btnFile}</div>`;
-    }); 
-    divLista.innerHTML = html;
+    }); divLista.innerHTML = html;
 }
-
 function apriModalePosa() { document.getElementById('form-intervento-posa').reset(); document.getElementById('posa-data').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-intervento-posa').classList.remove('hidden'); }
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
 async function eliminaPosa(id) { if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; await supabaseClient.from('interventi_posa').delete().eq('id', id); caricaPosaInterventi(); }
 
+// ================= GESTIONE FATTURAZIONE DA DENTRO LA COMMESSA =================
+function apriModaleNuovaFattura() { document.getElementById('form-nuova-fattura').reset(); document.getElementById('modal-nuova-fattura').classList.remove('hidden'); }
+function chiudiModaleNuovaFattura() { document.getElementById('modal-nuova-fattura').classList.add('hidden'); }
+
 // ================= GESTIONE MODIFICA E NUOVA COMMESSA =================
 function apriModaleModifica() {
-    if (commessaAttivaIndex === null) return; 
-    const com = commesseCorrenti[commessaAttivaIndex]; 
-    document.getElementById('mod-com-id').value = com.id;
-    document.getElementById('mod-com-sede').value = com.sede_gestione || ''; 
-    document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || ''; 
-    document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || ''; 
-    document.getElementById('mod-com-citta').value = com.citta_cantiere || ''; 
-    document.getElementById('mod-com-referente').value = com.referente || ''; 
-    document.getElementById('mod-com-tel-referente').value = com.telefono_referente || ''; 
-    document.getElementById('mod-com-email-referente').value = com.email_referente || '';
+    if (commessaAttivaIndex === null) return; const com = commesseCorrenti[commessaAttivaIndex]; document.getElementById('mod-com-id').value = com.id;
+    document.getElementById('mod-com-sede').value = com.sede_gestione || ''; document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || ''; document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || ''; document.getElementById('mod-com-citta').value = com.citta_cantiere || ''; document.getElementById('mod-com-referente').value = com.referente || ''; document.getElementById('mod-com-tel-referente').value = com.telefono_referente || ''; document.getElementById('mod-com-email-referente').value = com.email_referente || '';
     document.getElementById('modal-modifica-commessa').classList.remove('hidden');
 }
-
 function chiudiModaleModifica() { document.getElementById('modal-modifica-commessa').classList.add('hidden'); }
+function apriModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.remove('hidden'); const anno = new Date().getFullYear(); document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`; document.getElementById('check-copia-dati').checked = false; }
+function chiudiModaleNuovaCommessa() { document.getElementById('modal-nuova-commessa').classList.add('hidden'); document.getElementById('form-nuova-commessa').reset(); window.history.replaceState({}, document.title, window.location.pathname); }
 
-function apriModaleNuovaCommessa() { 
-    document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
-    const anno = new Date().getFullYear(); 
-    document.getElementById('form-com-numero').value = `COM-${anno}/${(totaleCommesse + 1).toString().padStart(3, '0')}`; 
-    document.getElementById('check-copia-dati').checked = false; 
-}
-
-function chiudiModaleNuovaCommessa() { 
-    document.getElementById('modal-nuova-commessa').classList.add('hidden'); 
-    document.getElementById('form-nuova-commessa').reset(); 
-    window.history.replaceState({}, document.title, window.location.pathname); 
-}
-
-// ================= EVENT LISTENERS DEI FORM (INIT) =================
+// ================= INIZIALIZZAZIONE FORM LISTENERS =================
 function inizializzaListeners() {
     
+    // Funzione protettiva per non far bloccare JS se un modale è assente
     const legaSubmit = (idForm, funzioneHandler) => {
         const form = document.getElementById(idForm);
         if (form) form.addEventListener('submit', funzioneHandler);
@@ -1047,15 +1032,13 @@ function inizializzaListeners() {
     if(formComCliente) formComCliente.addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
 
     legaSubmit('form-nuova-commessa', async (e) => {
-        e.preventDefault(); 
-        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivi', valore: null };
+        e.preventDefault(); const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivi', valore: null };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
         if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: `Apertura nuovo cantiere`, autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
 
     legaSubmit('form-modifica-commessa', async (e) => {
-        e.preventDefault(); 
-        const id = document.getElementById('mod-com-id').value;
+        e.preventDefault(); const id = document.getElementById('mod-com-id').value;
         const datiAggiornati = { sede_gestione: document.getElementById('mod-com-sede').value || null, nome_cantiere: document.getElementById('mod-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value, citta_cantiere: document.getElementById('mod-com-citta').value, referente: document.getElementById('mod-com-referente').value, telefono_referente: document.getElementById('mod-com-tel-referente').value, email_referente: document.getElementById('mod-com-email-referente').value };
         const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
         if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: `Dati anagrafici e operativi del cantiere aggiornati`, autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
@@ -1139,4 +1122,14 @@ function inizializzaListeners() {
         } else { alert("Errore salvataggio rilievo misure: " + error.message); }
         btn.innerText = "Salva Attività"; btn.disabled = false;
     });
+}
+
+async function confermaEliminazioneCommessa() {
+    const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt(`ATTENZIONE: Stai per eliminare definitivamente la commessa ${com.numero} e TUTTI i dati ad essa collegati.\n\nPer confermare, digita la parola ELIMINA qui sotto:`);
+    if (conferma !== 'ELIMINA') return;
+    const { data: contratti } = await supabaseClient.from('contratti').select('id').eq('commessa_id', com.id);
+    if (contratti && contratti.length > 0) { const contrattiIds = contratti.map(c => c.id); await supabaseClient.from('ordini_fornitori').delete().in('contratto_id', contrattiIds); }
+    await supabaseClient.from('preventivi').delete().eq('commessa_id', com.id); await supabaseClient.from('rilievi_misure').delete().eq('commessa_id', com.id); await supabaseClient.from('contratti').delete().eq('commessa_id', com.id); await supabaseClient.from('fatture').delete().eq('commessa_id', com.id); await supabaseClient.from('interventi_posa').delete().eq('commessa_id', com.id); await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
+    const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
+    if (!error) { alert(`Commessa eliminata con successo.`); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
