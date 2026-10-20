@@ -13,7 +13,7 @@ let totaleCommesse = 0;
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 
-let todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
+let todoPendente = { idx: null, label: '', nextState: 0, isTriState: false, isSiNo: false };
 
 const strutturaToDo = [
     { id: 'prev', label: '1. Preventivo', sub: [
@@ -25,14 +25,17 @@ const strutturaToDo = [
         { idx: 3, label: 'Per Preventivo', triState: false },
         { idx: 4, label: 'Esecutive', triState: false }
     ]},
-    { id: 'contr', label: '3. Contratto', sub: [
-        { idx: 5, label: 'Ricontrollo da C.O.', triState: false },
-        { idx: 6, label: 'Verifica', triState: false },
-        { idx: 7, label: 'Invio al cliente', triState: false }
+    { id: 'conf', label: '3. Esito Preventivo', sub: [
+        { idx: 5, label: 'Preventivo Confermato [SI / NO]', isSiNo: true }
     ]},
-    { id: 'pag', label: '4. Pagamenti', sub: [
-        { idx: 8, label: 'Acconto', triState: true },
-        { idx: 9, label: 'Saldo', triState: true }
+    { id: 'contr', label: '4. Contratto', sub: [
+        { idx: 6, label: 'Ricontrollo da C.O.', triState: false },
+        { idx: 7, label: 'Verifica', triState: false },
+        { idx: 8, label: 'Invio al cliente', triState: false }
+    ]},
+    { id: 'pag', label: '5. Pagamenti', sub: [
+        { idx: 9, label: 'Acconto', triState: true },
+        { idx: 10, label: 'Saldo', triState: true }
     ]}
 ];
 
@@ -261,10 +264,10 @@ function disegnaToDo() {
     if(!container) return;
     container.innerHTML = '';
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<10; i++) arr[i] = parsed[i] || 0; 
+        for(let i=0; i<11; i++) arr[i] = parsed[i] || 0; 
     }
     
     strutturaToDo.forEach(sezione => {
@@ -272,6 +275,7 @@ function disegnaToDo() {
         sezione.sub.forEach(item => {
             const val = arr[item.idx] || 0;
             const isTri = item.triState ? 'true' : 'false';
+            const isSiNo = item.isSiNo ? 'true' : 'false';
             
             let spanStyle = 'text-gray-700 font-medium';
             let boxHtml = '<div class="w-4 h-4 border-2 border-gray-300 rounded bg-white flex-shrink-0 mt-0.5 transition-colors"></div>';
@@ -279,27 +283,35 @@ function disegnaToDo() {
             if (val === 1 && item.triState) {
                 spanStyle = 'text-indigo-700 font-bold';
                 boxHtml = '<div class="w-4 h-4 border-2 border-indigo-500 rounded bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"><div class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div></div>';
-            } else if ((val === 1 && !item.triState) || val === 2) {
-                spanStyle = 'text-gray-400 line-through';
+            } else if ((val === 1 && !item.triState && !item.isSiNo) || (val === 2 && item.triState) || (val === 1 && item.isSiNo)) {
+                spanStyle = item.isSiNo ? 'text-emerald-700 font-bold' : 'text-gray-400 line-through';
                 boxHtml = '<div class="w-4 h-4 border-2 border-emerald-500 rounded bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"><span class="text-white text-[10px] font-bold leading-none">✓</span></div>';
+            } else if (val === 2 && item.isSiNo) {
+                spanStyle = 'text-red-600 font-bold line-through';
+                boxHtml = '<div class="w-4 h-4 border-2 border-red-500 rounded bg-red-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"><span class="text-white text-[10px] font-bold leading-none">✕</span></div>';
+            }
+            
+            let disabledClass = '';
+            if (item.idx > 5 && arr[5] !== 1) { 
+                disabledClass = ' opacity-40 pointer-events-none grayscale';
             }
             
             const safeLabel = (sezione.label + ' - ' + item.label).replace(/'/g, "\\'");
-            const callFunc = 'richiediConfermaToDo(' + item.idx + ', \'' + safeLabel + '\', ' + val + ', ' + isTri + ')';
+            const callFunc = 'richiediConfermaToDo(' + item.idx + ', \'' + safeLabel + '\', ' + val + ', ' + isTri + ', ' + isSiNo + ')';
             
-            htmlSec += '<div onclick="' + callFunc + '" class="flex items-start gap-3 cursor-pointer group">' + boxHtml + '<span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></div>';
+            htmlSec += '<div onclick="' + callFunc + '" class="flex items-start gap-3 cursor-pointer group' + disabledClass + '">' + boxHtml + '<span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></div>';
         });
         htmlSec += '</div></div>';
         container.innerHTML += htmlSec;
     });
 }
 
-function richiediConfermaToDo(idx, labelTesto, currentState, isTriState) {
+function richiediConfermaToDo(idx, labelTesto, currentState, isTriState, isSiNo) {
     let nextState = 0;
-    if (isTriState) { nextState = (currentState + 1) % 3; } 
+    if (isTriState || isSiNo) { nextState = (currentState + 1) % 3; } 
     else { nextState = currentState === 0 ? 1 : 0; }
     
-    todoPendente = { idx: idx, label: labelTesto, nextState: nextState, isTriState: isTriState };
+    todoPendente = { idx: idx, label: labelTesto, nextState: nextState, isTriState: isTriState, isSiNo: isSiNo };
 
     document.getElementById('todo-nota-testo').value = '';
     let modalTitolo = '';
@@ -308,6 +320,10 @@ function richiediConfermaToDo(idx, labelTesto, currentState, isTriState) {
         if (nextState === 1) modalTitolo = 'Fattura Inviata / Attesa Pagamento';
         else if (nextState === 2) modalTitolo = 'Conferma Incasso Ricevuto';
         else modalTitolo = 'Annulla Operazioni Pagamento';
+    } else if (isSiNo) {
+        if (nextState === 1) modalTitolo = 'Preventivo ACCETTATO (SI)';
+        else if (nextState === 2) modalTitolo = 'Preventivo RIFIUTATO (NO)';
+        else modalTitolo = 'Annulla Esito Preventivo';
     } else {
         modalTitolo = nextState === 1 ? 'Conferma Completamento' : 'Annulla Completamento';
     }
@@ -319,7 +335,7 @@ function richiediConfermaToDo(idx, labelTesto, currentState, isTriState) {
 
 function annullaToDoNota() {
     document.getElementById('modal-todo-nota').classList.add('hidden');
-    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
+    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false, isSiNo: false };
 }
 
 async function confermaToDoNota() {
@@ -327,10 +343,10 @@ async function confermaToDoNota() {
     btn.innerText = "Salvataggio..."; btn.disabled = true;
 
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<10; i++) arr[i] = parsed[i] || 0;
+        for(let i=0; i<11; i++) arr[i] = parsed[i] || 0;
     }
 
     arr[todoPendente.idx] = todoPendente.nextState;
@@ -344,6 +360,10 @@ async function confermaToDoNota() {
             if (todoPendente.nextState === 1) logMsg = '📤 Inviata/In Attesa: ' + todoPendente.label;
             else if (todoPendente.nextState === 2) logMsg = '✅ Pagato/Incassato: ' + todoPendente.label;
             else logMsg = '🔙 Annullato: ' + todoPendente.label;
+        } else if (todoPendente.isSiNo) {
+            if (todoPendente.nextState === 1) logMsg = '✅ Cliente ha ACCETTATO: ' + todoPendente.label;
+            else if (todoPendente.nextState === 2) logMsg = '❌ Cliente ha RIFIUTATO: ' + todoPendente.label;
+            else logMsg = '🔙 Annullato esito: ' + todoPendente.label;
         } else {
             logMsg = todoPendente.nextState === 1 ? '✅ Completato: ' + todoPendente.label : '🔙 Annullato: ' + todoPendente.label;
         }
@@ -357,7 +377,7 @@ async function confermaToDoNota() {
     }
 
     document.getElementById('modal-todo-nota').classList.add('hidden');
-    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
+    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false, isSiNo: false };
     btn.innerText = "Conferma"; btn.disabled = false;
 }
 
@@ -423,7 +443,7 @@ async function caricaCronologia(commessaId) {
         
         let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50 shrink-0"></div>';
         if (log.azione.includes('✅')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">✓</div>';
-        if (log.azione.includes('🔙')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50 shrink-0">!</div>';
+        if (log.azione.includes('❌') || log.azione.includes('🔙')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-red-100 text-red-600 text-[10px] ring-2 ring-red-50 shrink-0">✕</div>';
         if (log.azione.includes('🔄')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">~</div>';
         if (log.azione.includes('📤')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-[10px] ring-2 ring-indigo-50 shrink-0">~</div>';
         if (log.azione.includes('Rilievo') || log.azione.includes('📐')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-blue-100 text-blue-700 text-[10px] ring-2 ring-blue-50 shrink-0">📐</div>';
@@ -594,7 +614,7 @@ async function eliminaOrdineDaCommessa() {
     const idOrdine = document.getElementById('gest-ord-id').value;
     if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?")) return;
     const { error } = await supabaseClient.from('ordini_fornitori').delete().eq('id', idOrdine);
-    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: `Eliminato Ordine dal sistema`, autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
+    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: 'Eliminato Ordine dal sistema', autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
 
 async function caricaPosaInterventi() {
@@ -654,7 +674,7 @@ function inizializzaListeners() {
 
     legaSubmit('form-nuova-commessa', async (e) => {
         e.preventDefault(); 
-        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0' };
+        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0' };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
         if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
