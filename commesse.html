@@ -11,7 +11,6 @@
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Stile personalizzato per i checkbox della ToDo */
         input[type="checkbox"]:checked + span { text-decoration: line-through; color: #9ca3af; }
     </style>
 </head>
@@ -26,7 +25,6 @@
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
-            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
@@ -73,7 +71,6 @@
         </div>
     </main>
 
-    <!-- SCHEDA DETTAGLIO COMMESSA (SEMPLIFICATA) -->
     <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
         <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
             <div class="flex items-center gap-4">
@@ -83,7 +80,6 @@
                     <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">COM-0000/000</h2>
                     <span id="scheda-badge-sede" class="hidden px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-[10px] font-bold uppercase tracking-wider border border-indigo-200"></span>
                     
-                    <!-- MENU A TENDINA STATO MANUALE -->
                     <select id="scheda-select-stato" onchange="cambiaStatoManuale()" class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none cursor-pointer hover:border-[#2e2a5b] transition-colors ml-2">
                         <option value="Preventivo">Preventivo</option>
                         <option value="Rilievo Misure">Rilievo Misure</option>
@@ -93,36 +89,27 @@
                         <option value="Posa">Posa in opera</option>
                         <option value="Conclusa">Conclusa</option>
                     </select>
-
                 </div>
             </div>
             <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">✏️ Modifica Dati Base</button>
         </div>
 
         <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            
             <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> 
                 <span class="text-gray-400">&bull;</span> 
                 <span class="font-bold text-[#2e2a5b]">Cantiere:</span> <span id="scheda-sottotitolo-cantiere" class="text-gray-900">...</span>
             </div>
 
-            <!-- LAYOUT A 2 COLONNE: TO-DO LIST E DIARIO -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                
-                <!-- COLONNA SINISTRA: TO-DO LIST -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-lg font-bold text-gray-800 mb-6 flex justify-between items-center border-b border-gray-100 pb-3">
                         <span>Checklist Operativa (To-Do)</span>
                         <span class="text-xs font-normal text-gray-400">Spunta le attività completate</span>
                     </h3>
-                    
-                    <div id="todo-container" class="space-y-6">
-                        <!-- Generato dinamicamente via JS -->
-                    </div>
+                    <div id="todo-container" class="space-y-6"></div>
                 </div>
 
-                <!-- COLONNA DESTRA: DIARIO MANUALE -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
                     <h3 class="text-lg font-bold text-gray-800 mb-2 border-b border-gray-100 pb-3">Diario di Bordo & Note</h3>
                     <p class="text-xs text-gray-500 mb-5">Tutte le spunte della To-Do list vengono segnate qui. Puoi aggiungere note manuali.<br><strong class="text-[#2e2a5b]">Doppio clic su un'icona o data per modificare/eliminare.</strong></p>
@@ -136,7 +123,6 @@
                     <div id="lista-cronologia" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 no-scrollbar"></div>
                 </div>
             </div>
-
         </div>
     </div>
 
