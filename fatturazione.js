@@ -39,7 +39,6 @@ async function caricaFileSuStorage(file, prefisso) {
     return data.publicUrl;
 }
 
-// ================= MODIFICA SEGRETA DIARIO =================
 function apriModaleModificaLog(idStr) {
     const logId = parseInt(idStr);
     const log = logsCorrenti.find(l => l.id === logId);
@@ -78,7 +77,6 @@ async function eliminaLog() {
     if (!error) { chiudiModaleModificaLog(); caricaCronologia(); } else { alert("Impossibile eliminare: " + error.message); }
 }
 
-// ================= INIT E CARICAMENTO FATTURE =================
 document.addEventListener('DOMContentLoaded', async () => {
     const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
     if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
@@ -123,17 +121,14 @@ async function caricaPagamentiTendine() {
 async function caricaFatture() {
     const tbody = document.getElementById('tabella-fatture');
     
-    // TENTATIVO 1: JOIN DIRETTA
     let { data: fats, error } = await supabaseClient
         .from('fatture')
         .select('*, commesse(id, numero, nome_cantiere, cliente_id, clienti(nome_ragione_sociale))')
         .order('created_at', { ascending: false });
 
-    // TENTATIVO 2: FALLBACK MANUALE (Incrocio dati se manca la relazione)
     if (error) {
-        console.warn("Join Supabase fallito, avvio incrocio dati manuale...");
         const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
-        if (err2) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
+        if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
         
         const { data: rawComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id');
         const { data: rawClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
@@ -142,9 +137,7 @@ async function caricaFatture() {
             if (rawComms) {
                 let relCom = rawComms.find(c => String(c.id) === String(f.commessa_id));
                 if (relCom) {
-                    if (rawClienti) {
-                        relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id));
-                    }
+                    if (rawClienti) { relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id)); }
                     f.commesse = relCom;
                 }
             }
@@ -153,7 +146,8 @@ async function caricaFatture() {
     }
 
     fattureCorrenti = fats || []; 
-    document.getElementById('conteggio-fatture').innerText = fattureCorrenti.length + ' pratiche registrate';
+    const lblCount = document.getElementById('conteggio-fatture');
+    if(lblCount) lblCount.innerText = fattureCorrenti.length + ' pratiche registrate';
     aggiornaStileTabsFatture(); 
     aggiornaVistaFatture();
 }
@@ -216,7 +210,6 @@ function disegnaTabella(lista) {
     });
 }
 
-// ================= SCHEDA FATTURA E LED =================
 function apriSchedaFattura(index, fromUrl = false) {
     fatturaAttivaIndex = index; aggiornaDatiSchedaUI(); caricaCronologia();
     document.getElementById('vista-elenco').classList.replace('flex', 'hidden'); document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
@@ -275,13 +268,13 @@ function disegnaStepper(statoAttuale) {
 
 function saltoStato(nuovoStato) {
     let statoPuro = fattureCorrenti[fatturaAttivaIndex].stato || 'Da Emettere'; if(statoPuro === 'Inviata' || statoPuro === 'Emessa') statoPuro = 'Emessa / Inviata';
-    if (statoPuro === nuovoStato) return; if (confirm('Vuoi forzare lo stato fatturazione a: ' + nuovoStato.toUpperCase() + '?')) { preparaAzione(nuovoStato, true); }
+    if (statoPuro === nuovoStato) return; if (confirm('Vuoi forzare lo stato a: ' + nuovoStato.toUpperCase() + '?')) { preparaAzione(nuovoStato, true); }
 }
 
 function preparaAzione(nuovoStato, isJump = false) {
     document.getElementById('azione-target-stato').value = nuovoStato; document.getElementById('azione-is-jump').value = isJump ? 'SI' : 'NO'; document.getElementById('azione-data').value = new Date().toISOString().split('T')[0]; document.getElementById('azione-note').value = ''; document.getElementById('azione-file').value = '';
     const titolo = document.getElementById('modale-azione-titolo'); const sub = document.getElementById('modale-azione-sub'); const labelData = document.getElementById('label-data'); const labelFile = document.getElementById('label-file');
-    if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura di Cortesia (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = 'Aggiorna a: ' + nuovoStato.toUpperCase(); sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
+    if (nuovoStato === 'Emessa / Inviata') { titolo.innerText = "Emissione Fattura / Richiesta"; sub.innerText = "La richiesta è stata inoltrata formalmente."; labelData.innerText = "📅 Data Emissione"; labelFile.innerText = "Allega PDF Fattura (Opzionale)"; } else if (nuovoStato === 'Pagata') { titolo.innerText = "Registra Incasso"; sub.innerText = "Il cliente ha saldato questo importo."; labelData.innerText = "📅 Data Valuta Bonifico / Incasso"; labelFile.innerText = "Allega Contabile Bonifico (Opzionale)"; } else { titolo.innerText = 'Aggiorna a: ' + nuovoStato.toUpperCase(); sub.innerText = "Ritorno a stato precedente"; labelData.innerText = "📅 Data operazione"; labelFile.innerText = "Allega Documento (Opzionale)"; }
     document.getElementById('modal-azione').classList.remove('hidden');
 }
 
@@ -301,7 +294,7 @@ async function eseguiAzione() {
     const { error } = await supabaseClient.from('fatture').update(datiAggiornamento).eq('id', f.id);
     if (!error) {
         f.stato = nuovoStato; if(fileUrl) f.file_url = datiAggiornamento.file_url;
-        let testoLog = ''; if(nuovoStato === 'Emessa / Inviata') testoLog = 'Inviata richiesta fattura/acconto: ' + f.numero; else if(nuovoStato === 'Pagata') testoLog = '💰 Incasso registrato per: ' + f.numero + ' (€ ' + f.importo + ')'; else testoLog = 'Stato fattura ' + f.numero + ' riportato a: ' + nuovoStato;
+        let testoLog = ''; if(nuovoStato === 'Emessa / Inviata') testoLog = 'Inviata richiesta: ' + f.numero; else if(nuovoStato === 'Pagata') testoLog = '💰 Incasso registrato per: ' + f.numero + ' (€ ' + f.importo + ')'; else testoLog = 'Stato fattura ' + f.numero + ' riportato a: ' + nuovoStato;
         if(note) testoLog += ' Note: "' + note + '"';
         await supabaseClient.from('commesse_log').insert([{ commessa_id: f.commessa_id, azione: testoLog, file_url: fileUrl, autore: UTENTE_CORRENTE, created_at: timestampFormattato }]);
         chiudiModaleAzione(); aggiornaDatiSchedaUI(); caricaCronologia(); caricaFatture(); 
@@ -309,7 +302,6 @@ async function eseguiAzione() {
     btn.innerText = "Conferma Azione"; btn.disabled = false;
 }
 
-// ================= CREAZIONE FATTURE DA LISTA GLOBALE =================
 function apriModaleNuovo(commessaPreselezionata = null) {
     const form = document.getElementById('form-nuovo'); if (form) form.reset();
     
@@ -381,7 +373,6 @@ async function caricaCronologia() {
     divLog.innerHTML = html;
 }
 
-// ================= LISTENERS FATTURE =================
 function inizializzaListenersForm() {
     const formNuovo = document.getElementById('form-nuovo');
     if (formNuovo) {
