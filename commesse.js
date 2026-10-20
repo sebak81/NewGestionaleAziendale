@@ -12,7 +12,6 @@ let totaleCommesse = 0;
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 
-// Struttura fissa della To-Do List
 const strutturaToDo = [
     { id: 'prev', label: '1. Preventivo', sub: [
         { idx: 0, label: 'Calcolo' },
@@ -74,7 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// ================= GESTIONE LISTA COMMESSE =================
 async function popolaTendinaClienti() {
     const { data } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta, telefono, email').order('nome_ragione_sociale');
     if (data) {
@@ -162,7 +160,6 @@ function filtraCommesse() {
     disegnaListaCommesse(filtrate);
 }
 
-// ================= SCHEDA COMMESSA =================
 function apriSchedaCommessa(index) {
     commessaAttivaIndex = index;
     const com = commesseCorrenti[index];
@@ -222,7 +219,6 @@ async function cambiaStatoManuale() {
     }
 }
 
-// ================= TO-DO LIST =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
@@ -234,7 +230,7 @@ function disegnaToDo() {
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
         for(let i=0; i<10; i++) {
-            arr[i] = parsed[i] ? 1 : 0; // Protezione sicurezza contro vecchi dati
+            arr[i] = parsed[i] ? 1 : 0; 
         }
     }
     
@@ -284,7 +280,6 @@ async function toggleToDo(idx, labelTesto) {
     }
 }
 
-// ================= DIARIO / LOG =================
 function apriModaleModificaLog(idStr) {
     const logId = parseInt(idStr);
     const log = logsCorrenti.find(l => l.id === logId);
@@ -367,7 +362,7 @@ async function caricaCronologia(commessaId) {
     
     logs.forEach(log => {
         const dateObj = new Date(log.created_at); 
-        const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
+        const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
         const autoreText = log.autore ? '&bull; 👤 ' + log.autore : '';
         const notaHtml = log.nota ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"' + log.nota + '"</p>' : '';
         
@@ -384,7 +379,6 @@ async function caricaCronologia(commessaId) {
     divLog.innerHTML = html;
 }
 
-// ================= GESTIONE MODIFICA E NUOVA COMMESSA =================
 function apriModaleModifica() {
     if (commessaAttivaIndex === null) return; 
     const com = commesseCorrenti[commessaAttivaIndex]; 
@@ -414,7 +408,6 @@ function chiudiModaleNuovaCommessa() {
     window.history.replaceState({}, document.title, window.location.pathname); 
 }
 
-// ================= EVENT LISTENERS DEI FORM =================
 function inizializzaListeners() {
     const legaSubmit = (idForm, funzioneHandler) => {
         const form = document.getElementById(idForm);
