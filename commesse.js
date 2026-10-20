@@ -594,10 +594,9 @@ async function eliminaOrdineDaCommessa() {
     const idOrdine = document.getElementById('gest-ord-id').value;
     if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?")) return;
     const { error } = await supabaseClient.from('ordini_fornitori').delete().eq('id', idOrdine);
-    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: 'Eliminato Ordine dal sistema', autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
+    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: `Eliminato Ordine dal sistema`, autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
 
-// ================= GESTIONE POSA IN OPERA =================
 async function caricaPosaInterventi() {
     const com = commesseCorrenti[commessaAttivaIndex]; const divLista = document.getElementById('lista-interventi-posa'); divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
     const { data: interventi, error } = await supabaseClient.from('interventi_posa').select('*').eq('commessa_id', com.id).order('data_intervento', { ascending: false });
@@ -615,7 +614,6 @@ function apriModalePosa() { document.getElementById('form-intervento-posa').rese
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
 async function eliminaPosa(id) { if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; await supabaseClient.from('interventi_posa').delete().eq('id', id); caricaPosaInterventi(); }
 
-// ================= GESTIONE MODIFICA E NUOVA COMMESSA =================
 function apriModaleModifica() {
     if (commessaAttivaIndex === null) return; 
     const com = commesseCorrenti[commessaAttivaIndex]; 
