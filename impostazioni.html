@@ -355,4 +355,81 @@
             const dTel = data ? data.telefono || '' : '';
             const dMail = data ? data.email || '' : '';
 
-            tr.innerHTML = '<td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1.5" placeholder="Nome" value="' + dNome + '"></td><td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1.5" placeholder="Reparto" value="' + dRep + '"></td><td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1.5" placeholder="Telefono" value="' + dTel + '"></td><td class="p-2"><input type="email" class="ref-email w-full border rounded text-xs p-
+            tr.innerHTML = '<td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1.5" placeholder="Nome" value="' + dNome + '"></td><td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1.5" placeholder="Reparto" value="' + dRep + '"></td><td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1.5" placeholder="Telefono" value="' + dTel + '"></td><td class="p-2"><input type="email" class="ref-email w-full border rounded text-xs p-1.5" placeholder="Email" value="' + dMail + '"></td><td class="p-2 text-center"><button type="button" onclick="this.closest(\'tr\').remove()" class="text-red-400 hover:text-red-600 font-bold text-base">&times;</button></td>';
+            tbody.appendChild(tr);
+        }
+
+        document.getElementById('form-fornitore').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-salva-fornitore-def');
+            btn.innerText = "Salvataggio...";
+            btn.disabled = true;
+
+            const id = document.getElementById('fornitore-id').value;
+            const categorieSelezionate = Array.from(document.querySelectorAll('input[name="categoria"]:checked')).map(cb => cb.value).join(',');
+
+            const datiFornitore = {
+                nome_azienda: document.getElementById('f-nome').value.trim(),
+                indirizzo: document.getElementById('f-indirizzo').value.trim() || null,
+                citta: document.getElementById('f-citta').value.trim() || null,
+                telefono: document.getElementById('f-telefono').value.trim() || null,
+                email: document.getElementById('f-email').value.trim() || null,
+                categoria: categorieSelezionate || null
+            };
+
+            let fornitoreId = id;
+            let error = null;
+
+            if (id) {
+                const res = await supabaseClient.from('fornitori').update(datiFornitore).eq('id', id);
+                error = res.error;
+            } else {
+                const res = await supabaseClient.from('fornitori').insert([datiFornitore]).select();
+                error = res.error;
+                if (!error && res.data) {
+                    fornitoreId = res.data[0].id;
+                }
+            }
+
+            if (!error) {
+                if (id) {
+                    await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
+                }
+
+                const righeReferenti = document.querySelectorAll('#tabella-referenti-dinamica tr');
+                for (let riga of righeReferenti) {
+                    const nome = riga.querySelector('.ref-nome').value.trim();
+                    const reparto = riga.querySelector('.ref-reparto').value.trim();
+                    const tel = riga.querySelector('.ref-tel').value.trim();
+                    const email = riga.querySelector('.ref-email').value.trim();
+
+                    if (nome || reparto || tel || email) {
+                        await supabaseClient.from('fornitori_referenti').insert([{
+                            fornitore_id: fornitoreId,
+                            nome_referente: nome || null,
+                            mansione_reparto: reparto || null,
+                            telefono: tel || null,
+                            email: email || null
+                        }]);
+                    }
+                }
+
+                chiudiModaleFornitore();
+                caricaFornitori();
+            } else {
+                alert("Errore durante il salvataggio: " + error.message);
+            }
+
+            btn.innerText = "Salva Fornitore";
+            btn.disabled = false;
+        });
+
+        async function eliminaFornitore(id) {
+            if(!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
+            await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
+            const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
+            if (!error) caricaFornitori(); else alert("Impossibile eliminare: " + error.message);
+        }
+    </script>
+</body>
+</html>
