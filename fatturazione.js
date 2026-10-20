@@ -46,7 +46,6 @@ function apriModaleModificaLog(idStr) {
     document.getElementById('mod-log-id').value = log.id;
     document.getElementById('mod-log-azione').value = log.azione || '';
     document.getElementById('mod-log-nota').value = log.nota || '';
-    
     if (log.created_at) {
         const d = new Date(log.created_at);
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
@@ -62,12 +61,10 @@ async function salvaModificaLog() {
     const nuovaAzione = document.getElementById('mod-log-azione').value;
     const nuovaNota = document.getElementById('mod-log-nota').value;
     const nuovaData = document.getElementById('mod-log-data').value;
-
     let timestamp = new Date().toISOString();
     if (nuovaData) timestamp = new Date(nuovaData).toISOString();
-
     const { error } = await supabaseClient.from('commesse_log').update({ azione: nuovaAzione, nota: nuovaNota || null, created_at: timestamp }).eq('id', id);
-    if (!error) { chiudiModaleModificaLog(); caricaCronologia(); } else { alert("Errore modifica log: " + error.message); }
+    if (!error) { chiudiModaleModificaLog(); caricaCronologia(); } else { alert("Errore: " + error.message); }
 }
 
 async function eliminaLog() {
@@ -80,9 +77,7 @@ async function eliminaLog() {
 document.addEventListener('DOMContentLoaded', async () => {
     const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
     if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
-
     inizializzaListenersForm(); 
-
     await inizializzaDatiNuovaFattura();
     await caricaPagamentiTendine();
     await caricaFatture();
@@ -120,36 +115,26 @@ async function caricaPagamentiTendine() {
 
 async function caricaFatture() {
     const tbody = document.getElementById('tabella-fatture');
+    const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
+    if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
+    const { data: rawComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id');
+    const { data: rawClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
     
-    let { data: fats, error } = await supabaseClient
-        .from('fatture')
-        .select('*, commesse(id, numero, nome_cantiere, cliente_id, clienti(nome_ragione_sociale))')
-        .order('created_at', { ascending: false });
-
-    if (error) {
-        const { data: rawFats, error: err2 } = await supabaseClient.from('fatture').select('*').order('created_at', { ascending: false });
-        if (err2 && tbody) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-red-500 py-4 font-bold">Errore DB Server.</td></tr>'; return; }
-        
-        const { data: rawComms } = await supabaseClient.from('commesse').select('id, numero, nome_cantiere, cliente_id');
-        const { data: rawClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
-        
-        fats = (rawFats || []).map(f => {
-            if (rawComms) {
-                let relCom = rawComms.find(c => String(c.id) === String(f.commessa_id));
-                if (relCom) {
-                    if (rawClienti) { relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id)); }
-                    f.commesse = relCom;
-                }
+    let fats = (rawFats || []).map(f => {
+        if (rawComms) {
+            let relCom = rawComms.find(c => String(c.id) === String(f.commessa_id));
+            if (relCom) {
+                if (rawClienti) { relCom.clienti = rawClienti.find(cl => String(cl.id) === String(relCom.cliente_id)); }
+                f.commesse = relCom;
             }
-            return f;
-        });
-    }
+        }
+        return f;
+    });
 
     fattureCorrenti = fats || []; 
     const lblCount = document.getElementById('conteggio-fatture');
     if(lblCount) lblCount.innerText = fattureCorrenti.length + ' pratiche registrate';
-    aggiornaStileTabsFatture(); 
-    aggiornaVistaFatture();
+    aggiornaStileTabsFatture(); aggiornaVistaFatture();
 }
 
 function aggiornaStileTabsFatture() {
@@ -173,7 +158,6 @@ function aggiornaVistaFatture() {
         const nomeCliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? String(f.commesse.clienti.nome_ragione_sociale).toLowerCase() : '';
         const numCommessa = (f.commesse && f.commesse.numero) ? String(f.commesse.numero).toLowerCase() : '';
         const numFattura = (f.numero) ? String(f.numero).toLowerCase() : '';
-        
         const matchTesto = nomeCliente.includes(query) || numCommessa.includes(query) || numFattura.includes(query);
         const matchTab = (filtroFattureCorrente === 'Tutte') || (f.statoPulito === filtroFattureCorrente);
         return matchTesto && matchTab;
@@ -225,7 +209,6 @@ function chiudiScheda() {
 function aggiornaDatiSchedaUI() {
     const f = fattureCorrenti[fatturaAttivaIndex]; 
     document.getElementById('scheda-titolo').innerText = f.numero + (f.tipo_documento ? ' (' + f.tipo_documento + ')' : '');
-    
     const cantiere = f.commesse ? (f.commesse.numero + ' ' + (f.commesse.nome_cantiere ? '('+f.commesse.nome_cantiere+')' : '')) : '--';
     const cliente = (f.commesse && f.commesse.clienti && f.commesse.clienti.nome_ragione_sociale) ? f.commesse.clienti.nome_ragione_sociale : '--';
     const importo = f.importo ? '€ ' + parseFloat(f.importo).toFixed(2).replace('.', ',') : '0,00 €';
@@ -304,19 +287,11 @@ async function eseguiAzione() {
 
 function apriModaleNuovo(commessaPreselezionata = null) {
     const form = document.getElementById('form-nuovo'); if (form) form.reset();
-    
-    const inpData = document.getElementById('nuovo-data');
-    if(inpData) inpData.value = new Date().toISOString().split('T')[0];
-
+    const inpData = document.getElementById('nuovo-data'); if(inpData) inpData.value = new Date().toISOString().split('T')[0];
     const selCliente = document.getElementById('nuovo-cliente'); 
-    if(selCliente) {
-        selCliente.innerHTML = '<option value="">-- Seleziona Cliente --</option>'; 
-        clientiGlobali.forEach(c => selCliente.innerHTML += '<option value="' + c.id + '">' + c.nome_ragione_sociale + '</option>');
-    }
+    if(selCliente) { selCliente.innerHTML = '<option value="">-- Seleziona Cliente --</option>'; clientiGlobali.forEach(c => selCliente.innerHTML += '<option value="' + c.id + '">' + c.nome_ragione_sociale + '</option>'); }
     const selCommessa = document.getElementById('nuovo-commessa'); 
-    if(selCommessa) {
-        selCommessa.innerHTML = '<option value="">-- Seleziona prima un cliente --</option>'; selCommessa.disabled = true; selCommessa.classList.add('bg-gray-50'); selCommessa.classList.remove('bg-white');
-    }
+    if(selCommessa) { selCommessa.innerHTML = '<option value="">-- Seleziona prima un cliente --</option>'; selCommessa.disabled = true; selCommessa.classList.add('bg-gray-50'); selCommessa.classList.remove('bg-white'); }
     const mod = document.getElementById('modal-nuovo'); if(mod) mod.classList.remove('hidden');
     if (commessaPreselezionata) { const comTrovata = commesseGlobali.find(c => String(c.id) === String(commessaPreselezionata)); if (comTrovata) { selCliente.value = comTrovata.cliente_id; filtraCommessePerCliente(); selCommessa.value = comTrovata.id; } }
 }
@@ -384,18 +359,13 @@ function inizializzaListenersForm() {
             const imp = document.getElementById('nuovo-importo').value;
             const dati = { 
                 commessa_id: document.getElementById('nuovo-commessa').value, 
-                tipo_documento: tipo,
-                data_emissione: dataEmissione,
-                numero: num, 
-                importo: imp, 
-                condizione_pagamento: document.getElementById('nuovo-pagamento').value || null, 
-                stato: 'Da Emettere' 
+                tipo_documento: tipo, data_emissione: dataEmissione, numero: num, importo: imp, 
+                condizione_pagamento: document.getElementById('nuovo-pagamento').value || null, stato: 'Da Emettere' 
             };
             const { error } = await supabaseClient.from('fatture').insert([dati]);
             if (!error) { 
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: dati.commessa_id, azione: 'Generata nuova richiesta di ' + tipo + ': ' + num + ' (€ ' + imp + ')', autore: UTENTE_CORRENTE }]); 
-                chiudiModaleNuovo(); 
-                caricaFatture(); 
+                chiudiModaleNuovo(); caricaFatture(); 
             } else { alert("Errore salvataggio: " + error.message); }
         });
     }
