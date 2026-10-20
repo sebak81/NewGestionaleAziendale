@@ -15,20 +15,17 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR AGGIORNATA E SNELLITA -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
             <span class="font-bold text-lg">3 ESSE</span>
         </div>
         <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
+            <!-- La dashboard è "accesa" (sfondo scuro) -->
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Dashboard</a>
             <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
-            <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
-            <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
-            <a href="ordini.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Ordini Fornitori</a>
-            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
@@ -166,17 +163,17 @@
             const { count: countContr } = await supabaseClient.from('contratti').select('*', { count: 'exact', head: true }).neq('stato', 'Confermato').neq('stato', 'Disdetto');
             document.getElementById('kpi-contratti').innerText = countContr || '0';
 
-            // KPI: Ordini in Attesa Conferma (Include "Ordine inviato", "Inviato", "In Modifica")
+            // KPI: Ordini in Attesa Conferma
             const { count: countOrd } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
                 .in('stato', ['Ordine inviato', 'Inviato', 'Richiesta Inviata', 'In Modifica']);
             document.getElementById('kpi-ordini').innerText = countOrd || '0';
 
-            // KPI: Merce in Arrivo (Ordine confermato, ma non arrivato)
+            // KPI: Merce in Arrivo
             const { count: countArrivo } = await supabaseClient.from('ordini_fornitori').select('*', { count: 'exact', head: true })
                 .in('stato', ['Conferma', 'Approvato ed Inviato', 'Ordine confermato ed inviato al Fornitore', 'Da controllare ed inviare']);
             document.getElementById('kpi-in-arrivo').innerText = countArrivo || '0';
 
-            // KPI: Fatture NON Saldate (Qualsiasi tipo: Acconto o Saldo)
+            // KPI: Fatture NON Saldate
             const { count: countFatt } = await supabaseClient.from('fatture').select('*', { count: 'exact', head: true }).neq('stato', 'Pagata');
             document.getElementById('kpi-fatture').innerText = countFatt || '0';
 
@@ -195,7 +192,6 @@
                     if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800';
                     if(com.stato === 'Conclusa' || com.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800';
 
-                    // Il click apre direttamente la scheda della commessa passando l'ID via URL
                     htmlCommesse += `
                         <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html?id=${com.id}'">
                             <div>
