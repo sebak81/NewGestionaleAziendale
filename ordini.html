@@ -15,7 +15,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
@@ -25,19 +24,12 @@
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
-            <a href="preventivi.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Preventivi</a>
-            <a href="contratti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Contratti</a>
-            <a href="ordini.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Ordini Fornitori</a>
-            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
         </nav>
         <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div>
-                    <p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p>
-                    <p class="text-xs text-gray-500 uppercase">Owner</p>
-                </div>
+                <div><p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p><p class="text-xs text-gray-500 uppercase">Owner</p></div>
             </div>
         </div>
     </aside>
@@ -49,8 +41,6 @@
         </header>
 
         <div class="flex-1 flex flex-col overflow-hidden px-8 pb-8 space-y-4">
-            
-            <!-- FILTRI A SUB-TAB CON SFONDO (Pillole) -->
             <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 shrink-0 mt-4">
                 <button onclick="cambiaTabOrdini('Tutti')" id="tab-ord-Tutti" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center">Registro Ordini (In Lavorazione)</button>
                 <button onclick="cambiaTabOrdini('Ordine inviato')" id="tab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Ordini Inviati (C.O. in attesa)</button>
@@ -59,20 +49,11 @@
                 <button onclick="cambiaTabOrdini('Merce Arrivata')" id="tab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center">Merce Arrivata (Magazzino)</button>
             </div>
 
-            <!-- TABELLA UNICA DINAMICA -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-1 overflow-hidden flex flex-col">
                 <div class="overflow-auto flex-1 no-scrollbar relative">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50/90 backdrop-blur-sm text-xs uppercase font-semibold text-gray-500 border-b border-gray-100 sticky top-0 z-10">
-                            <tr>
-                                <th class="px-4 py-3">Commessa / Cliente</th>
-                                <th class="px-4 py-3">Fornitore</th>
-                                <th class="px-4 py-3">Materiale</th>
-                                <th class="px-4 py-3">Data</th>
-                                <th class="px-4 py-3">Importo Conf.</th>
-                                <th class="px-4 py-3 w-40">Stato & Consegna</th>
-                                <th class="px-4 py-3 text-center">Azioni</th>
-                            </tr>
+                            <tr><th class="px-4 py-3">Commessa / Cliente</th><th class="px-4 py-3">Fornitore</th><th class="px-4 py-3">Materiale</th><th class="px-4 py-3">Data</th><th class="px-4 py-3">Importo Conf.</th><th class="px-4 py-3 w-40">Stato & Consegna</th><th class="px-4 py-3 text-center">Azioni</th></tr>
                         </thead>
                         <tbody id="tabella-ordini" class="divide-y divide-gray-100">
                             <tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Caricamento in corso...</td></tr>
@@ -80,11 +61,9 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <!-- MODALE: AGGIORNA E GESTISCI ORDINE -->
     <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
@@ -94,64 +73,26 @@
             <div class="p-6 overflow-y-auto no-scrollbar">
                 <form id="form-gestisci-ordine" class="space-y-4">
                     <input type="hidden" id="gest-ord-id">
-                    
                     <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento Ordine</h4>
                         <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
                         <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
                     </div>
-                    
-                    <!-- BOX INPUT SEMPRE VISIBILI ED EXTRA DINAMICI -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label>
-                            <input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label>
-                            <div class="flex items-center">
-                                <input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold">
-                                <button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button>
-                            </div>
-                        </div>
-
-                        <!-- BOX CONFERMA E COSTI (Dinamici) -->
-                        <div id="box-ord-data-conferma" class="hidden col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label>
-                            <input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700">
-                        </div>
-                        <div id="box-ord-costo" class="hidden col-span-1">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label>
-                            <input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none">
-                        </div>
-                        <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1">
-                            <label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label>
-                            <input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700">
-                        </div>
-
-                        <!-- BOX ARRIVO MERCE (Dinamici) -->
-                        <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3">
-                            <label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label>
-                            <input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800">
-                        </div>
-
-                        <div class="col-span-2 mt-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label>
-                            <textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea>
-                        </div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label><input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero di Revisione</label><div class="flex items-center"><input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold"><button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button></div></div>
+                        <div id="box-ord-data-conferma" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label><input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (Conf. d'Ordine) (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
+                        <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1"><label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label><input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700"></div>
+                        <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3"><label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label><input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800"></div>
+                        <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                     </div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label>
-                        <input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer">
-                    </div>
+                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Conferma / Ddt / Fattura Fornitore</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
                 </form>
             </div>
             <div class="p-6 border-t border-gray-100 flex justify-between items-center bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="eliminaOrdineDaGlobale()" class="text-xs font-bold text-red-600 hover:text-red-800 transition-colors">🗑️ Elimina Ordine</button>
-                <div class="flex gap-3">
-                    <button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors">Annulla</button>
-                    <button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md transition-colors">Salva Ordine</button>
-                </div>
+                <button type="button" onclick="eliminaOrdineDaGlobale()" class="text-xs font-bold text-red-600 hover:text-red-800">🗑️ Elimina Ordine</button>
+                <div class="flex gap-3"><button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold bg-gray-100">Annulla</button><button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold shadow-md">Salva Ordine</button></div>
             </div>
         </div>
     </div>
@@ -160,54 +101,31 @@
 
     <script>
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar').innerText;
+        const UTENTE_CORRENTE = document.getElementById('nome-utente-sidebar') ? document.getElementById('nome-utente-sidebar').innerText : "Sistema";
         let ordiniGlobaliCache = [];
         let filtroOrdiniCorrente = 'Tutti';
-
         const sequenzaStatiOrdine = ['Ordine inviato', 'In Modifica', 'Conferma', 'Merce Arrivata'];
         let statoPendenteOrdine = '';
 
         async function caricaFileSuStorage(file, prefisso) {
             if (!file) return null;
             const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-            const fileName = `${prefisso}_${Date.now()}_${cleanFileName}`;
+            const fileName = prefisso + '_' + Date.now() + '_' + cleanFileName;
             await supabaseClient.storage.from('contratti_docs').upload(fileName, file, { cacheControl: '3600', upsert: false });
             const { data } = supabaseClient.storage.from('contratti_docs').getPublicUrl(fileName);
             return data.publicUrl;
         }
 
         async function caricaTuttiOrdini() {
-            const { data: ordini, error } = await supabaseClient
-                .from('ordini_fornitori')
-                .select(`
-                    *, 
-                    fornitori(nome_azienda, categoria), 
-                    commesse!ordini_fornitori_commessa_id_fkey(numero, nome_cantiere, clienti(nome_ragione_sociale)),
-                    contratti(commessa_id, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale)))
-                `)
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                document.getElementById('tabella-ordini').innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-red-500">Errore caricamento dati dal server.</td></tr>';
-                return;
-            }
-
+            const { data: ordini, error } = await supabaseClient.from('ordini_fornitori').select('*, fornitori(nome_azienda, categoria), commesse!ordini_fornitori_commessa_id_fkey(numero, nome_cantiere, clienti(nome_ragione_sociale)), contratti(commessa_id, commesse(numero, nome_cantiere, clienti(nome_ragione_sociale)))').order('created_at', { ascending: false });
+            if (error) { document.getElementById('tabella-ordini').innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-red-500">Errore caricamento dati dal server.</td></tr>'; return; }
             ordiniGlobaliCache = ordini || [];
-            aggiornaStileTabsOrdini();
-            disegnaTabellaOrdini();
+            aggiornaStileTabsOrdini(); disegnaTabellaOrdini();
         }
 
         function aggiornaStileTabsOrdini() {
-            const tabs = [
-                { id: 'Tutti', label: 'Registro Ordini (In Lavorazione)' },
-                { id: 'Ordine inviato', label: 'Ordini Inviati (C.O. in attesa)' },
-                { id: 'In Modifica', label: 'In Modifica' },
-                { id: 'Conferma', label: 'In Arrivo (già confermati)' },
-                { id: 'Merce Arrivata', label: 'Merce Arrivata (Magazzino)' }
-            ];
-
+            const tabs = [ { id: 'Tutti', label: 'Registro Ordini (In Lavorazione)' }, { id: 'Ordine inviato', label: 'Ordini Inviati (C.O. in attesa)' }, { id: 'In Modifica', label: 'In Modifica' }, { id: 'Conferma', label: 'In Arrivo (già confermati)' }, { id: 'Merce Arrivata', label: 'Merce Arrivata (Magazzino)' } ];
             let counts = { 'Tutti': ordiniGlobaliCache.length, 'Ordine inviato': 0, 'In Modifica': 0, 'Conferma': 0, 'Merce Arrivata': 0 };
-            
             ordiniGlobaliCache.forEach(o => {
                 let s = o.stato || 'Ordine inviato';
                 if(s === 'Inviato' || s === 'Richiesta Inviata') s = 'Ordine inviato';
@@ -215,105 +133,57 @@
                 if(s === 'Merce Arrivata in Magazzino') s = 'Merce Arrivata';
                 if(counts[s] !== undefined) counts[s]++;
             });
-
             tabs.forEach(t => {
                 const btn = document.getElementById('tab-ord-' + t.id.replace(/ /g, ''));
                 if (btn) {
-                    btn.innerHTML = `${t.label} <span class="ml-1 opacity-80">(${counts[t.id]})</span>`;
-                    if (t.id === filtroOrdiniCorrente) {
-                        btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center";
-                    } else {
-                        btn.className = "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center";
-                    }
+                    btn.innerHTML = t.label + ' <span class="ml-1 opacity-80">(' + counts[t.id] + ')</span>';
+                    if (t.id === filtroOrdiniCorrente) { btn.className = "px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm transition-colors whitespace-nowrap flex items-center"; } 
+                    else { btn.className = "px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg transition-colors whitespace-nowrap flex items-center"; }
                 }
             });
         }
 
-        function cambiaTabOrdini(tab) {
-            filtroOrdiniCorrente = tab;
-            aggiornaStileTabsOrdini();
-            disegnaTabellaOrdini();
-        }
+        function cambiaTabOrdini(tab) { filtroOrdiniCorrente = tab; aggiornaStileTabsOrdini(); disegnaTabellaOrdini(); }
 
         function disegnaTabellaOrdini() {
-            const tbody = document.getElementById('tabella-ordini');
-            tbody.innerHTML = '';
-
+            const tbody = document.getElementById('tabella-ordini'); tbody.innerHTML = '';
             const filtrati = ordiniGlobaliCache.filter(ord => {
                 let statoPulito = ord.stato || 'Ordine inviato';
                 if(statoPulito === 'Inviato' || statoPulito === 'Richiesta Inviata') statoPulito = 'Ordine inviato';
                 if(statoPulito === 'Da controllare ed inviare' || statoPulito === 'Approvato ed Inviato' || statoPulito === 'Ordine confermato ed inviato al Fornitore') statoPulito = 'Conferma';
                 if(statoPulito === 'Merce Arrivata in Magazzino') statoPulito = 'Merce Arrivata';
-                
                 ord.statoPulito = statoPulito;
-                
                 if (filtroOrdiniCorrente === 'Tutti') return true;
                 return statoPulito === filtroOrdiniCorrente;
             });
 
-            if (filtrati.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato per questa categoria.</td></tr>';
-                return;
-            }
+            if (filtrati.length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato per questa categoria.</td></tr>'; return; }
 
             let html = '';
             filtrati.forEach(ord => {
                 const originalIndex = ordiniGlobaliCache.indexOf(ord);
                 const statoPulito = ord.statoPulito;
                 const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Sconosciuto';
-                
-                let numCommessa = '--';
-                let cantiereNome = '--';
-                let clienteNome = '';
-                let commessaIdPerLink = '';
+                let numCommessa = '--'; let cantiereNome = '--'; let clienteNome = ''; let commessaIdPerLink = '';
+                if (ord.commesse) { numCommessa = ord.commesse.numero; cantiereNome = ord.commesse.nome_cantiere || ''; clienteNome = ord.commesse.clienti ? ord.commesse.clienti.nome_ragione_sociale : ''; commessaIdPerLink = ord.commessa_id; } 
+                else if (ord.contratti && ord.contratti.commesse) { numCommessa = ord.contratti.commesse.numero; cantiereNome = ord.contratti.commesse.nome_cantiere || ''; clienteNome = ord.contratti.commesse.clienti ? ord.contratti.commesse.clienti.nome_ragione_sociale : ''; commessaIdPerLink = ord.contratti.commessa_id; }
 
-                if (ord.commesse) {
-                    numCommessa = ord.commesse.numero;
-                    cantiereNome = ord.commesse.nome_cantiere || '';
-                    clienteNome = ord.commesse.clienti ? ord.commesse.clienti.nome_ragione_sociale : '';
-                    commessaIdPerLink = ord.commessa_id;
-                } else if (ord.contratti && ord.contratti.commesse) {
-                    numCommessa = ord.contratti.commesse.numero;
-                    cantiereNome = ord.contratti.commesse.nome_cantiere || '';
-                    clienteNome = ord.contratti.commesse.clienti ? ord.contratti.commesse.clienti.nome_ragione_sociale : '';
-                    commessaIdPerLink = ord.contratti.commessa_id;
-                }
-
-                const riferimentoCommessa = clienteNome ? `${numCommessa} <span class="font-normal text-gray-500">(${clienteNome})</span>` : numCommessa;
-                
+                const riferimentoCommessa = clienteNome ? numCommessa + ' <span class="font-normal text-gray-500">(' + clienteNome + ')</span>' : numCommessa;
                 let descVisuale = ord.descrizione;
-                if (descVisuale && descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) {
-                    descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>');
-                }
+                if (descVisuale && descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) { descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>'); }
 
-                let dataStatoStr = '--';
-                let labelData = 'Inserito';
+                let dataStatoStr = '--'; let labelData = 'Inserito';
+                if (statoPulito === 'Ordine inviato' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Inviato'; } 
+                else if (statoPulito === 'In Modifica' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Da Modificare'; } 
+                else if (statoPulito === 'Conferma' && ord.data_conferma) { dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT'); labelData = 'Confermato'; } 
+                else if (statoPulito === 'Merce Arrivata' && ord.data_arrivo_merce) { dataStatoStr = new Date(ord.data_arrivo_merce).toLocaleDateString('it-IT'); labelData = 'Arrivato'; } 
+                else if (ord.created_at) { dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT'); labelData = 'Creato'; }
 
-                if (statoPulito === 'Ordine inviato' && ord.data_ordine) {
-                    dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
-                    labelData = 'Inviato';
-                } else if (statoPulito === 'In Modifica' && ord.data_ordine) {
-                    dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT');
-                    labelData = 'Da Modificare';
-                } else if (statoPulito === 'Conferma' && ord.data_conferma) {
-                    dataStatoStr = new Date(ord.data_conferma).toLocaleDateString('it-IT');
-                    labelData = 'Confermato';
-                } else if (statoPulito === 'Merce Arrivata' && ord.data_arrivo_merce) {
-                    dataStatoStr = new Date(ord.data_arrivo_merce).toLocaleDateString('it-IT');
-                    labelData = 'Arrivato';
-                } else if (ord.created_at) {
-                    dataStatoStr = new Date(ord.created_at).toLocaleDateString('it-IT');
-                    labelData = 'Creato';
-                }
-
-                const htmlDataCella = `<div class="font-bold text-gray-900">${dataStatoStr}</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">${labelData}</div>`;
-                const costoConf = ord.costo_confermato ? `€ ${parseFloat(ord.costo_confermato).toFixed(2)}` : '<span class="text-gray-300">-</span>';
+                const htmlDataCella = '<div class="font-bold text-gray-900">' + dataStatoStr + '</div><div class="text-[10px] text-gray-400 uppercase tracking-wider">' + labelData + '</div>';
+                const costoConf = ord.costo_confermato ? '€ ' + parseFloat(ord.costo_confermato).toFixed(2) : '<span class="text-gray-300">-</span>';
                 
                 let stringaConsegna = '<span class="text-gray-400 text-xs">Consegna non definita</span>';
-                if (ord.data_presunta_consegna) {
-                    const d = ord.data_presunta_consegna.split('-');
-                    stringaConsegna = `<span class="text-gray-600 text-xs">Consegna: <strong>${d[2]}/${d[1]}/${d[0]}</strong></span>`;
-                }
+                if (ord.data_presunta_consegna) { const d = ord.data_presunta_consegna.split('-'); stringaConsegna = '<span class="text-gray-600 text-xs">Consegna: <strong>' + d[2] + '/' + d[1] + '/' + d[0] + '</strong></span>'; }
 
                 let badgeClass = 'bg-gray-100 text-gray-600';
                 if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700';
@@ -321,25 +191,7 @@
                 if(statoPulito === 'Conferma') badgeClass = 'bg-yellow-100 text-yellow-800';
                 if(statoPulito === 'Merce Arrivata') badgeClass = 'bg-teal-100 text-teal-800';
 
-                html += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3">
-                            <div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href='commesse.html?id=${commessaIdPerLink}'">${riferimentoCommessa}</div>
-                            <div class="text-[10px] text-gray-500 mt-0.5">${cantiereNome}</div>
-                        </td>
-                        <td class="px-4 py-3 font-bold text-gray-900">${fornitoreNome}</td>
-                        <td class="px-4 py-3 text-gray-700 text-xs">${descVisuale}</td>
-                        <td class="px-4 py-3">${htmlDataCella}</td>
-                        <td class="px-4 py-3 font-bold text-emerald-600">${costoConf}</td>
-                        <td class="px-4 py-3 w-40">
-                            <span class="px-2 py-1 ${badgeClass} rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">${statoPulito}</span>
-                            <div class="mt-1">${stringaConsegna}</div>
-                        </td>
-                        <td class="px-4 py-3 text-center">
-                            <button onclick="apriModaleGestioneOrdine(${originalIndex})" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Gestisci</button>
-                        </td>
-                    </tr>
-                `;
+                html += '<tr class="hover:bg-gray-50"><td class="px-4 py-3"><div class="font-bold text-[#2e2a5b] cursor-pointer hover:underline" onclick="window.location.href=\'commesse.html?id=' + commessaIdPerLink + '&tab=ordini\'">' + riferimentoCommessa + '</div><div class="text-[10px] text-gray-500 mt-0.5">' + cantiereNome + '</div></td><td class="px-4 py-3 font-bold text-gray-900">' + fornitoreNome + '</td><td class="px-4 py-3 text-gray-700 text-xs">' + descVisuale + '</td><td class="px-4 py-3">' + htmlDataCella + '</td><td class="px-4 py-3 font-bold text-emerald-600">' + costoConf + '</td><td class="px-4 py-3 w-40"><span class="px-2 py-1 ' + badgeClass + ' rounded text-[10px] font-bold uppercase leading-tight inline-block text-center w-full">' + statoPulito + '</span><div class="mt-1">' + stringaConsegna + '</div></td><td class="px-4 py-3 text-center"><button onclick="apriModaleGestioneOrdine(' + originalIndex + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Gestisci</button></td></tr>';
             });
             tbody.innerHTML = html;
         }
@@ -347,16 +199,12 @@
         function apriModaleGestioneOrdine(indexMemoria) {
             const ord = ordiniGlobaliCache[indexMemoria];
             const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
-            
             let numCommessa = '--';
-            if (ord.commesse) {
-                numCommessa = ord.commesse.numero;
-            } else if (ord.contratti && ord.contratti.commesse) {
-                numCommessa = ord.contratti.commesse.numero;
-            }
+            if (ord.commesse) { numCommessa = ord.commesse.numero; } 
+            else if (ord.contratti && ord.contratti.commesse) { numCommessa = ord.contratti.commesse.numero; }
 
             document.getElementById('gest-ord-id').value = ord.id;
-            document.getElementById('sottotitolo-gestione-ordine').innerText = `Gestione per: ${nomeFornitore} (Commessa: ${numCommessa})`;
+            document.getElementById('sottotitolo-gestione-ordine').innerText = 'Gestione per: ' + nomeFornitore + ' (Commessa: ' + numCommessa + ')';
             
             let statoPartenza = ord.stato || 'Ordine inviato';
             if(statoPartenza === 'Inviato' || statoPartenza === 'Richiesta Inviata') statoPartenza = 'Ordine inviato';
@@ -369,94 +217,50 @@
             document.getElementById('gest-ord-revisione').value = ord.revisione || 0;
             document.getElementById('gest-ord-data-presunta').value = ord.data_presunta_consegna || '';
             document.getElementById('gest-ord-data-arrivo').value = ord.data_arrivo_merce || ''; 
-            document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ''; 
+            document.getElementById('gest-ord-annotazioni').value = ord.annotazioni || ord.descrizione || ''; 
             document.getElementById('gest-ord-file').value = ''; 
 
             impostaStatoPendenteOrdine(statoPartenza);
             document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
         }
 
-        function chiudiModaleGestioneOrdine() { 
-            document.getElementById('modal-gestisci-ordine').classList.add('hidden'); 
-        }
+        function chiudiModaleGestioneOrdine() { document.getElementById('modal-gestisci-ordine').classList.add('hidden'); }
 
         function impostaStatoPendenteOrdine(nuovoStato) {
             statoPendenteOrdine = nuovoStato;
-            const container = document.getElementById('stepper-container-ordine');
-            const azioniBox = document.getElementById('stepper-azioni-ordine');
-            
+            const container = document.getElementById('stepper-container-ordine'); const azioniBox = document.getElementById('stepper-azioni-ordine');
             container.innerHTML = ''; azioniBox.innerHTML = '';
 
             const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine);
-            const bgLine = document.createElement('div');
-            bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4';
-            container.appendChild(bgLine);
+            const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4'; container.appendChild(bgLine);
 
             sequenzaStatiOrdine.forEach((stato, index) => {
-                const punto = document.createElement('div');
-                punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
-                
-                let iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">${index + 1}</div>`;
-                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) {
-                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>`;
-                } else if (index === currentIdx) {
-                    let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100';
-                    iconaHTML = `<div class="w-6 h-6 rounded-full flex items-center justify-center ${col} text-white font-bold text-[10px] shadow-md ring-2">${index + 1}</div>`;
-                }
-                
+                const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
+                let iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">' + (index + 1) + '</div>';
+                if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) { iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>'; } 
+                else if (index === currentIdx) { let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100'; iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>'; }
                 let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
                 if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
-
-                punto.innerHTML = `${iconaHTML}<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ${textColor}">${stato}</span>`;
+                punto.innerHTML = iconaHTML + '<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ' + textColor + '">' + stato + '</span>';
                 container.appendChild(punto);
             });
 
-            // Gestione visibilità box in base allo stato
-            document.getElementById('box-ord-data-conferma').classList.add('hidden');
-            document.getElementById('box-ord-costo').classList.add('hidden');
-            document.getElementById('box-ord-presunta').classList.add('hidden');
-            document.getElementById('box-ord-arrivo').classList.add('hidden');
+            document.getElementById('box-ord-data-conferma').classList.add('hidden'); document.getElementById('box-ord-costo').classList.add('hidden'); document.getElementById('box-ord-presunta').classList.add('hidden'); document.getElementById('box-ord-arrivo').classList.add('hidden');
 
             if (statoPendenteOrdine === 'Ordine inviato') {
-                azioniBox.innerHTML = `
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
-                `;
+                azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
             } else if (statoPendenteOrdine === 'In Modifica') {
-                azioniBox.innerHTML = `
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>
-                `;
+                azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Ordine inviato\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
             } else if (statoPendenteOrdine === 'Conferma') {
-                const lConferma = document.getElementById('box-ord-data-conferma');
-                lConferma.classList.remove('hidden');
-                lConferma.querySelector('label').innerText = "Data Invio Conferma";
-                document.getElementById('box-ord-costo').classList.remove('hidden');
-                document.getElementById('box-ord-presunta').classList.remove('hidden');
-                
-                if(!document.getElementById('gest-ord-data-conferma').value) {
-                    document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
-                }
-                
-                azioniBox.innerHTML = `
-                    <button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>
-                    <div class="flex-1"></div>
-                    <button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>
-                `;
+                const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
+                document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-presunta').classList.remove('hidden');
+                if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
+                azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Merce Arrivata\')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>';
             } else if (statoPendenteOrdine === 'Merce Arrivata') {
-                const lConferma = document.getElementById('box-ord-data-conferma');
-                lConferma.classList.remove('hidden');
-                lConferma.querySelector('label').innerText = "Data Invio Conferma";
-                document.getElementById('box-ord-costo').classList.remove('hidden');
-                document.getElementById('box-ord-arrivo').classList.remove('hidden');
-                
-                if(!document.getElementById('gest-ord-data-arrivo').value) {
-                    document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
-                }
-                
-                azioniBox.innerHTML = `<button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>`;
+                const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
+                document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-arrivo').classList.remove('hidden');
+                if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
+                azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>';
             }
         }
 
@@ -465,18 +269,12 @@
             const ordOriginale = ordiniGlobaliCache.find(o => o.id == idOrdine);
             const commessaId = ordOriginale.commessa_id || (ordOriginale.contratti ? ordOriginale.contratti.commessa_id : null);
             
-            if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?\nL'operazione non può essere annullata.")) return;
-            
+            if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?")) return;
             const { error } = await supabaseClient.from('ordini_fornitori').delete().eq('id', idOrdine);
             if(!error) {
-                chiudiModaleGestioneOrdine();
-                caricaTuttiOrdini();
-                if(commessaId) {
-                    await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `Eliminato Ordine dal sistema`, autore: UTENTE_CORRENTE }]);
-                }
-            } else { 
-                alert("Errore durante l'eliminazione: " + error.message); 
-            }
+                chiudiModaleGestioneOrdine(); caricaTuttiOrdini();
+                if(commessaId) await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: 'Eliminato Ordine dal sistema', autore: UTENTE_CORRENTE }]);
+            } else { alert("Errore durante l'eliminazione: " + error.message); }
         }
 
         document.getElementById('form-gestisci-ordine').addEventListener('submit', async (e) => {
@@ -484,45 +282,30 @@
             const btnSubmit = document.getElementById('btn-salva-gest-ordine');
             const idOrdine = document.getElementById('gest-ord-id').value;
             const ordOriginale = ordiniGlobaliCache.find(o => o.id == idOrdine);
-            
             const commessaId = ordOriginale.commessa_id || (ordOriginale.contratti ? ordOriginale.contratti.commessa_id : null);
             const nomeFornitore = ordOriginale.fornitori ? ordOriginale.fornitori.nome_azienda : 'Fornitore';
 
-            btnSubmit.innerText = "Salvataggio...";
-            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Salvataggio..."; btnSubmit.disabled = true;
 
-            let fileUrl = null;
-            const fileInputUpdate = document.getElementById('gest-ord-file');
-            if (fileInputUpdate.files.length > 0) { 
-                fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF'); 
-            }
+            let fileUrl = null; const fileInputUpdate = document.getElementById('gest-ord-file');
+            if (fileInputUpdate.files.length > 0) fileUrl = await caricaFileSuStorage(fileInputUpdate.files[0], 'ORD_CONF'); 
 
             let datiUpdate = {
-                stato: statoPendenteOrdine, 
-                costo_confermato: document.getElementById('gest-ord-costo-conf').value || null,
-                data_ordine: document.getElementById('gest-ord-data-ordine').value || null,
-                data_conferma: document.getElementById('gest-ord-data-conferma').value || null,
-                data_presunta_consegna: document.getElementById('gest-ord-data-presunta').value || null,
-                revisione: document.getElementById('gest-ord-revisione').value,
-                data_arrivo_merce: document.getElementById('gest-ord-data-arrivo').value || null,
-                annotazioni: document.getElementById('gest-ord-annotazioni').value || null
+                stato: statoPendenteOrdine, costo_confermato: document.getElementById('gest-ord-costo-conf').value || null,
+                data_ordine: document.getElementById('gest-ord-data-ordine').value || null, data_conferma: document.getElementById('gest-ord-data-conferma').value || null,
+                data_presunta_consegna: document.getElementById('gest-ord-data-presunta').value || null, revisione: document.getElementById('gest-ord-revisione').value,
+                data_arrivo_merce: document.getElementById('gest-ord-data-arrivo').value || null, annotazioni: document.getElementById('gest-ord-annotazioni').value || null
             };
-            
-            if(fileUrl) { 
-                datiUpdate.file_url = (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') ? ordOriginale.file_url + ',' + fileUrl : fileUrl; 
-            }
+            if(fileUrl) datiUpdate.file_url = (ordOriginale.file_url && ordOriginale.file_url.trim() !== '') ? ordOriginale.file_url + ',' + fileUrl : fileUrl; 
 
             const { error } = await supabaseClient.from('ordini_fornitori').update(datiUpdate).eq('id', idOrdine);
 
             if (!error) {
                 if (commessaId) {
-                    await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `Ordine a ${nomeFornitore} aggiornato in: ${statoPendenteOrdine.toUpperCase()}`, nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
-
-                    // Controllo auto-avanzamento a "Posa" se la merce è tutta arrivata
+                    await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: 'Ordine a ' + nomeFornitore + ' aggiornato in: ' + statoPendenteOrdine.toUpperCase(), nota: datiUpdate.annotazioni, file_url: fileUrl, autore: UTENTE_CORRENTE }]);
                     if (statoPendenteOrdine === 'Merce Arrivata') {
                         const { data: commessa } = await supabaseClient.from('commesse').select('stato').eq('id', commessaId).single();
                         if (commessa && (commessa.stato === 'Ordini' || commessa.stato === 'In Assistenza / Ripristino')) {
-                            
                             let tuttiArrivati = false;
                             if (ordOriginale.contratto_id) {
                                 const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('contratto_id', ordOriginale.contratto_id);
@@ -531,26 +314,18 @@
                                 const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('commessa_id', commessaId);
                                 if (tuttiOrdini) tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata');
                             }
-                            
                             if (tuttiArrivati) {
                                 await supabaseClient.from('commesse').update({ stato: 'Posa' }).eq('id', commessaId);
-                                await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: `⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: POSA`, autore: 'Sistema Auto' }]);
+                                await supabaseClient.from('commesse_log').insert([{ commessa_id: commessaId, azione: '⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: POSA', autore: 'Sistema Auto' }]);
                             }
                         }
                     }
                 }
-
-                chiudiModaleGestioneOrdine();
-                caricaTuttiOrdini();
-            } else { 
-                alert("Errore aggiornamento ordine: " + error.message); 
-            }
-
-            btnSubmit.innerText = "Salva Ordine";
-            btnSubmit.disabled = false;
+                chiudiModaleGestioneOrdine(); caricaTuttiOrdini();
+            } else { alert("Errore aggiornamento ordine: " + error.message); }
+            btnSubmit.innerText = "Salva Ordine"; btnSubmit.disabled = false;
         });
 
-        // INIT
         document.addEventListener('DOMContentLoaded', caricaTuttiOrdini);
     </script>
 </body>
