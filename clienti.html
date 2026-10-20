@@ -54,11 +54,11 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
                     <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca" onkeyup="applicaFiltriEOrdinamento()" placeholder="Cerca cliente per ragione sociale, città, telefono o P.IVA..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
+                        <input type="text" id="input-ricerca" onkeyup="applicaFiltriEOrdinamento()" placeholder="Cerca cliente per ragione sociale, città, telefono o P.IVA..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]">
                         <span class="absolute left-3 top-2 text-gray-400">🔍</span>
                     </div>
                     <div class="w-full sm:w-64">
-                        <select id="select-ordinamento" onchange="applicaFiltriEOrdinamento()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors font-medium text-gray-700 cursor-pointer">
+                        <select id="select-ordinamento" onchange="applicaFiltriEOrdinamento()" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b] font-medium text-gray-700 cursor-pointer">
                             <option value="modifica">⏱️ Recenti / Modificati</option>
                             <option value="az">🔤 Nome (A &gt; Z)</option>
                             <option value="citta">📍 Città (A &gt; Z)</option>
@@ -93,7 +93,6 @@
                 </div>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="creaNuovaCommessaPerCliente()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 shadow-sm"><span>+</span> Apri Nuovo Cantiere</button>
                 <button onclick="apriModaleCliente(clienteAttivoIndex)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">✏️ Modifica Anagrafica</button>
             </div>
         </div>
@@ -150,8 +149,12 @@
                     <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
                         <div>
                             <h3 class="text-base font-bold text-gray-800 flex items-center gap-2"><span>🏗️</span> Cantieri & Commesse Collegate</h3>
-                            <p class="text-xs text-gray-400 mt-0.5">Seleziona un cantiere per accedere al suo fascicolo operativo</p>
+                            <p class="text-xs text-gray-400 mt-0.5">Gestisci o aggiungi nuovi cantieri per questo cliente</p>
                         </div>
+                        <!-- NUOVO PULSANTE VISIBILE SOPRA LA LISTA -->
+                        <button onclick="creaNuovaCommessaPerCliente()" class="text-sm font-semibold text-white bg-[#2e2a5b] hover:bg-[#3f3a7a] px-4 py-2 rounded-lg transition-colors shadow-sm whitespace-nowrap">
+                            + Aggiungi Cantiere
+                        </button>
                     </div>
                     <div id="lista-commesse-cliente" class="space-y-3 flex-1 overflow-y-auto no-scrollbar">
                         <p class="text-sm text-gray-500 italic py-4 text-center">Caricamento commesse...</p>
@@ -404,7 +407,7 @@
             container.innerHTML = '';
 
             if (!commesse || commesse.length === 0) {
-                container.innerHTML = '<div class="p-8 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500 mb-2">Nessun cantiere registrato per questo cliente.</p><button onclick="creaNuovaCommessaPerCliente()" class="text-xs font-bold text-[#2e2a5b] hover:underline">+ Apri la prima commessa</button></div>';
+                container.innerHTML = '<div class="p-8 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500 mb-2">Nessun cantiere registrato per questo cliente.</p></div>';
                 return;
             }
 
