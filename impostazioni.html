@@ -17,7 +17,6 @@
 </head>
 <body class="flex h-screen overflow-hidden text-gray-800 relative">
 
-    <!-- SIDEBAR AGGIORNATA E SNELLITA -->
     <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
         <div class="p-6 flex items-center gap-3">
             <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
@@ -27,10 +26,14 @@
             <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
             <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
             <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
-            
-            <!-- La tab Impostazioni è "accesa" (sfondo scuro) -->
             <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Impostazioni</a>
         </nav>
+        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
+                <div><p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p><p class="text-xs text-gray-500 uppercase">Owner</p></div>
+            </div>
+        </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
@@ -54,7 +57,7 @@
                     <div class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 text-2xl group-hover:scale-110 transition-transform shrink-0">🏢</div>
                     <div>
                         <h3 class="font-bold text-gray-900 text-lg">Sedi Operative</h3>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Aggiungi o rimuovi le sedi aziendali (es. Signoressa, Castagnole).</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Aggiungi o rimuovi le sedi aziendali.</p>
                     </div>
                 </button>
 
@@ -62,7 +65,7 @@
                     <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-2xl group-hover:scale-110 transition-transform shrink-0">💳</div>
                     <div>
                         <h3 class="font-bold text-gray-900 text-lg">Condizioni Pagamento</h3>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Configura i metodi di pagamento (es. 50% Acconto + Saldo).</p>
+                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">Configura i metodi di pagamento (es. 50% Acconto).</p>
                     </div>
                 </button>
             </div>
@@ -81,12 +84,7 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                                <tr>
-                                    <th class="px-6 py-4">Azienda / Sede</th>
-                                    <th class="px-6 py-4">Categorie</th>
-                                    <th class="px-6 py-4">Contatti Generali & Referenti</th>
-                                    <th class="px-6 py-4 text-center w-28">Azioni</th>
-                                </tr>
+                                <tr><th class="px-6 py-4">Azienda / Sede</th><th class="px-6 py-4">Categorie</th><th class="px-6 py-4">Contatti Generali & Referenti</th><th class="px-6 py-4 text-center w-28">Azioni</th></tr>
                             </thead>
                             <tbody id="tabella-fornitori" class="divide-y divide-gray-100">
                                 <tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Caricamento fornitori...</td></tr>
@@ -189,13 +187,7 @@
                         <div class="border border-gray-200 rounded-xl overflow-hidden">
                             <table class="w-full text-left text-xs">
                                 <thead class="bg-gray-50 text-[10px] uppercase font-semibold text-gray-500 border-b border-gray-100">
-                                    <tr>
-                                        <th class="p-2">Nome Referente</th>
-                                        <th class="p-2">Reparto / Mansione</th>
-                                        <th class="p-2">Telefono</th>
-                                        <th class="p-2">Email</th>
-                                        <th class="p-2 text-center w-10"></th>
-                                    </tr>
+                                    <tr><th class="p-2">Nome Referente</th><th class="p-2">Reparto / Mansione</th><th class="p-2">Telefono</th><th class="p-2">Email</th><th class="p-2 text-center w-10"></th></tr>
                                 </thead>
                                 <tbody id="tabella-referenti-dinamica" class="divide-y divide-gray-100 bg-white"></tbody>
                             </table>
@@ -363,81 +355,4 @@
             const dTel = data ? data.telefono || '' : '';
             const dMail = data ? data.email || '' : '';
 
-            tr.innerHTML = '<td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1.5" placeholder="Nome" value="' + dNome + '"></td><td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1.5" placeholder="Reparto" value="' + dRep + '"></td><td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1.5" placeholder="Telefono" value="' + dTel + '"></td><td class="p-2"><input type="email" class="ref-email w-full border rounded text-xs p-1.5" placeholder="Email" value="' + dMail + '"></td><td class="p-2 text-center"><button type="button" onclick="this.closest(\'tr\').remove()" class="text-red-400 hover:text-red-600 font-bold text-base">&times;</button></td>';
-            tbody.appendChild(tr);
-        }
-
-        document.getElementById('form-fornitore').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-salva-fornitore-def');
-            btn.innerText = "Salvataggio...";
-            btn.disabled = true;
-
-            const id = document.getElementById('fornitore-id').value;
-            const categorieSelezionate = Array.from(document.querySelectorAll('input[name="categoria"]:checked')).map(cb => cb.value).join(',');
-
-            const datiFornitore = {
-                nome_azienda: document.getElementById('f-nome').value.trim(),
-                indirizzo: document.getElementById('f-indirizzo').value.trim() || null,
-                citta: document.getElementById('f-citta').value.trim() || null,
-                telefono: document.getElementById('f-telefono').value.trim() || null,
-                email: document.getElementById('f-email').value.trim() || null,
-                categoria: categorieSelezionate || null
-            };
-
-            let fornitoreId = id;
-            let error = null;
-
-            if (id) {
-                const res = await supabaseClient.from('fornitori').update(datiFornitore).eq('id', id);
-                error = res.error;
-            } else {
-                const res = await supabaseClient.from('fornitori').insert([datiFornitore]).select();
-                error = res.error;
-                if (!error && res.data) {
-                    fornitoreId = res.data[0].id;
-                }
-            }
-
-            if (!error) {
-                if (id) {
-                    await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
-                }
-
-                const righeReferenti = document.querySelectorAll('#tabella-referenti-dinamica tr');
-                for (let riga of righeReferenti) {
-                    const nome = riga.querySelector('.ref-nome').value.trim();
-                    const reparto = riga.querySelector('.ref-reparto').value.trim();
-                    const tel = riga.querySelector('.ref-tel').value.trim();
-                    const email = riga.querySelector('.ref-email').value.trim();
-
-                    if (nome || reparto || tel || email) {
-                        await supabaseClient.from('fornitori_referenti').insert([{
-                            fornitore_id: fornitoreId,
-                            nome_referente: nome || null,
-                            mansione_reparto: reparto || null,
-                            telefono: tel || null,
-                            email: email || null
-                        }]);
-                    }
-                }
-
-                chiudiModaleFornitore();
-                caricaFornitori();
-            } else {
-                alert("Errore durante il salvataggio: " + error.message);
-            }
-
-            btn.innerText = "Salva Fornitore";
-            btn.disabled = false;
-        });
-
-        async function eliminaFornitore(id) {
-            if(!confirm("Sei sicuro di voler eliminare questo fornitore?")) return;
-            await supabaseClient.from('fornitori_referenti').delete().eq('fornitore_id', id);
-            const { error } = await supabaseClient.from('fornitori').delete().eq('id', id);
-            if (!error) caricaFornitori(); else alert("Impossibile eliminare: " + error.message);
-        }
-    </script>
-</body>
-</html>
+            tr.innerHTML = '<td class="p-2"><input type="text" class="ref-nome w-full border rounded text-xs p-1.5" placeholder="Nome" value="' + dNome + '"></td><td class="p-2"><input type="text" class="ref-reparto w-full border rounded text-xs p-1.5" placeholder="Reparto" value="' + dRep + '"></td><td class="p-2"><input type="text" class="ref-tel w-full border rounded text-xs p-1.5" placeholder="Telefono" value="' + dTel + '"></td><td class="p-2"><input type="email" class="ref-email w-full border rounded text-xs p-
