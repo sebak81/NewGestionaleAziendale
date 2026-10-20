@@ -1,153 +1,460 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3 ESSE - Commesse</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Stile personalizzato per i checkbox della ToDo */
-        input[type="checkbox"]:checked + span { text-decoration: line-through; color: #9ca3af; }
-    </style>
-</head>
-<body class="flex h-screen overflow-hidden text-gray-800 relative">
+// ==========================================
+// 3 ESSE - MOTORE LOGICO COMMESSE SEMPLIFICATO
+// ==========================================
 
-    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
-        <div class="p-6 flex items-center gap-3">
-            <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
-            <span class="font-bold text-lg">3 ESSE</span>
-        </div>
-        <nav class="flex-1 overflow-y-auto px-4 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
-            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
-            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
-            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
-            <a href="fatturazione.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Fatturazione</a>
-            <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
-        </nav>
-        <div class="p-4 border-t border-gray-200 m-4 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold">S</div>
-                <div><p class="font-bold text-sm" id="nome-utente-sidebar">Sebastiano</p><p class="text-xs text-gray-500 uppercase">Owner</p></div>
-            </div>
-        </div>
-    </aside>
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let UTENTE_CORRENTE = "Sistema";
 
-    <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
-            <h1 class="text-xl font-bold">Commesse Operative 🏗️</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione semplificata dei cantieri e To-Do List lavorazioni</p>
-        </header>
+let listaClientiCache = [];
+let commesseCorrenti = []; 
+let sediGlobali = []; 
+let totaleCommesse = 0; 
+let logsCorrenti = []; 
+let commessaAttivaIndex = null; 
 
-        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
-            <div class="mb-6 flex justify-between items-end">
-                <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Commesse</h2>
-                    <p class="text-sm text-gray-500 mt-1" id="conteggio-commesse">Caricamento in corso...</p>
-                </div>
-                <button onclick="apriModaleNuovaCommessa()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2">
-                    <span>+</span> Nuova commessa
-                </button>
-            </div>
+// Struttura fissa della To-Do List
+const strutturaToDo = [
+    { id: 'prev', label: '1. Preventivo', sub: [
+        { idx: 0, label: 'Calcolo' },
+        { idx: 1, label: 'Verifica' },
+        { idx: 2, label: 'Invio' }
+    ]},
+    { id: 'ril', label: '2. Rilievo misure', sub: [
+        { idx: 3, label: 'Per Preventivo' },
+        { idx: 4, label: 'Esecutive' }
+    ]},
+    { id: 'contr', label: '3. Contratto', sub: [
+        { idx: 5, label: 'Ricontrollo da C.O.' },
+        { idx: 6, label: 'Verifica' },
+        { idx: 7, label: 'Invio al cliente' }
+    ]},
+    { id: 'pag', label: '4. Pagamenti', sub: [
+        { idx: 8, label: 'Acconto' },
+        { idx: 9, label: 'Saldo' }
+    ]}
+];
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1 relative">
-                        <input type="text" id="input-ricerca-commesse" onkeyup="filtraCommesse()" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b] focus:bg-white transition-colors">
-                        <span class="absolute left-3 top-2 text-gray-400">🔍</span>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100">
-                            <tr><th class="px-6 py-4">Numero & Sede</th><th class="px-6 py-4">Cliente Principale</th><th class="px-6 py-4">Nome Cantiere / Lavoro</th><th class="px-6 py-4">Fase Corrente</th></tr>
-                        </thead>
-                        <tbody id="tabella-commesse" class="divide-y divide-gray-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </main>
+document.addEventListener('DOMContentLoaded', async () => { 
+    const nomeUtenteEl = document.getElementById('nome-utente-sidebar');
+    if (nomeUtenteEl) UTENTE_CORRENTE = nomeUtenteEl.innerText;
 
-    <!-- SCHEDA DETTAGLIO COMMESSA (SEMPLIFICATA) -->
-    <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
-        <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium"><span>&larr;</span> Torna a Commesse</button>
-                <div class="h-6 w-px bg-gray-300"></div>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">COM-0000/000</h2>
-                    <span id="scheda-badge-sede" class="hidden px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-[10px] font-bold uppercase tracking-wider border border-indigo-200"></span>
-                    
-                    <!-- MENU A TENDINA STATO MANUALE -->
-                    <select id="scheda-select-stato" onchange="cambiaStatoManuale()" class="px-3 py-1 bg-white border border-gray-300 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none cursor-pointer hover:border-[#2e2a5b] transition-colors ml-2">
-                        <option value="Preventivo">Preventivo</option>
-                        <option value="Rilievo Misure">Rilievo Misure</option>
-                        <option value="Contratto">Contratto</option>
-                        <option value="Pagamenti">Pagamenti</option>
-                        <option value="Ordini">Ordini / Lavorazione</option>
-                        <option value="Posa">Posa in opera</option>
-                        <option value="Conclusa">Conclusa</option>
-                    </select>
+    inizializzaListeners();
 
-                </div>
-            </div>
-            <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 border border-gray-200">✏️ Modifica Dati Base</button>
-        </div>
+    try {
+        await popolaTendinaClienti(); 
+        await caricaSediTendina(); 
+        await caricaCommesse(); 
+    } catch(err) {
+        console.error("Errore durante il download dal database:", err);
+    }
 
-        <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
+    const urlParams = new URLSearchParams(window.location.search);
+    const idToOpen = urlParams.get('id');
+    const action = urlParams.get('action');
+    const clienteId = urlParams.get('cliente_id');
+
+    if (action === 'new') {
+        apriModaleNuovaCommessa();
+        if (clienteId) {
+            const select = document.getElementById('form-com-cliente');
+            if(select) {
+                select.value = clienteId;
+                const chk = document.getElementById('check-copia-dati');
+                if(chk) chk.checked = true;
+                select.dispatchEvent(new Event('change'));
+            }
+        }
+    }
+
+    if (idToOpen) {
+        const index = commesseCorrenti.findIndex(c => String(c.id) === idToOpen);
+        if (index !== -1) {
+            apriSchedaCommessa(index);
+        }
+    }
+});
+
+// ================= GESTIONE LISTA COMMESSE =================
+async function popolaTendinaClienti() {
+    const { data } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale, indirizzo, citta, telefono, email').order('nome_ragione_sociale');
+    if (data) {
+        listaClientiCache = data;
+        const select = document.getElementById('form-com-cliente');
+        if(select) {
+            select.innerHTML = '<option value="">-- Seleziona un cliente --</option>';
+            data.forEach(c => select.innerHTML += '<option value="' + c.id + '">' + c.nome_ragione_sociale + '</option>');
+        }
+    }
+}
+
+async function caricaSediTendina() {
+    const { data } = await supabaseClient.from('sedi_aziendali').select('nome').order('nome');
+    if (data) {
+        sediGlobali = data;
+        const selNuovo = document.getElementById('form-com-sede');
+        const selModifica = document.getElementById('mod-com-sede');
+        if(selNuovo) selNuovo.innerHTML = '<option value="">-- Seleziona Sede --</option>';
+        if(selModifica) selModifica.innerHTML = '<option value="">Nessuna sede specificata</option>';
+        data.forEach(s => {
+            if(selNuovo) selNuovo.innerHTML += '<option value="' + s.nome + '">' + s.nome + '</option>';
+            if(selModifica) selModifica.innerHTML += '<option value="' + s.nome + '">' + s.nome + '</option>';
+        });
+    }
+}
+
+async function caricaCommesse() {
+    let { data: commesse, error } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)').order('updated_at', { ascending: false, nullsFirst: false }); 
+    const tbody = document.getElementById('tabella-commesse');
+    
+    if (error) { 
+        const { data: rawCommesse } = await supabaseClient.from('commesse').select('*').order('created_at', { ascending: false });
+        if (!rawCommesse) return;
+        const { data: allClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
+        commesse = rawCommesse.map(com => {
+            if (allClienti) com.clienti = allClienti.find(c => String(c.id) === String(com.cliente_id));
+            return com;
+        });
+    }
+
+    commesseCorrenti = commesse || [];
+    totaleCommesse = commesseCorrenti.length; 
+    const lblCount = document.getElementById('conteggio-commesse');
+    if(lblCount) lblCount.innerText = commesseCorrenti.length + ' commesse in corso';
+    disegnaListaCommesse(commesseCorrenti);
+}
+
+function disegnaListaCommesse(lista) {
+    const tbody = document.getElementById('tabella-commesse');
+    if(!tbody) return;
+    tbody.innerHTML = ''; 
+    if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessuna commessa trovata</td></tr>'; return; }
+
+    lista.forEach(com => {
+        const index = commesseCorrenti.findIndex(c => c.id === com.id);
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+        tr.addEventListener('click', () => apriSchedaCommessa(index)); 
+        
+        const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+        const cantiere = com.nome_cantiere || '--';
+        const sedeTesto = com.sede_gestione ? '<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">' + com.sede_gestione + '</div>' : '';
+
+        let bgStato = 'bg-gray-100 text-gray-700';
+        if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
+        if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 font-bold';
+        if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 font-bold';
+        
+        tr.innerHTML = '<td class="px-6 py-4 font-semibold text-gray-900">' + com.numero + ' ' + sedeTesto + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600">' + nomeCliente + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600 font-medium">' + cantiere + '</td>' +
+                       '<td class="px-6 py-4"><span class="px-3 py-1 ' + bgStato + ' rounded-full text-[10px] uppercase tracking-wider">' + (com.stato || 'Preventivi') + '</span></td>';
+        tbody.appendChild(tr);
+    });
+}
+
+function filtraCommesse() {
+    const q = document.getElementById('input-ricerca-commesse').value.toLowerCase();
+    const filtrate = commesseCorrenti.filter(c => 
+        (c.numero && c.numero.toLowerCase().includes(q)) || 
+        (c.clienti && c.clienti.nome_ragione_sociale && c.clienti.nome_ragione_sociale.toLowerCase().includes(q)) ||
+        (c.nome_cantiere && c.nome_cantiere.toLowerCase().includes(q))
+    );
+    disegnaListaCommesse(filtrate);
+}
+
+// ================= SCHEDA COMMESSA =================
+function apriSchedaCommessa(index) {
+    commessaAttivaIndex = index;
+    const com = commesseCorrenti[index];
+
+    aggiornaDatiSchedaUI();
+    disegnaToDo();
+    caricaCronologia(com.id);
+
+    document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
+    document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
+    window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+function chiudiScheda() {
+    commessaAttivaIndex = null;
+    document.getElementById('vista-scheda').classList.replace('flex', 'hidden');
+    document.getElementById('vista-elenco').classList.replace('hidden', 'flex');
+    caricaCommesse(); 
+}
+
+function aggiornaDatiSchedaUI() {
+    if(commessaAttivaIndex === null) return;
+    const com = commesseCorrenti[commessaAttivaIndex];
+    document.getElementById('scheda-titolo').innerText = com.numero;
+    
+    const bdgSede = document.getElementById('scheda-badge-sede');
+    if (com.sede_gestione) { bdgSede.innerText = com.sede_gestione; bdgSede.classList.remove('hidden'); } 
+    else { bdgSede.classList.add('hidden'); }
+
+    const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+    document.getElementById('scheda-sottotitolo-cliente').innerText = nomeCliente;
+    document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
+    
+    const selStato = document.getElementById('scheda-select-stato');
+    if(selStato) {
+        selStato.value = com.stato || 'Preventivo';
+    }
+
+    document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
+}
+
+async function cambiaStatoManuale() {
+    const com = commesseCorrenti[commessaAttivaIndex];
+    const nuovoStato = document.getElementById('scheda-select-stato').value;
+    
+    if(com.stato === nuovoStato) return;
+    
+    const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
+    if(!error) {
+        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '🔄 Stato commessa modificato in: ' + nuovoStato, autore: UTENTE_CORRENTE }]);
+        com.stato = nuovoStato;
+        caricaCronologia(com.id);
+        caricaCommesse(); 
+    } else {
+        alert("Errore cambio stato: " + error.message);
+        document.getElementById('scheda-select-stato').value = com.stato || 'Preventivo';
+    }
+}
+
+// ================= TO-DO LIST =================
+function disegnaToDo() {
+    const container = document.getElementById('todo-container');
+    if(!container) return;
+    container.innerHTML = '';
+    
+    const com = commesseCorrenti[commessaAttivaIndex];
+    let arr = [0,0,0,0,0,0,0,0,0,0];
+    
+    if (com.fasi_cantiere) {
+        let parsed = com.fasi_cantiere.split(',').map(Number);
+        for(let i=0; i<10; i++) {
+            arr[i] = parsed[i] ? 1 : 0; // Protezione sicurezza contro vecchi dati
+        }
+    }
+    
+    strutturaToDo.forEach(sezione => {
+        let htmlSec = '<div class="mb-5"><h4 class="font-bold text-[#2e2a5b] text-sm mb-2">' + sezione.label + '</h4><div class="space-y-2 pl-2 border-l-2 border-gray-100 ml-1 py-1">';
+        sezione.sub.forEach(item => {
+            const isChecked = arr[item.idx] > 0;
+            const checkedAttr = isChecked ? 'checked' : '';
+            const spanStyle = isChecked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium';
             
-            <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> 
-                <span class="text-gray-400">&bull;</span> 
-                <span class="font-bold text-[#2e2a5b]">Cantiere:</span> <span id="scheda-sottotitolo-cantiere" class="text-gray-900">...</span>
-            </div>
+            htmlSec += '<label class="flex items-center gap-3 cursor-pointer group">' +
+                       '<input type="checkbox" ' + checkedAttr + ' onchange="toggleToDo(' + item.idx + ', \'' + (sezione.label + ' - ' + item.label).replace(/'/g, "\\'") + '\')" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer">' +
+                       '<span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span>' +
+                       '</label>';
+        });
+        htmlSec += '</div></div>';
+        container.innerHTML += htmlSec;
+    });
+}
 
-            <!-- LAYOUT A 2 COLONNE: TO-DO LIST E DIARIO -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                
-                <!-- COLONNA SINISTRA: TO-DO LIST -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="text-lg font-bold text-gray-800 mb-6 flex justify-between items-center border-b border-gray-100 pb-3">
-                        <span>Checklist Operativa (To-Do)</span>
-                        <span class="text-xs font-normal text-gray-400">Spunta le attività completate</span>
-                    </h3>
-                    
-                    <div id="todo-container" class="space-y-6">
-                        <!-- Generato dinamicamente via JS -->
-                    </div>
-                </div>
-
-                <!-- COLONNA DESTRA: DIARIO MANUALE -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-                    <h3 class="text-lg font-bold text-gray-800 mb-2 border-b border-gray-100 pb-3">Diario di Bordo & Note</h3>
-                    <p class="text-xs text-gray-500 mb-5">Tutte le spunte della To-Do list vengono segnate qui. Puoi aggiungere note manuali.<br><strong class="text-[#2e2a5b]">Doppio clic su un'icona o data per modificare/eliminare.</strong></p>
-                    
-                    <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                        <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <input type="text" id="input-nota-libera" placeholder="Scrivi una nota per il diario..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                        <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm whitespace-nowrap">Aggiungi</button>
-                    </div>
-                    
-                    <div id="lista-cronologia" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 no-scrollbar"></div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- MODALI DI BASE -->
-    <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50"><div><h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3><p class="text-xs text-gray-500">Modalità Amministratore</p></div><button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 space-y-4"><input type="hidden" id="mod-log-id"><div><label class="block text-sm font-medium text-gray-700 mb-1">Azione Registrata</label><input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold outline-none"></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Nota Libera</label><textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></textarea></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Data (Retroattiva)</label><input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold text-[#2e2a5b] outline-none"></div></div><div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50"><button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800">🗑️ Elimina Record</button><div class="flex gap-2"><button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button><button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Salva Modifiche</button></div></div></div></div>
+async function toggleToDo(idx, labelTesto) {
+    const com = commesseCorrenti[commessaAttivaIndex];
+    let arr = [0,0,0,0,0,0,0,0,0,0];
     
-    <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0"><div><h3 class="text-lg font-bold">Nuova Commessa</h3></div><button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto no-scrollbar"><form id="form-nuova-commessa" class="space-y-5"><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale *</label><select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"></select><div class="mt-2 flex items-center gap-2"><input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer"><label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label></div></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Numero *</label><input type="text" id="form-com-numero" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600"></div></div><div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100"><label class="block text-sm font-bold text-[#2e2a5b] mb-1">Sede di Gestione *</label><select id="form-com-sede" required class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm outline-none"><option value="">Caricamento sedi...</option></select></div><div class="p-4 bg-blue-50 border border-blue-100 rounded-lg"><div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Riferimento cantiere</label><input type="text" id="form-com-nome-cantiere" placeholder="Es. descrizione breve del cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div><div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div><div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50"><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div></div></div></form></div><div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button><button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button></div></div></div>
+    if (com.fasi_cantiere) {
+        let parsed = com.fasi_cantiere.split(',').map(Number);
+        for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0;
+    }
     
-    <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0"><div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div><button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto no-scrollbar"><form id="form-modifica-commessa" class="space-y-4"><input type="hidden" id="mod-com-id"> <div class="pt-2 space-y-4"><div class="mb-4"><label class="block text-xs font-bold text-[#2e2a5b] mb-1">Sede di Gestione</label><select id="mod-com-sede" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></select></div><div><label class="block text-xs font-medium text-gray-500 mb-1">Riferimento cantiere</label><input type="text" id="mod-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div><div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="mod-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div><div class="grid grid-cols-12 gap-4 pt-2"><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Referente</label><input type="text" id="mod-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="mod-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="mod-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div></div></form></div><div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Cantiere</button><div class="flex gap-3"><button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button><button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button></div></div></div></div>
+    const isNowChecked = arr[idx] === 0; 
+    arr[idx] = isNowChecked ? 1 : 0;
+    
+    const nuovaStringa = arr.join(',');
+    
+    const { error } = await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa }).eq('id', com.id);
+    
+    if (!error) {
+        const logMsg = isNowChecked ? '✅ Completato: ' + labelTesto : '🔙 Annullato: ' + labelTesto;
+        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, autore: UTENTE_CORRENTE }]);
+        
+        com.fasi_cantiere = nuovaStringa;
+        disegnaToDo();
+        caricaCronologia(com.id);
+    } else {
+        alert("Errore aggiornamento To-Do: " + error.message);
+        disegnaToDo(); 
+    }
+}
 
-    <script src="config.js"></script>
-    <script src="commesse.js"></script>
-</body>
-</html>
+// ================= DIARIO / LOG =================
+function apriModaleModificaLog(idStr) {
+    const logId = parseInt(idStr);
+    const log = logsCorrenti.find(l => l.id === logId);
+    if(!log) return;
+    document.getElementById('mod-log-id').value = log.id;
+    document.getElementById('mod-log-azione').value = log.azione || '';
+    document.getElementById('mod-log-nota').value = log.nota || '';
+    
+    if (log.created_at) {
+        const d = new Date(log.created_at);
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        document.getElementById('mod-log-data').value = d.toISOString().slice(0,16);
+    }
+    document.getElementById('modal-modifica-log').classList.remove('hidden');
+}
+
+function chiudiModaleModificaLog() { document.getElementById('modal-modifica-log').classList.add('hidden'); }
+
+async function salvaModificaLog() {
+    const id = document.getElementById('mod-log-id').value;
+    const nuovaAzione = document.getElementById('mod-log-azione').value;
+    const nuovaNota = document.getElementById('mod-log-nota').value;
+    const nuovaData = document.getElementById('mod-log-data').value;
+
+    let timestamp = new Date().toISOString();
+    if (nuovaData) timestamp = new Date(nuovaData).toISOString();
+
+    const { error } = await supabaseClient.from('commesse_log').update({ azione: nuovaAzione, nota: nuovaNota || null, created_at: timestamp }).eq('id', id);
+    if (!error) { 
+        chiudiModaleModificaLog(); 
+        caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); 
+    } else { alert("Errore modifica log: " + error.message); }
+}
+
+async function eliminaLog() {
+    const id = document.getElementById('mod-log-id').value;
+    if (!confirm("ATTENZIONE: Vuoi eliminare definitivamente questa registrazione dal diario?")) return;
+    const { error } = await supabaseClient.from('commesse_log').delete().eq('id', id);
+    if (!error) { 
+        chiudiModaleModificaLog(); 
+        caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); 
+    } else { alert("Impossibile eliminare: " + error.message); }
+}
+
+async function salvaNotaLibera() {
+    const inputNota = document.getElementById('input-nota-libera'); 
+    const dataNota = document.getElementById('data-nota-libera').value; 
+    const testo = inputNota.value; 
+    if (!testo || testo.trim() === '') return; 
+    const comId = commesseCorrenti[commessaAttivaIndex].id;
+    
+    let timestamp = new Date().toISOString(); 
+    if (dataNota && dataNota !== new Date().toISOString().split('T')[0]) { 
+        timestamp = new Date(dataNota + 'T12:00:00Z').toISOString(); 
+    }
+    const { error } = await supabaseClient.from('commesse_log').insert([{ 
+        commessa_id: comId, 
+        azione: "Nota / Diario", 
+        nota: testo, 
+        autore: UTENTE_CORRENTE, 
+        created_at: timestamp 
+    }]);
+    
+    if (!error) { 
+        inputNota.value = ''; 
+        caricaCronologia(comId); 
+    } else { alert("Errore salvataggio nota: " + error.message); }
+}
+
+async function caricaCronologia(commessaId) {
+    const divLog = document.getElementById('lista-cronologia'); 
+    divLog.innerHTML = '<p class="text-sm text-gray-500 italic">Caricamento registro...</p>';
+    
+    const { data: logs, error } = await supabaseClient.from('commesse_log').select('*').eq('commessa_id', commessaId).order('created_at', { ascending: false });
+    
+    if (error || !logs || logs.length === 0) { divLog.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata.</p>'; return; }
+    
+    logsCorrenti = logs; 
+    let html = '';
+    
+    logs.forEach(log => {
+        const dateObj = new Date(log.created_at); 
+        const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
+        const autoreText = log.autore ? '&bull; 👤 ' + log.autore : '';
+        const notaHtml = log.nota ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"' + log.nota + '"</p>' : '';
+        
+        let icona = '<div class="w-2 h-2 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50"></div>';
+        if (log.azione.includes('✅')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50">✓</div>';
+        if (log.azione.includes('🔙')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50">!</div>';
+        if (log.azione.includes('🔄')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50">~</div>';
+        
+        let iconaContainer = '<div class="cursor-pointer hover:scale-125 transition-transform mt-0.5" ondblclick="apriModaleModificaLog(\'' + log.id + '\')" title="Doppio clic per modificare">' + icona + '</div>';
+        let pData = '<p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider cursor-pointer hover:text-[#2e2a5b] transition-colors" ondblclick="apriModaleModificaLog(\'' + log.id + '\')" title="Doppio clic per modificare">' + dataFormat + ' ' + autoreText + '</p>';
+        
+        html += '<div class="flex gap-4 items-start pb-4 border-b border-gray-100 last:border-0 last:pb-0">' + iconaContainer + '<div class="flex-1"><div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-1"><p class="text-sm font-bold text-gray-900">' + log.azione + '</p>' + pData + '</div>' + notaHtml + '</div></div>';
+    }); 
+    divLog.innerHTML = html;
+}
+
+// ================= GESTIONE MODIFICA E NUOVA COMMESSA =================
+function apriModaleModifica() {
+    if (commessaAttivaIndex === null) return; 
+    const com = commesseCorrenti[commessaAttivaIndex]; 
+    document.getElementById('mod-com-id').value = com.id;
+    document.getElementById('mod-com-sede').value = com.sede_gestione || ''; 
+    document.getElementById('mod-com-nome-cantiere').value = com.nome_cantiere || ''; 
+    document.getElementById('mod-com-indirizzo').value = com.indirizzo_cantiere || ''; 
+    document.getElementById('mod-com-citta').value = com.citta_cantiere || ''; 
+    document.getElementById('mod-com-referente').value = com.referente || ''; 
+    document.getElementById('mod-com-tel-referente').value = com.telefono_referente || ''; 
+    document.getElementById('mod-com-email-referente').value = com.email_referente || '';
+    document.getElementById('modal-modifica-commessa').classList.remove('hidden');
+}
+
+function chiudiModaleModifica() { document.getElementById('modal-modifica-commessa').classList.add('hidden'); }
+
+function apriModaleNuovaCommessa() { 
+    document.getElementById('modal-nuova-commessa').classList.remove('hidden'); 
+    const anno = new Date().getFullYear(); 
+    document.getElementById('form-com-numero').value = 'COM-' + anno + '/' + (totaleCommesse + 1).toString().padStart(3, '0'); 
+    document.getElementById('check-copia-dati').checked = false; 
+}
+
+function chiudiModaleNuovaCommessa() { 
+    document.getElementById('modal-nuova-commessa').classList.add('hidden'); 
+    document.getElementById('form-nuova-commessa').reset(); 
+    window.history.replaceState({}, document.title, window.location.pathname); 
+}
+
+// ================= EVENT LISTENERS DEI FORM =================
+function inizializzaListeners() {
+    const legaSubmit = (idForm, funzioneHandler) => {
+        const form = document.getElementById(idForm);
+        if (form) form.addEventListener('submit', funzioneHandler);
+    };
+
+    const checkCopia = document.getElementById('check-copia-dati');
+    if(checkCopia) {
+        checkCopia.addEventListener('change', () => {
+            const isChecked = document.getElementById('check-copia-dati').checked; const clienteId = document.getElementById('form-com-cliente').value;
+            if (isChecked && clienteId) { 
+                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId)); 
+                if (cliente) { document.getElementById('form-com-indirizzo').value = cliente.indirizzo || ''; document.getElementById('form-com-citta').value = cliente.citta || ''; document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || ''; document.getElementById('form-com-tel-referente').value = cliente.telefono || ''; document.getElementById('form-com-email-referente').value = cliente.email || ''; } 
+            } else { document.getElementById('form-com-indirizzo').value = ''; document.getElementById('form-com-citta').value = ''; document.getElementById('form-com-referente').value = ''; document.getElementById('form-com-tel-referente').value = ''; document.getElementById('form-com-email-referente').value = ''; }
+        });
+    }
+
+    const formComCliente = document.getElementById('form-com-cliente');
+    if(formComCliente) formComCliente.addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
+
+    legaSubmit('form-nuova-commessa', async (e) => {
+        e.preventDefault(); 
+        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0' };
+        const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
+        if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
+    });
+
+    legaSubmit('form-modifica-commessa', async (e) => {
+        e.preventDefault(); 
+        const id = document.getElementById('mod-com-id').value;
+        const datiAggiornati = { sede_gestione: document.getElementById('mod-com-sede').value || null, nome_cantiere: document.getElementById('mod-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('mod-com-indirizzo').value, citta_cantiere: document.getElementById('mod-com-citta').value, referente: document.getElementById('mod-com-referente').value, telefono_referente: document.getElementById('mod-com-tel-referente').value, email_referente: document.getElementById('mod-com-email-referente').value };
+        const { error } = await supabaseClient.from('commesse').update(datiAggiornati).eq('id', id);
+        if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: 'Dati anagrafici e operativi del cantiere aggiornati', autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
+    });
+}
+
+async function confermaEliminazioneCommessa() {
+    const com = commesseCorrenti[commessaAttivaIndex]; const conferma = prompt('ATTENZIONE: Stai per eliminare definitivamente la commessa ' + com.numero + '.\n\nPer confermare, digita la parola ELIMINA qui sotto:');
+    if (conferma !== 'ELIMINA') return;
+    await supabaseClient.from('commesse_log').delete().eq('commessa_id', com.id);
+    const { error } = await supabaseClient.from('commesse').delete().eq('id', com.id);
+    if (!error) { alert('Commessa eliminata con successo.'); chiudiModaleModifica(); chiudiScheda(); caricaCommesse(); } else { alert("Errore durante l'eliminazione: " + error.message); }
+}
