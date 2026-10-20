@@ -14,6 +14,8 @@ let totaleCommesse = 0;
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 
+let todoPendente = { idx: null, label: '', isNowChecked: false };
+
 const strutturaToDo = [
     { id: 'prev', label: '1. Preventivo', sub: [
         { idx: 0, label: 'Calcolo' },
@@ -258,6 +260,7 @@ async function cambiaStatoManuale() {
     }
 }
 
+// ================= TO-DO E DIARIO (NUOVO FLUSSO) =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
@@ -275,29 +278,76 @@ function disegnaToDo() {
             const isChecked = arr[item.idx] > 0;
             const checkedAttr = isChecked ? 'checked' : '';
             const spanStyle = isChecked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium';
-            htmlSec += '<label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" ' + checkedAttr + ' onchange="toggleToDo(' + item.idx + ', \'' + (sezione.label + ' - ' + item.label).replace(/'/g, "\\'") + '\')" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"><span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></label>';
+            const callFunc = 'richiediConfermaToDo(' + item.idx + ', \'' + (sezione.label + ' - ' + item.label).replace(/'/g, "\\'") + '\')';
+            
+            htmlSec += '<label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" ' + checkedAttr + ' onchange="' + callFunc + '" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"><span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></label>';
         });
         htmlSec += '</div></div>';
         container.innerHTML += htmlSec;
     });
 }
 
-async function toggleToDo(idx, labelTesto) {
+function richiediConfermaToDo(idx, labelTesto) {
     const com = commesseCorrenti[commessaAttivaIndex];
     let arr = [0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
         for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0;
     }
-    const isNowChecked = arr[idx] === 0; arr[idx] = isNowChecked ? 1 : 0;
-    const nuovaStringa = arr.join(',');
     
+    todoPendente.isNowChecked = arr[idx] === 0; 
+    todoPendente.idx = idx;
+    todoPendente.label = labelTesto;
+
+    document.getElementById('todo-nota-testo').value = '';
+    document.getElementById('todo-nota-titolo').innerText = todoPendente.isNowChecked ? 'Conferma Completamento' : 'Annulla Completamento';
+    document.getElementById('todo-nota-sub').innerText = labelTesto;
+    document.getElementById('modal-todo-nota').classList.remove('hidden');
+}
+
+function annullaToDoNota() {
+    document.getElementById('modal-todo-nota').classList.add('hidden');
+    disegnaToDo(); 
+    caricaRilieviDiQuestaCommessa(); 
+    todoPendente = { idx: null, label: '', isNowChecked: false };
+}
+
+async function confermaToDoNota() {
+    const btn = document.getElementById('btn-conferma-todo');
+    btn.innerText = "Salvataggio..."; btn.disabled = true;
+
+    const com = commesseCorrenti[commessaAttivaIndex];
+    let arr = [0,0,0,0,0,0,0,0,0,0];
+    if (com.fasi_cantiere) {
+        let parsed = com.fasi_cantiere.split(',').map(Number);
+        for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0;
+    }
+
+    arr[todoPendente.idx] = todoPendente.isNowChecked ? 1 : 0;
+    const nuovaStringa = arr.join(',');
+    const notaTesto = document.getElementById('todo-nota-testo').value.trim();
+
     const { error } = await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa }).eq('id', com.id);
     if (!error) {
-        const logMsg = isNowChecked ? '✅ Completato: ' + labelTesto : '🔙 Annullato: ' + labelTesto;
-        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, autore: UTENTE_CORRENTE }]);
-        com.fasi_cantiere = nuovaStringa; disegnaToDo(); caricaCronologia(com.id);
-    } else { alert("Errore aggiornamento To-Do: " + error.message); disegnaToDo(); }
+        const logMsg = todoPendente.isNowChecked ? '✅ Completato: ' + todoPendente.label : '🔙 Annullato: ' + todoPendente.label;
+        await supabaseClient.from('commesse_log').insert([{
+            commessa_id: com.id,
+            azione: logMsg,
+            nota: notaTesto || null,
+            autore: UTENTE_CORRENTE
+        }]);
+        com.fasi_cantiere = nuovaStringa;
+        disegnaToDo();
+        caricaRilieviDiQuestaCommessa();
+        caricaCronologia(com.id);
+    } else {
+        alert("Errore aggiornamento To-Do: " + error.message);
+        disegnaToDo();
+    }
+
+    document.getElementById('modal-todo-nota').classList.add('hidden');
+    todoPendente = { idx: null, label: '', isNowChecked: false };
+    btn.innerText = "Conferma"; btn.disabled = false;
 }
 
 function apriModaleModificaLog(idStr) {
@@ -355,7 +405,7 @@ async function caricaCronologia(commessaId) {
     logsCorrenti = logs; let html = '';
     logs.forEach(log => {
         const dateObj = new Date(log.created_at); 
-        const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
+        const dataFormat = dateObj.toLocaleDateString('it-IT') + ' ore ' + dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' }); 
         const autoreText = log.autore ? '&bull; 👤 ' + log.autore : '';
         const notaHtml = log.nota ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 shadow-inner">"' + log.nota + '"</p>' : '';
         const fileHtml = log.file_url ? '<a href="' + log.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1.5 bg-blue-50 text-blue-700 rounded text-xs font-bold border border-blue-100">📎 Apri Documento</a>' : '';
@@ -376,7 +426,7 @@ async function caricaCronologia(commessaId) {
     divLog.innerHTML = html;
 }
 
-// ================= GESTIONE MODULI =================
+// ================= GESTIONE MODULI NELLE TABS =================
 async function caricaRilieviDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-rilievi-commessa');
@@ -384,14 +434,18 @@ async function caricaRilieviDiQuestaCommessa() {
 
     const { data: rilievi, error } = await supabaseClient.from('rilievi_misure').select('*').eq('commessa_id', com.id).order('data_rilievo', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB.</p>'; return; }
+    
     rilieviCommessaCache = rilievi || [];
 
     const containerStepper = document.getElementById('stepper-rilievo-container');
     const badgeStato = document.getElementById('rilievo-badge-stato');
     if (containerStepper && badgeStato) {
         let arr = [0,0,0,0,0,0,0,0,0,0];
-        if (com.fasi_cantiere) { let parsed = com.fasi_cantiere.split(',').map(Number); for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0; }
-        
+        if (com.fasi_cantiere) {
+            let parsed = com.fasi_cantiere.split(',').map(Number);
+            for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0; 
+        }
+
         let val = 0;
         if(arr[3]===1) val=1; 
         if(arr[4]===1) val=2;
@@ -412,12 +466,15 @@ async function caricaRilieviDiQuestaCommessa() {
         let p2Text = '<span class="text-xs uppercase tracking-wider text-gray-400 mt-2">Eseguito</span>';
         if(val === 2) { p2Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div>'; p2Text = '<span class="text-xs font-bold uppercase tracking-wider text-emerald-700 mt-2">Eseguito</span>'; }
 
-        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="toggleToDo(3, \'Rilievo In Lavorazione\')">' + p1Icon + p1Text + '</div>';
-        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="toggleToDo(4, \'Rilievo Eseguito\')">' + p2Icon + p2Text + '</div>';
+        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(3, \'Rilievo In Lavorazione\')">' + p1Icon + p1Text + '</div>';
+        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(4, \'Rilievo Eseguito\')">' + p2Icon + p2Text + '</div>';
         containerStepper.innerHTML = htmlStep;
     }
 
-    if (rilieviCommessaCache.length === 0) { divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-4 text-center">Nessuna attività registrata.</p>'; return; }
+    if (rilieviCommessaCache.length === 0) {
+        divLista.innerHTML = '<p class="text-sm text-gray-500 italic py-4 text-center">Nessuna attività registrata. Clicca su "+ Nuovo Rilievo" per iniziare.</p>';
+        return;
+    }
 
     let html = '';
     rilieviCommessaCache.forEach(ril => {
@@ -431,7 +488,8 @@ async function caricaRilieviDiQuestaCommessa() {
 
         const note = ril.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + ril.note + '</p>' : ''; 
         const btnFile = ril.file_url ? '<a href="' + ril.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-indigo-50 text-indigo-700 rounded text-xs font-bold border border-indigo-100">📎 Apri Allegato</a>' : '';
-        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 ' + colorBadge + ' rounded-full text-xs font-bold">' + tipo + '</span><span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ' + (ril.tecnico || '--') + '</span></div><div class="flex items-center gap-2"><button onclick="apriModaleRilievo(' + ril.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaRilievo(' + ril.id + ')" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button></div></div>' + note + ' ' + btnFile + '</div>';
+        
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 ' + colorBadge + ' rounded-full text-xs font-bold">' + tipo + '</span><span class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-bold">👤 ' + (ril.tecnico || '--') + '</span></div><div class="flex items-center gap-2"><button onclick="apriModaleRilievo(' + ril.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaRilievo(' + ril.id + ')" class="text-red-400 hover:text-red-600 font-bold text-xl leading-none">&times;</button></div></div>' + note + ' ' + btnFile + '</div>';
     });
     divLista.innerHTML = html;
 }
@@ -439,8 +497,10 @@ async function caricaRilieviDiQuestaCommessa() {
 function apriModaleRilievo(idStr = null) { 
     const form = document.getElementById('form-rilievo-misure');
     if(form) form.reset(); 
+    
     document.getElementById('rilievo-id').value = '';
     document.getElementById('modal-rilievo-titolo').innerText = 'Registra Attività Rilievo';
+
     if (idStr) {
         document.getElementById('modal-rilievo-titolo').innerText = 'Modifica Rilievo';
         const ril = rilieviCommessaCache.find(r => r.id == idStr);
@@ -455,12 +515,13 @@ function apriModaleRilievo(idStr = null) {
         document.getElementById('rilievo-input-data').value = new Date().toISOString().split('T')[0]; 
         document.getElementById('rilievo-input-tecnico').value = UTENTE_CORRENTE; 
     }
+    
     document.getElementById('modal-rilievo-misure').classList.remove('hidden'); 
 }
-
 function chiudiModaleRilievo() { document.getElementById('modal-rilievo-misure').classList.add('hidden'); }
-async function eliminaRilievo(id) { if(!confirm("Vuoi eliminare questa registrazione?")) return; await supabaseClient.from('rilievi_misure').delete().eq('id', id); caricaRilieviDiQuestaCommessa(); }
+async function eliminaRilievo(id) { if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return; await supabaseClient.from('rilievi_misure').delete().eq('id', id); caricaRilieviDiQuestaCommessa(); }
 
+// ================= PREVENTIVI E CONTRATTI =================
 async function caricaPreventiviDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-preventivi-commessa');
@@ -468,6 +529,7 @@ async function caricaPreventiviDiQuestaCommessa() {
     const { data: preventivi, error } = await supabaseClient.from('preventivi').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento preventivi.</p>'; return; }
     if (!preventivi || preventivi.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun preventivo associato a questa commessa.</p></div>'; return; }
+
     let html = '';
     preventivi.forEach(prev => {
         const importo = prev.importo ? formattaEuro(prev.importo) : '--';
@@ -491,6 +553,7 @@ async function caricaContrattiDiQuestaCommessa() {
     const { data: contratti, error } = await supabaseClient.from('contratti').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento contratti.</p>'; return; }
     if (!contratti || contratti.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500 mb-2">Nessun contratto generato per questa commessa.</p><button onclick="creaContrattoDaCommessa()" class="text-xs font-bold text-[#2e2a5b] hover:underline">+ Aggiungi Nuovo Contratto</button></div>'; return; }
+
     let html = '';
     contratti.forEach(con => {
         const importo = con.valore_finale ? formattaEuro(con.valore_finale) : '--';
@@ -503,13 +566,15 @@ async function caricaContrattiDiQuestaCommessa() {
     divLista.innerHTML = html;
 }
 
+// ================= GESTIONE FATTURE DA COMMESSA =================
 async function caricaFattureDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-fatture-commessa');
     divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
     const { data: fatture, error } = await supabaseClient.from('fatture').select('*').eq('commessa_id', com.id).order('created_at', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore caricamento fatture.</p>'; return; }
-    if (!fatture || fatture.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessuna fattura in coda per questa commessa.</p></div>'; return; }
+    if (!fatture || fatture.length === 0) { divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessuna fattura/acconto in coda per questa commessa.</p></div>'; return; }
+
     let html = '';
     fatture.forEach(fat => {
         const importo = fat.importo ? formattaEuro(fat.importo) : '<span class="text-orange-500">Da definire</span>';
@@ -519,6 +584,7 @@ async function caricaFattureDiQuestaCommessa() {
         let nomePuro = fat.stato || 'Da Emettere';
         if (nomePuro === 'Inviata' || nomePuro === 'Emessa') nomePuro = 'Emessa / Inviata';
         const tipoBadge = fat.tipo_documento ? '<div class="text-[10px] text-gray-500 uppercase mt-0.5">' + fat.tipo_documento + '</div>' : '';
+
         html += '<div onclick="window.location.href=\'fatturazione.html?id=' + fat.id + '\'" class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:border-[#2e2a5b] transition-colors cursor-pointer group"><div><div class="flex items-center gap-3 mb-1"><span class="font-bold text-[#2e2a5b] group-hover:underline">' + fat.numero + '</span>' + tipoBadge + '<span class="px-2 py-0.5 ' + colorStato + ' rounded-full text-[10px] font-bold uppercase tracking-wider">' + nomePuro + '</span></div><p class="text-xs text-gray-500">Importo: <strong class="text-gray-900">' + importo + '</strong></p></div><div class="text-gray-400 font-bold ml-4">&rarr;</div></div>';
     });
     divLista.innerHTML = html;
@@ -532,19 +598,13 @@ function apriModaleNuovaFattura() {
     const mod = document.getElementById('modal-nuova-fattura');
     if (mod) mod.classList.remove('hidden'); 
 }
-function chiudiModaleNuovaFattura() { document.getElementById('modal-nuova-fattura').classList.add('hidden'); }
+function chiudiModaleNuovaFattura() { const mod = document.getElementById('modal-nuova-fattura'); if (mod) mod.classList.add('hidden'); }
 
 // ================= GESTIONE ORDINI FORNITORI =================
 function cambiaSubTabOrdini(tab) { filtroOrdiniCommessa = tab; aggiornaStileTabsOrdini(); disegnaOrdiniCommessa(); }
 
 function aggiornaStileTabsOrdini() {
-    const tabs = [
-        { id: 'Tutti', label: 'Registro Ordini' },
-        { id: 'Ordine inviato', label: 'Inviati' },
-        { id: 'In Modifica', label: 'In Modifica' },
-        { id: 'Conferma', label: 'Confermati / In Arrivo' },
-        { id: 'Merce Arrivata', label: 'Merce Arrivata' }
-    ];
+    const tabs = [ { id: 'Tutti', label: 'Registro Ordini' }, { id: 'Ordine inviato', label: 'Inviati' }, { id: 'In Modifica', label: 'In Modifica' }, { id: 'Conferma', label: 'Confermati / In Arrivo' }, { id: 'Merce Arrivata', label: 'Merce Arrivata' } ];
     let counts = { 'Tutti': ordiniCommessaCache.length, 'Ordine inviato': 0, 'In Modifica': 0, 'Conferma': 0, 'Merce Arrivata': 0 };
     ordiniCommessaCache.forEach(o => {
         let s = o.stato || 'Ordine inviato';
@@ -574,12 +634,12 @@ async function apriModaleNuovoOrdineDaCommessa() {
     selectContratti.innerHTML = '<option value="">-- Nessun Contratto / Extra --</option>';
     const { data: contratti } = await supabaseClient.from('contratti').select('id, numero').eq('commessa_id', com.id);
     if(contratti && contratti.length > 0) { contratti.forEach(c => selectContratti.innerHTML += '<option value="' + c.id + '">' + c.numero + '</option>'); }
+    
     if(document.getElementById('form-ord-new-fornitore').options.length <= 1) await caricaFornitoriTendina();
     document.getElementById('form-nuovo-ordine-commessa').reset();
     document.getElementById('form-ord-new-data').value = new Date().toISOString().split('T')[0];
     document.getElementById('modal-nuovo-ordine-commessa').classList.remove('hidden');
 }
-
 function chiudiModaleNuovoOrdineDaCommessa() { document.getElementById('modal-nuovo-ordine-commessa').classList.add('hidden'); }
 
 async function caricaOrdiniDiQuestaCommessa() {
@@ -605,15 +665,17 @@ function disegnaOrdiniCommessa() {
         return statoPulito === filtroOrdiniCommessa;
     });
 
-    if (filtrati.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun ordine trovato.</td></tr>'; return; }
+    if (filtrati.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-gray-500">Nessun ordine.</td></tr>'; return; }
 
     let html = '';
     filtrati.forEach(ord => {
         const originalIndex = ordiniCommessaCache.indexOf(ord);
         const statoPulito = ord.statoPulito;
         const fornitoreNome = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore Extra'; 
+        
         let descVisuale = ord.descrizione || '';
         if (descVisuale && descVisuale.includes('[SOSTITUZIONE/ASSISTENZA]')) { descVisuale = descVisuale.replace('[SOSTITUZIONE/ASSISTENZA]', '<span class="bg-orange-100 text-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-300 mr-1">⚠️ Sostituzione</span>'); }
+        
         let dataStatoStr = '--'; let labelData = 'Inserito';
         if (statoPulito === 'Ordine inviato' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Inviato'; } 
         else if (statoPulito === 'In Modifica' && ord.data_ordine) { dataStatoStr = new Date(ord.data_ordine).toLocaleDateString('it-IT'); labelData = 'Da Modificare'; } 
@@ -624,6 +686,7 @@ function disegnaOrdiniCommessa() {
 
         let stringaConsegna = '<span class="text-gray-400 text-xs">Consegna non definita</span>';
         if (ord.data_presunta_consegna) { const d = ord.data_presunta_consegna.split('-'); stringaConsegna = '<span class="text-gray-600 text-xs">Consegna: <strong>' + d[2] + '/' + d[1] + '/' + d[0] + '</strong></span>'; }
+
         let badgeClass = 'bg-gray-100 text-gray-600';
         if(statoPulito === 'Ordine inviato') badgeClass = 'bg-blue-100 text-blue-700';
         if(statoPulito === 'In Modifica') badgeClass = 'bg-red-100 text-red-800 border border-red-200';
@@ -639,6 +702,7 @@ function apriModaleGestioneOrdine(indexMemoria) {
     const ord = ordiniCommessaCache[indexMemoria]; const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
     document.getElementById('gest-ord-id').value = ord.id; 
     document.getElementById('sottotitolo-gestione-ordine').innerText = 'Gestione per: ' + nomeFornitore;
+    
     let statoPartenza = ord.stato || 'Ordine inviato';
     if(statoPartenza === 'Inviato' || statoPartenza === 'Richiesta Inviata') statoPartenza = 'Ordine inviato';
     if(statoPartenza === 'Da controllare ed inviare' || statoPartenza === 'Approvato ed Inviato' || statoPartenza === 'Ordine confermato ed inviato al Fornitore') statoPartenza = 'Conferma';
@@ -656,28 +720,26 @@ function apriModaleGestioneOrdine(indexMemoria) {
     impostaStatoPendenteOrdine(statoPartenza); 
     document.getElementById('modal-gestisci-ordine').classList.remove('hidden');
 }
+
 function chiudiModaleGestioneOrdine() { document.getElementById('modal-gestisci-ordine').classList.add('hidden'); }
 
 function impostaStatoPendenteOrdine(nuovoStato) {
     statoPendenteOrdine = nuovoStato; 
-    const container = document.getElementById('stepper-container-ordine'); const azioniBox = document.getElementById('stepper-azioni-ordine'); 
-    container.innerHTML = ''; azioniBox.innerHTML = '';
-    const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine); 
-    const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4'; container.appendChild(bgLine);
+    const container = document.getElementById('stepper-container-ordine'); const azioniBox = document.getElementById('stepper-azioni-ordine'); container.innerHTML = ''; azioniBox.innerHTML = '';
+    const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine); const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4'; container.appendChild(bgLine);
     
     sequenzaStatiOrdine.forEach((stato, index) => {
         const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
         let iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">' + (index + 1) + '</div>';
         if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) { iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>'; } 
         else if (index === currentIdx) { let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100'; iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>'; }
-        let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400';
-        if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
+        let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400'; if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
         punto.innerHTML = iconaHTML + '<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ' + textColor + '">' + stato + '</span>'; 
         container.appendChild(punto);
     });
     
     document.getElementById('box-ord-data-conferma').classList.add('hidden'); document.getElementById('box-ord-costo').classList.add('hidden'); document.getElementById('box-ord-presunta').classList.add('hidden'); document.getElementById('box-ord-arrivo').classList.add('hidden');
-
+    
     if (statoPendenteOrdine === 'Ordine inviato') {
         azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'In Modifica') {
@@ -713,7 +775,8 @@ async function caricaPosaInterventi() {
         const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; const dataIta = int.data_intervento ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
         const note = int.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + int.note + '</p>' : ''; const btnFile = int.file_url ? '<a href="' + int.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>' : '';
         html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">' + int.posatore + '</span></div><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div>' + note + ' ' + btnFile + '</div>';
-    }); divLista.innerHTML = html;
+    }); 
+    divLista.innerHTML = html;
 }
 function apriModalePosa() { document.getElementById('form-intervento-posa').reset(); document.getElementById('posa-data').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-intervento-posa').classList.remove('hidden'); }
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
@@ -744,6 +807,20 @@ function inizializzaListeners() {
         if (form) form.addEventListener('submit', funzioneHandler);
     };
 
+    const checkCopia = document.getElementById('check-copia-dati');
+    if(checkCopia) {
+        checkCopia.addEventListener('change', () => {
+            const isChecked = document.getElementById('check-copia-dati').checked; const clienteId = document.getElementById('form-com-cliente').value;
+            if (isChecked && clienteId) { 
+                const cliente = listaClientiCache.find(c => String(c.id) === String(clienteId)); 
+                if (cliente) { document.getElementById('form-com-indirizzo').value = cliente.indirizzo || ''; document.getElementById('form-com-citta').value = cliente.citta || ''; document.getElementById('form-com-referente').value = cliente.nome_ragione_sociale || ''; document.getElementById('form-com-tel-referente').value = cliente.telefono || ''; document.getElementById('form-com-email-referente').value = cliente.email || ''; } 
+            } else { document.getElementById('form-com-indirizzo').value = ''; document.getElementById('form-com-citta').value = ''; document.getElementById('form-com-referente').value = ''; document.getElementById('form-com-tel-referente').value = ''; document.getElementById('form-com-email-referente').value = ''; }
+        });
+    }
+
+    const formComCliente = document.getElementById('form-com-cliente');
+    if(formComCliente) formComCliente.addEventListener('change', () => { if(document.getElementById('check-copia-dati').checked) { document.getElementById('check-copia-dati').dispatchEvent(new Event('change')); } });
+
     legaSubmit('form-nuova-commessa', async (e) => {
         e.preventDefault(); 
         const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: document.getElementById('form-com-numero').value, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0' };
@@ -767,7 +844,6 @@ function inizializzaListeners() {
         const { error } = await supabaseClient.from('interventi_posa').insert([nuovoInt]);
         if (!error) { 
             await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: 'Registrato intervento di posa in cantiere da: ' + nuovoInt.posatore, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
-            if(ledStati[5] === 0) await aggiornaLedDB(5, 1);
             chiudiModalePosa(); caricaPosaInterventi(); caricaCronologia(com.id); 
         } else { alert("Errore posa: " + error.message); }
         btn.innerText = "Salva Intervento"; btn.disabled = false;
@@ -782,8 +858,7 @@ function inizializzaListeners() {
         const { error } = await supabaseClient.from('fatture').insert([payload]);
         if (!error) {
             await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '💶 Registrata richiesta di ' + tipoDoc + ': ' + numero + ' (€ ' + importo + ' - ' + stato + ')', autore: UTENTE_CORRENTE }]);
-            if (ledStati[3] === 0) await aggiornaLedDB(3, 1);
-            chiudiModaleNuovaFattura(); await caricaFattureDiQuestaCommessa(); await caricaCronologia(com.id); await calcolaValoriEconomici();
+            chiudiModaleNuovaFattura(); await caricaFattureDiQuestaCommessa(); await caricaCronologia(com.id);
         } else { alert("Errore salvataggio fattura: " + error.message); }
         btn.innerText = "Registra Pagamento"; btn.disabled = false;
     });
@@ -802,7 +877,10 @@ function inizializzaListeners() {
                 const { data: tuttiOrdini } = await supabaseClient.from('ordini_fornitori').select('stato, commessa_id').eq('commessa_id', com.id);
                 if (tuttiOrdini && tuttiOrdini.length > 0) {
                     const tuttiArrivati = tuttiOrdini.every(o => o.stato === 'Merce Arrivata');
-                    if (tuttiArrivati) { if(ledStati[4] !== 2) await aggiornaLedDB(4, 2); }
+                    if (tuttiArrivati) {
+                        await supabaseClient.from('commesse').update({ stato: 'Posa' }).eq('id', com.id);
+                        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '⚡ Tutta la merce del cantiere è arrivata! Il cantiere avanza a: POSA', autore: 'Sistema Auto' }]);
+                    }
                 }
             }
             chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); caricaCronologia(com.id);
@@ -820,7 +898,6 @@ function inizializzaListeners() {
         if (!error) {
             const nomeFornitore = data[0].fornitori ? data[0].fornitori.nome_azienda : 'Fornitore'; const labelAssistenza = isSostituzione ? ' ⚠️ (In Sostituzione / Post-Posa)' : '';
             await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: 'Creato Ordine Inviato a: ' + nomeFornitore + labelAssistenza, autore: UTENTE_CORRENTE }]);
-            if(ledStati[4] === 0) await aggiornaLedDB(4, 1);
             chiudiModaleNuovoOrdineDaCommessa(); caricaOrdiniDiQuestaCommessa(); caricaCronologia(com.id);
         } else { alert("Errore ordine: " + error.message); }
         btnSubmit.innerText = "Crea Ordine"; btnSubmit.disabled = false;
@@ -841,7 +918,6 @@ function inizializzaListeners() {
             const { error } = await supabaseClient.from('rilievi_misure').insert([payload]); erroreDB = error;
             if (!error) {
                 await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '📐 Inserita uscita: ' + tipoRilievo + ' (Tecnico: ' + tecnico + ')', nota: note || null, file_url: nuovoFileUrl, autore: UTENTE_CORRENTE }]);
-                if (tipoRilievo === 'Rilievo Esecutive') { if(ledStati[1] !== 2) await aggiornaLedDB(1, 2); } else { if(ledStati[1] === 0) await aggiornaLedDB(1, 1); }
             }
         }
         if (!erroreDB) { chiudiModaleRilievo(); await caricaRilieviDiQuestaCommessa(); await caricaCronologia(com.id); } else { alert("Errore: " + erroreDB.message); }
