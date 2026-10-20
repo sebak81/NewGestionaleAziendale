@@ -14,26 +14,26 @@ let totaleCommesse = 0;
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 
-let todoPendente = { idx: null, label: '', isNowChecked: false };
+let todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
 
 const strutturaToDo = [
     { id: 'prev', label: '1. Preventivo', sub: [
-        { idx: 0, label: 'Calcolo' },
-        { idx: 1, label: 'Verifica' },
-        { idx: 2, label: 'Invio' }
+        { idx: 0, label: 'Calcolo', triState: false },
+        { idx: 1, label: 'Verifica', triState: false },
+        { idx: 2, label: 'Invio', triState: false }
     ]},
     { id: 'ril', label: '2. Rilievo misure', sub: [
-        { idx: 3, label: 'Per Preventivo' },
-        { idx: 4, label: 'Esecutive' }
+        { idx: 3, label: 'Per Preventivo', triState: false },
+        { idx: 4, label: 'Esecutive', triState: false }
     ]},
     { id: 'contr', label: '3. Contratto', sub: [
-        { idx: 5, label: 'Ricontrollo da C.O.' },
-        { idx: 6, label: 'Verifica' },
-        { idx: 7, label: 'Invio al cliente' }
+        { idx: 5, label: 'Ricontrollo da C.O.', triState: false },
+        { idx: 6, label: 'Verifica', triState: false },
+        { idx: 7, label: 'Invio al cliente', triState: false }
     ]},
     { id: 'pag', label: '4. Pagamenti', sub: [
-        { idx: 8, label: 'Acconto' },
-        { idx: 9, label: 'Saldo' }
+        { idx: 8, label: 'Acconto', triState: true },
+        { idx: 9, label: 'Saldo', triState: true }
     ]}
 ];
 
@@ -260,7 +260,7 @@ async function cambiaStatoManuale() {
     }
 }
 
-// ================= TO-DO E DIARIO (NUOVO FLUSSO) =================
+// ================= TO-DO E DIARIO (STATI E MODALE) =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
@@ -269,47 +269,62 @@ function disegnaToDo() {
     let arr = [0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0; 
+        for(let i=0; i<10; i++) arr[i] = parsed[i] || 0; 
     }
     
     strutturaToDo.forEach(sezione => {
         let htmlSec = '<div class="mb-5"><h4 class="font-bold text-[#2e2a5b] text-sm mb-2">' + sezione.label + '</h4><div class="space-y-2 pl-2 border-l-2 border-gray-100 ml-1 py-1">';
         sezione.sub.forEach(item => {
-            const isChecked = arr[item.idx] > 0;
-            const checkedAttr = isChecked ? 'checked' : '';
-            const spanStyle = isChecked ? 'text-gray-400 line-through' : 'text-gray-700 font-medium';
-            const callFunc = 'richiediConfermaToDo(' + item.idx + ', \'' + (sezione.label + ' - ' + item.label).replace(/'/g, "\\'") + '\')';
+            const val = arr[item.idx] || 0;
+            const isTri = item.triState ? 'true' : 'false';
             
-            htmlSec += '<label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" ' + checkedAttr + ' onchange="' + callFunc + '" class="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"><span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></label>';
+            let spanStyle = 'text-gray-700 font-medium';
+            let boxHtml = '<div class="w-4 h-4 border-2 border-gray-300 rounded bg-white flex-shrink-0 mt-0.5 transition-colors"></div>';
+            
+            if (val === 1 && item.triState) {
+                spanStyle = 'text-indigo-700 font-bold';
+                boxHtml = '<div class="w-4 h-4 border-2 border-indigo-500 rounded bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"><div class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></div></div>';
+            } else if ((val === 1 && !item.triState) || val === 2) {
+                spanStyle = 'text-gray-400 line-through';
+                boxHtml = '<div class="w-4 h-4 border-2 border-emerald-500 rounded bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors"><span class="text-white text-[10px] font-bold leading-none">✓</span></div>';
+            }
+            
+            const safeLabel = (sezione.label + ' - ' + item.label).replace(/'/g, "\\'");
+            const callFunc = 'richiediConfermaToDo(' + item.idx + ', \'' + safeLabel + '\', ' + val + ', ' + isTri + ')';
+            
+            htmlSec += '<div onclick="' + callFunc + '" class="flex items-start gap-3 cursor-pointer group">' + boxHtml + '<span class="text-sm ' + spanStyle + ' group-hover:text-[#2e2a5b] transition-colors select-none">' + item.label + '</span></div>';
         });
         htmlSec += '</div></div>';
         container.innerHTML += htmlSec;
     });
 }
 
-function richiediConfermaToDo(idx, labelTesto) {
-    const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0];
-    if (com.fasi_cantiere) {
-        let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0;
-    }
+function richiediConfermaToDo(idx, labelTesto, currentState, isTriState) {
+    let nextState = 0;
+    if (isTriState) { nextState = (currentState + 1) % 3; } 
+    else { nextState = currentState === 0 ? 1 : 0; }
     
-    todoPendente.isNowChecked = arr[idx] === 0; 
-    todoPendente.idx = idx;
-    todoPendente.label = labelTesto;
+    todoPendente = { idx: idx, label: labelTesto, nextState: nextState, isTriState: isTriState };
 
     document.getElementById('todo-nota-testo').value = '';
-    document.getElementById('todo-nota-titolo').innerText = todoPendente.isNowChecked ? 'Conferma Completamento' : 'Annulla Completamento';
+    let modalTitolo = '';
+    
+    if (isTriState) {
+        if (nextState === 1) modalTitolo = 'Fattura Inviata / Attesa Pagamento';
+        else if (nextState === 2) modalTitolo = 'Conferma Incasso Ricevuto';
+        else modalTitolo = 'Annulla Operazioni Pagamento';
+    } else {
+        modalTitolo = nextState === 1 ? 'Conferma Completamento' : 'Annulla Completamento';
+    }
+    
+    document.getElementById('todo-nota-titolo').innerText = modalTitolo;
     document.getElementById('todo-nota-sub').innerText = labelTesto;
     document.getElementById('modal-todo-nota').classList.remove('hidden');
 }
 
 function annullaToDoNota() {
     document.getElementById('modal-todo-nota').classList.add('hidden');
-    disegnaToDo(); 
-    caricaRilieviDiQuestaCommessa(); 
-    todoPendente = { idx: null, label: '', isNowChecked: false };
+    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
 }
 
 async function confermaToDoNota() {
@@ -320,33 +335,34 @@ async function confermaToDoNota() {
     let arr = [0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0;
+        for(let i=0; i<10; i++) arr[i] = parsed[i] || 0;
     }
 
-    arr[todoPendente.idx] = todoPendente.isNowChecked ? 1 : 0;
+    arr[todoPendente.idx] = todoPendente.nextState;
     const nuovaStringa = arr.join(',');
     const notaTesto = document.getElementById('todo-nota-testo').value.trim();
 
     const { error } = await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa }).eq('id', com.id);
     if (!error) {
-        const logMsg = todoPendente.isNowChecked ? '✅ Completato: ' + todoPendente.label : '🔙 Annullato: ' + todoPendente.label;
-        await supabaseClient.from('commesse_log').insert([{
-            commessa_id: com.id,
-            azione: logMsg,
-            nota: notaTesto || null,
-            autore: UTENTE_CORRENTE
-        }]);
+        let logMsg = '';
+        if (todoPendente.isTriState) {
+            if (todoPendente.nextState === 1) logMsg = '📤 Inviata/In Attesa: ' + todoPendente.label;
+            else if (todoPendente.nextState === 2) logMsg = '✅ Pagato/Incassato: ' + todoPendente.label;
+            else logMsg = '🔙 Annullato: ' + todoPendente.label;
+        } else {
+            logMsg = todoPendente.nextState === 1 ? '✅ Completato: ' + todoPendente.label : '🔙 Annullato: ' + todoPendente.label;
+        }
+        
+        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logMsg, nota: notaTesto || null, autore: UTENTE_CORRENTE }]);
         com.fasi_cantiere = nuovaStringa;
-        disegnaToDo();
-        caricaRilieviDiQuestaCommessa();
-        caricaCronologia(com.id);
+        disegnaToDo(); caricaRilieviDiQuestaCommessa(); caricaCronologia(com.id);
     } else {
         alert("Errore aggiornamento To-Do: " + error.message);
         disegnaToDo();
     }
 
     document.getElementById('modal-todo-nota').classList.add('hidden');
-    todoPendente = { idx: null, label: '', isNowChecked: false };
+    todoPendente = { idx: null, label: '', nextState: 0, isTriState: false };
     btn.innerText = "Conferma"; btn.disabled = false;
 }
 
@@ -414,6 +430,7 @@ async function caricaCronologia(commessaId) {
         if (log.azione.includes('✅')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">✓</div>';
         if (log.azione.includes('🔙')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-orange-100 text-orange-600 text-[10px] ring-2 ring-orange-50 shrink-0">!</div>';
         if (log.azione.includes('🔄')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">~</div>';
+        if (log.azione.includes('📤')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-indigo-100 text-indigo-600 text-[10px] ring-2 ring-indigo-50 shrink-0">~</div>';
         if (log.azione.includes('Rilievo') || log.azione.includes('📐')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-blue-100 text-blue-700 text-[10px] ring-2 ring-blue-50 shrink-0">📐</div>';
         if (log.azione.includes('Ordine') || log.azione.includes('📦')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-teal-100 text-teal-700 text-[10px] ring-2 ring-teal-50 shrink-0">📦</div>';
         if (log.azione.includes('💶')) icona = '<div class="w-4 h-4 rounded-full flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">€</div>';
@@ -443,7 +460,7 @@ async function caricaRilieviDiQuestaCommessa() {
         let arr = [0,0,0,0,0,0,0,0,0,0];
         if (com.fasi_cantiere) {
             let parsed = com.fasi_cantiere.split(',').map(Number);
-            for(let i=0; i<10; i++) arr[i] = parsed[i] ? 1 : 0; 
+            for(let i=0; i<10; i++) arr[i] = parsed[i] || 0; 
         }
 
         let val = 0;
@@ -466,8 +483,8 @@ async function caricaRilieviDiQuestaCommessa() {
         let p2Text = '<span class="text-xs uppercase tracking-wider text-gray-400 mt-2">Eseguito</span>';
         if(val === 2) { p2Icon = '<div class="w-8 h-8 rounded-full flex items-center justify-center bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-100 text-sm font-bold">✓</div>'; p2Text = '<span class="text-xs font-bold uppercase tracking-wider text-emerald-700 mt-2">Eseguito</span>'; }
 
-        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(3, \'Rilievo In Lavorazione\')">' + p1Icon + p1Text + '</div>';
-        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(4, \'Rilievo Eseguito\')">' + p2Icon + p2Text + '</div>';
+        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(3, \'Rilievo In Lavorazione\', ' + (arr[3]||0) + ', false)">' + p1Icon + p1Text + '</div>';
+        htmlStep += '<div class="flex flex-col items-center bg-white px-3 z-10 cursor-pointer hover:scale-110 transition-transform" onclick="richiediConfermaToDo(4, \'Rilievo Eseguito\', ' + (arr[4]||0) + ', false)">' + p2Icon + p2Text + '</div>';
         containerStepper.innerHTML = htmlStep;
     }
 
@@ -521,7 +538,6 @@ function apriModaleRilievo(idStr = null) {
 function chiudiModaleRilievo() { document.getElementById('modal-rilievo-misure').classList.add('hidden'); }
 async function eliminaRilievo(id) { if(!confirm("Vuoi eliminare questa registrazione di rilievo?")) return; await supabaseClient.from('rilievi_misure').delete().eq('id', id); caricaRilieviDiQuestaCommessa(); }
 
-// ================= PREVENTIVI E CONTRATTI =================
 async function caricaPreventiviDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-preventivi-commessa');
@@ -566,7 +582,6 @@ async function caricaContrattiDiQuestaCommessa() {
     divLista.innerHTML = html;
 }
 
-// ================= GESTIONE FATTURE DA COMMESSA =================
 async function caricaFattureDiQuestaCommessa() {
     const com = commesseCorrenti[commessaAttivaIndex];
     const divLista = document.getElementById('lista-fatture-commessa');
@@ -600,7 +615,6 @@ function apriModaleNuovaFattura() {
 }
 function chiudiModaleNuovaFattura() { const mod = document.getElementById('modal-nuova-fattura'); if (mod) mod.classList.add('hidden'); }
 
-// ================= GESTIONE ORDINI FORNITORI =================
 function cambiaSubTabOrdini(tab) { filtroOrdiniCommessa = tab; aggiornaStileTabsOrdini(); disegnaOrdiniCommessa(); }
 
 function aggiornaStileTabsOrdini() {
@@ -761,10 +775,9 @@ async function eliminaOrdineDaCommessa() {
     const idOrdine = document.getElementById('gest-ord-id').value;
     if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?")) return;
     const { error } = await supabaseClient.from('ordini_fornitori').delete().eq('id', idOrdine);
-    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: `Eliminato Ordine dal sistema`, autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
+    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: 'Eliminato Ordine dal sistema', autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
 
-// ================= GESTIONE POSA IN OPERA =================
 async function caricaPosaInterventi() {
     const com = commesseCorrenti[commessaAttivaIndex]; const divLista = document.getElementById('lista-interventi-posa'); divLista.innerHTML = '<p class="text-sm text-gray-500">Caricamento in corso...</p>';
     const { data: interventi, error } = await supabaseClient.from('interventi_posa').select('*').eq('commessa_id', com.id).order('data_intervento', { ascending: false });
@@ -778,11 +791,11 @@ async function caricaPosaInterventi() {
     }); 
     divLista.innerHTML = html;
 }
+
 function apriModalePosa() { document.getElementById('form-intervento-posa').reset(); document.getElementById('posa-data').value = new Date().toISOString().split('T')[0]; document.getElementById('modal-intervento-posa').classList.remove('hidden'); }
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
 async function eliminaPosa(id) { if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; await supabaseClient.from('interventi_posa').delete().eq('id', id); caricaPosaInterventi(); }
 
-// ================= GESTIONE MODIFICA E NUOVA COMMESSA =================
 function apriModaleModifica() {
     if (commessaAttivaIndex === null) return; 
     const com = commesseCorrenti[commessaAttivaIndex]; 
