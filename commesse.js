@@ -264,7 +264,7 @@ async function cambiaStatoManuale() {
     }
 }
 
-// ================= TO-DO E DIARIO (STATI E MODALE) =================
+// ================= TO-DO E DIARIO =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
@@ -595,9 +595,13 @@ function disegnaOrdiniCommessa() {
 }
 
 function apriModaleGestioneOrdine(indexMemoria) {
-    const ord = ordiniCommessaCache[indexMemoria]; const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+    const ord = ordiniCommessaCache[indexMemoria]; 
+    const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
+    
     document.getElementById('gest-ord-id').value = ord.id; 
-    document.getElementById('sottotitolo-gestione-ordine').innerText = 'Gestione per: ' + nomeFornitore;
+    
+    const subTitolo = document.getElementById('sottotitolo-gestione-ordine');
+    if(subTitolo) subTitolo.innerText = 'Gestione per: ' + nomeFornitore;
     
     let statoPartenza = ord.stato || 'Ordine inviato';
     if(statoPartenza === 'Inviato' || statoPartenza === 'Richiesta Inviata') statoPartenza = 'Ordine inviato';
