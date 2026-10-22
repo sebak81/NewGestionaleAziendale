@@ -92,6 +92,40 @@ function formattaEuro(numero) {
     return '€ ' + interi + ',' + decimali;
 }
 
+function renderMarkdown(testo) {
+    if (!testo) return '<span class="text-gray-400 italic">Clicca qui per aggiungere materiali o promemoria...</span>';
+    let html = testo.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    return html;
+}
+
+function attivaModificaRiepilogo() {
+    document.getElementById('preview-riepilogo-commessa').classList.add('hidden');
+    const ta = document.getElementById('testo-riepilogo-commessa');
+    ta.classList.remove('hidden');
+    document.getElementById('btn-salva-riepilogo').classList.remove('hidden');
+    ta.focus();
+}
+
+async function salvaRiepilogoCommessa() {
+    const btn = document.getElementById('btn-salva-riepilogo');
+    btn.innerText = "Salvataggio...";
+    const testo = document.getElementById('testo-riepilogo-commessa').value;
+    const com = commesseCorrenti[commessaAttivaIndex];
+    
+    const { error } = await supabaseClient.from('commesse').update({ descrizione_materiali: testo || null }).eq('id', com.id);
+    if (!error) {
+        com.descrizione_materiali = testo;
+        document.getElementById('preview-riepilogo-commessa').innerHTML = renderMarkdown(testo);
+        document.getElementById('testo-riepilogo-commessa').classList.add('hidden');
+        document.getElementById('preview-riepilogo-commessa').classList.remove('hidden');
+        btn.classList.add('hidden');
+        btn.innerText = "Salva note";
+    } else {
+        alert("Errore salvataggio note: " + error.message);
+        btn.innerText = "Salva note";
+    }
+}
+
 async function caricaFileSuStorage(file, prefisso) {
     if (!file) return null;
     const cleanFileName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
@@ -243,6 +277,13 @@ function aggiornaDatiSchedaUI() {
     document.getElementById('scheda-sottotitolo-cliente').innerText = nomeCliente;
     document.getElementById('scheda-sottotitolo-cantiere').innerText = com.nome_cantiere || 'Nessun cantiere spec.';
     
+    const testoRiep = com.descrizione_materiali || '';
+    document.getElementById('testo-riepilogo-commessa').value = testoRiep;
+    document.getElementById('preview-riepilogo-commessa').innerHTML = renderMarkdown(testoRiep);
+    document.getElementById('preview-riepilogo-commessa').classList.remove('hidden');
+    document.getElementById('testo-riepilogo-commessa').classList.add('hidden');
+    document.getElementById('btn-salva-riepilogo').classList.add('hidden');
+
     const selStato = document.getElementById('scheda-select-stato');
     if(selStato) selStato.value = com.stato || 'Preventivo';
 
@@ -264,7 +305,6 @@ async function cambiaStatoManuale() {
     }
 }
 
-// ================= TO-DO E DIARIO =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
@@ -501,7 +541,6 @@ async function caricaCronologia(commessaId) {
     divLog.innerHTML = html;
 }
 
-// ================= GESTIONE ORDINI FORNITORI =================
 function cambiaSubTabOrdini(tab) { filtroOrdiniCommessa = tab; aggiornaStileTabsOrdini(); disegnaOrdiniCommessa(); }
 
 function aggiornaStileTabsOrdini() {
@@ -595,9 +634,7 @@ function disegnaOrdiniCommessa() {
 }
 
 function apriModaleGestioneOrdine(indexMemoria) {
-    const ord = ordiniCommessaCache[indexMemoria]; 
-    const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
-    
+    const ord = ordiniCommessaCache[indexMemoria]; const nomeFornitore = ord.fornitori ? ord.fornitori.nome_azienda : 'Fornitore';
     document.getElementById('gest-ord-id').value = ord.id; 
     
     const subTitolo = document.getElementById('sottotitolo-gestione-ordine');
@@ -740,7 +777,7 @@ function inizializzaListeners() {
         let valNumero = document.getElementById('form-com-numero').value.trim();
         if (valNumero === '') valNumero = '[Da Definire]';
         
-        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0' };
+        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0', descrizione_materiali: null };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
         if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
