@@ -47,11 +47,11 @@
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar">
             
-            <!-- KPI / CONTATORI AGGIORNATI -->
+            <!-- KPI / CONTATORI CON LINK FILTRATO -->
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 
                 <!-- 1. Preventivi Aperti -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_aperti'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-lg">📝</div>
                         <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[9px] font-bold uppercase">In sospeso</span>
@@ -60,8 +60,8 @@
                     <p class="text-[11px] text-gray-500 mt-1">Preventivi aperti</p>
                 </div>
 
-                <!-- 2. Preventivi Confermati (Nuovo) -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <!-- 2. Preventivi Confermati -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_confermati'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">👍</div>
                         <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[9px] font-bold uppercase">Accettati</span>
@@ -71,7 +71,7 @@
                 </div>
 
                 <!-- 3. Contratti Firmati -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-blue-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-blue-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=contratti_firmati'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg">📑</div>
                         <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[9px] font-bold uppercase">Firmati</span>
@@ -81,7 +81,7 @@
                 </div>
 
                 <!-- 4. Ordini da Confermare / Modificare -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-orange-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-orange-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=ordini_inattesa'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-lg">📦</div>
                         <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[9px] font-bold uppercase">Da Conf.</span>
@@ -91,7 +91,7 @@
                 </div>
 
                 <!-- 5. Materiale in Arrivo -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-teal-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-teal-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=materiale_inarrivo'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center text-lg">🚚</div>
                         <span class="px-2 py-1 bg-teal-100 text-teal-800 rounded text-[9px] font-bold uppercase">In Arrivo</span>
@@ -101,7 +101,7 @@
                 </div>
 
                 <!-- 6. Fatture non ancora saldate -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-indigo-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html'">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-indigo-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=fatture_inattesa'">
                     <div class="flex justify-between items-start mb-3">
                         <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">💶</div>
                         <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[9px] font-bold uppercase">Da Saldare</span>
@@ -135,7 +135,6 @@
 
             <!-- LISTE RECENTI -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Ultime Commesse -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
                         <h3 class="text-base font-bold text-gray-800">Cantieri Recenti</h3>
@@ -144,7 +143,6 @@
                     <div class="flex-1 overflow-y-auto no-scrollbar space-y-3" id="lista-commesse-recenti"></div>
                 </div>
 
-                <!-- Radar Attività -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-96">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
                         <h3 class="text-base font-bold text-gray-800">Radar Attività</h3>
@@ -165,7 +163,6 @@
         document.getElementById('data-odierna').innerText = new Date().toLocaleDateString('it-IT', opzioniData);
 
         async function caricaDashboard() {
-            // 1. Carichiamo tutte le commesse per analizzare i flag interni della To-Do List (fasi_cantiere)
             const { data: commesseAll } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)');
             
             let countPrevAperti = 0;
@@ -175,27 +172,24 @@
 
             if (commesseAll) {
                 commesseAll.forEach(com => {
-                    let arr = [0,0,0,0,0,0,0,0,0,0,0];
+                    let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
                     if (com.fasi_cantiere) {
                         let parsed = com.fasi_cantiere.split(',').map(Number);
-                        for(let i=0; i<11; i++) arr[i] = parsed[i] || 0;
+                        for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
                     }
 
-                    // Preventivo Confermato (Indice 5: 1 = SI, 2 = NO)
                     if (arr[5] === 1) {
                         countPrevConfermati++;
                     } else if (arr[5] === 0) {
                         countPrevAperti++;
                     }
 
-                    // Contratti Firmati (Indici 6, 7 o 8 della sezione Contratto spuntati)
-                    if (arr[6] === 1 || arr[7] === 1 || arr[8] === 1) {
+                    if (arr[9] === 1) {
                         countContrattiFirmati++;
                     }
 
-                    // Fatture / Pagamenti in stato intermedio (Indice 9 = Acconto, Indice 10 = Saldo -> stato 1 = Inviata/In attesa)
-                    if (arr[9] === 1) countFattureInAttesa++;
                     if (arr[10] === 1) countFattureInAttesa++;
+                    if (arr[11] === 1) countFattureInAttesa++;
                 });
             }
 
@@ -204,7 +198,6 @@
             document.getElementById('kpi-contratti-firmati').innerText = countContrattiFirmati;
             document.getElementById('kpi-fatture-inattesa').innerText = countFattureInAttesa;
 
-            // 2. Ordini Fornitori (Tab Ordini: In attesa vs In arrivo)
             const { data: ordiniAll } = await supabaseClient.from('ordini_fornitori').select('stato');
             let countOrdiniInAttesa = 0;
             let countMaterialeInArrivo = 0;
@@ -223,10 +216,8 @@
             document.getElementById('kpi-ordini-inattesa').innerText = countOrdiniInAttesa;
             document.getElementById('kpi-inarrivo').innerText = countMaterialeInArrivo;
 
-            // 3. Cantieri Recenti
             const divCommesse = document.getElementById('lista-commesse-recenti');
             if (commesseAll && commesseAll.length > 0) {
-                // Ordiniamo per data di aggiornamento/creazione discendente
                 const commesseRecenti = [...commesseAll].sort((a,b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)).slice(0, 6);
                 let htmlCommesse = '';
                 commesseRecenti.forEach(com => {
@@ -245,7 +236,6 @@
                 divCommesse.innerHTML = htmlCommesse;
             } else { divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>'; }
 
-            // 4. Radar Attività
             const divRadar = document.getElementById('lista-attivita-recenti');
             const { data: logs } = await supabaseClient.from('commesse_log').select('*, commesse(numero, clienti(nome_ragione_sociale))').order('created_at', { ascending: false }).limit(15); 
 
