@@ -83,9 +83,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         await caricaCommesse(); 
     } catch(err) {
-        console.error("Errore DB:", err);
+        console.error("Errore inizializzazione:", err);
+        commesseCorrenti = [];
+        disegnaListaCommesse([]);
         const lblCount = document.getElementById('conteggio-commesse');
-        if(lblCount) lblCount.innerText = 'Errore di caricamento dati';
+        if(lblCount) lblCount.innerText = '0 commesse (Errore connessione)';
     }
 
     if (idToOpen) {
@@ -138,12 +140,16 @@ async function salvaRiepilogoCommessa() {
 }
 
 async function caricaOrdiniGlobaliPerFiltro() {
-    const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato, contratti(commessa_id)');
-    if (data) {
-        ordiniGlobaliPerFiltro = data.map(o => ({
-            commessa_id: o.commessa_id || (o.contratti ? o.contratti.commessa_id : null),
-            stato: o.stato
-        }));
+    try {
+        const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato, contratti(commessa_id)');
+        if (data) {
+            ordiniGlobaliPerFiltro = data.map(o => ({
+                commessa_id: o.commessa_id || (o.contratti ? o.contratti.commessa_id : null),
+                stato: o.stato
+            }));
+        }
+    } catch(e) {
+        ordiniGlobaliPerFiltro = [];
     }
 }
 
@@ -203,7 +209,7 @@ async function caricaCommesse() {
             commesse = data || [];
         }
     } catch(e) {
-        console.error("Errore in caricaCommesse:", e);
+        console.error("Errore query commesse:", e);
         commesse = [];
     }
 
@@ -223,7 +229,6 @@ function filtraCommesse() {
     const searchInput = document.getElementById('input-ricerca-commesse');
     const q = searchInput ? searchInput.value.toLowerCase() : '';
     
-    // Aggiorna grafica pillole
     const idsPillole = ['tutte', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'fatture_inattesa'];
     idsPillole.forEach(id => {
         const b = document.getElementById('pill-' + id);
@@ -237,10 +242,11 @@ function filtraCommesse() {
     });
 
     const filtrate = commesseCorrenti.filter(c => {
-        const matchTesto = (c.numero && c.numero.toLowerCase().includes(q)) || 
-                           (c.clienti && c.clienti.nome_ragione_sociale && c.clienti.nome_ragione_sociale.toLowerCase().includes(q)) ||
-                           (c.nome_cantiere && c.nome_cantiere.toLowerCase().includes(q));
+        const nomeCli = (c.clienti && c.clienti.nome_ragione_sociale) ? String(c.clienti.nome_ragione_sociale).toLowerCase() : '';
+        const numCom = (c.numero) ? String(c.numero).toLowerCase() : '';
+        const nomCant = (c.nome_cantiere) ? String(c.nome_cantiere).toLowerCase() : '';
         
+        const matchTesto = numCom.includes(q) || nomeCli.includes(q) || nomCant.includes(q);
         if (!matchTesto) return false;
 
         if (filtroAttivoUrl === 'tutte') return true;
@@ -252,13 +258,13 @@ function filtraCommesse() {
         }
 
         if (filtroAttivoUrl === 'preventivi_aperti') {
-            return arr[5] === 0; // Preventivo non confermato
+            return arr[5] === 0;
         } else if (filtroAttivoUrl === 'preventivi_confermati') {
-            return arr[5] === 1; // Preventivo confermato SI
+            return arr[5] === 1;
         } else if (filtroAttivoUrl === 'contratti_firmati') {
-            return arr[9] === 1; // Contratto Firmato spuntato (Indice 9)
+            return arr[9] === 1;
         } else if (filtroAttivoUrl === 'fatture_inattesa') {
-            return arr[10] === 1 || arr[11] === 1; // Acconto o Saldo in stato intermedio
+            return arr[10] === 1 || arr[11] === 1;
         } else if (filtroAttivoUrl === 'ordini_inattesa') {
             return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
                 (o.stato === 'Ordine inviato' || o.stato === 'Inviato' || o.stato === 'Richiesta Inviata' || o.stato === 'In Modifica'));
