@@ -13,6 +13,7 @@ let totaleCommesse = 0;
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 
+let filtroAttivoDashboard = 'tutti';
 let todoPendente = { idx: null, label: '', nextState: 0, isTriState: false, isSiNo: false };
 
 const strutturaToDo = [
@@ -54,6 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const action = urlParams.get('action');
     const clienteId = urlParams.get('cliente_id');
     const idToOpen = urlParams.get('id');
+    const filtroParam = urlParams.get('filtro');
+
+    if (filtroParam) {
+        impostaFiltroDashboard(filtroParam, false);
+    }
 
     if (action === 'new') {
         apriModaleNuovaCommessa();
@@ -179,16 +185,93 @@ async function caricaCommesse() {
         });
     }
     commesseCorrenti = commesse || [];
+    
+    // Raccogliamo anche gli ordini globali in background per poter filtrare correttamente se richiesto
+    const { data: ordiniAll } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato');
+    window.ordiniGlobaliFiltroCache = ordiniAll || [];
+
     const lblCount = document.getElementById('conteggio-commesse');
     if(lblCount) lblCount.innerText = commesseCorrenti.length + ' commesse in corso';
-    disegnaListaCommesse(commesseCorrenti);
+    applicaFiltriEVisualizza();
+}
+
+function impostaFiltroDashboard(tipoFiltro, aggiornaUrl = true) {
+    filtroAttivoDashboard = tipoFiltro;
+    
+    // Aggiorna lo stile dei bottoni guida rapidi
+    const ids = ['tutti', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'fatture_inattesa'];
+    ids.forEach(id => {
+        const btn = document.getElementById('btn-filtro-' + id);
+        if (btn) {
+            if (id === tipoFiltro) {
+                btn.className = "px-4 py-2 text-xs font-bold bg-[#2e2a5b] text-white rounded-lg shadow-sm whitespace-nowrap transition-colors";
+            } else {
+                btn.className = "px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
+            }
+        }
+    });
+
+    if (aggiornaUrl) {
+        const newUrl = tipoFiltro === 'tutti' ? window.location.pathname : window.location.pathname + '?filtro=' + tipoFiltro;
+        window.history.replaceState({}, document.title, newUrl);
+    }
+
+    applicaFiltriEVisualizza();
+}
+
+function applicaFiltriEVisualizza() {
+    const q = document.getElementById('input-ricerca-commesse') ? document.getElementById('input-ricerca-commesse').value.toLowerCase() : '';
+    
+    const filtrate = commesseCorrenti.filter(com => {
+        // Filtro testuale standard
+        const matchTesto = (com.numero && com.numero.toLowerCase().includes(q)) || 
+                           (com.clienti && com.clienti.nome_ragione_sociale && com.clienti.nome_ragione_sociale.toLowerCase().includes(q)) ||
+                           (com.nome_cantiere && com.nome_cantiere.toLowerCase().includes(q));
+        if (!matchTesto) return false;
+
+        // Estrazione array fasi To-Do
+        let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+        if (com.fasi_cantiere) {
+            let parsed = com.fasi_cantiere.split(',').map(Number);
+            for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
+        }
+
+        // Filtro specifico proveniente dalla Dashboard
+        if (filtroAttivoDashboard === 'preventivi_aperti') {
+            return arr[5] === 0; // Preventivo non confermato
+        } else if (filtroAttivoDashboard === 'preventivi_confermati') {
+            return arr[5] === 1; // Preventivo confermato SI
+        } else if (filtroAttivoDashboard === 'contratti_firmati') {
+            return arr[9] === 1; // Contratto Firmato spuntato
+        } else if (filtroAttivoDashboard === 'ordini_inattesa') {
+            // Cerca se ha ordini inviati o in modifica
+            const ords = (window.ordiniGlobaliFiltroCache || []).filter(o => String(o.commessa_id) === String(com.id));
+            return ords.some(o => {
+                let s = o.stato || 'Ordine inviato';
+                return s === 'Inviato' || s === 'Richiesta Inviata' || s === 'Ordine inviato' || s === 'In Modifica';
+            });
+        } else if (filtroAttivoDashboard === 'materiale_inarrivo') {
+            // Cerca se ha ordini confermati in arrivo
+            const ords = (window.ordiniGlobaliFiltroCache || []).filter(o => String(o.commessa_id) === String(com.id));
+            return ords.some(o => {
+                let s = o.stato || 'Ordine inviato';
+                return s === 'Conferma' || s === 'Da controllare ed inviare' || s === 'Approvato ed Inviato' || s === 'Ordine confermato ed inviato al Fornitore';
+            });
+        } else if (filtroAttivoDashboard === 'fatture_inattesa') {
+            return arr[10] === 1 || arr[11] === 1; // Acconto o Saldo in stato intermedio (Inviata)
+        }
+
+        return true;
+    });
+
+    disegnaListaCommesse(filtrate);
 }
 
 function disegnaListaCommesse(lista) {
     const tbody = document.getElementById('tabella-commesse');
     if(!tbody) return;
     tbody.innerHTML = ''; 
-    if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessuna commessa trovata</td></tr>'; return; }
+    if (lista.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Nessuna commessa trovata per questo filtro</td></tr>'; return; }
 
     lista.forEach(com => {
         const index = commesseCorrenti.findIndex(c => c.id === com.id);
@@ -217,13 +300,7 @@ function disegnaListaCommesse(lista) {
 }
 
 function filtraCommesse() {
-    const q = document.getElementById('input-ricerca-commesse').value.toLowerCase();
-    const filtrate = commesseCorrenti.filter(c => 
-        (c.numero && c.numero.toLowerCase().includes(q)) || 
-        (c.clienti && c.clienti.nome_ragione_sociale && c.clienti.nome_ragione_sociale.toLowerCase().includes(q)) ||
-        (c.nome_cantiere && c.nome_cantiere.toLowerCase().includes(q))
-    );
-    disegnaListaCommesse(filtrate);
+    applicaFiltriEVisualizza();
 }
 
 function apriSchedaCommessa(index) {
@@ -340,7 +417,6 @@ function disegnaToDo() {
             }
             
             let disabledClass = '';
-            // Se siamo dopo l'esito preventivo (idx > 5), controlliamo se l'esito (idx 5) è stato impostato su ACCETTATO (valore 1)
             if (item.idx > 5 && arr[5] !== 1) { 
                 disabledClass = ' opacity-40 pointer-events-none grayscale';
             }
