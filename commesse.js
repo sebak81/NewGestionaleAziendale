@@ -10,7 +10,6 @@ let commesseCorrenti = [];
 let ordiniCommessaCache = [];
 let ordiniGlobaliPerFiltro = [];
 let sediGlobali = []; 
-let totaleCommesse = 0; 
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 let filtroAttivoUrl = 'tutte';
@@ -87,11 +86,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         commesseCorrenti = [];
         disegnaListaCommesse([]);
         const lblCount = document.getElementById('conteggio-commesse');
-        if(lblCount) lblCount.innerText = '0 commesse (Errore di caricamento)';
+        if(lblCount) lblCount.innerText = '0 commesse (Errore)';
     }
 
     if (idToOpen) {
-        const index = commesseCorrenti.findIndex(c => String(c.id) === idToOpen);
+        const index = commesseCorrenti.findIndex(c => String(c.id) === String(idToOpen));
         if (index !== -1) apriSchedaCommessa(index);
     }
 });
@@ -196,7 +195,6 @@ async function caricaSediTendina() {
 async function caricaCommesse() {
     let commesse = [];
     try {
-        // Caricamento sicuro ordinato per ID discendente (evita errori su colonne di timestamp mancanti)
         let { data: rawCommesse, error: err2 } = await supabaseClient.from('commesse').select('*').order('id', { ascending: false });
         if (err2) throw err2;
         
@@ -241,35 +239,40 @@ function filtraCommesse() {
     });
 
     const filtrate = commesseCorrenti.filter(c => {
-        const nomeCli = (c.clienti && c.clienti.nome_ragione_sociale) ? String(c.clienti.nome_ragione_sociale).toLowerCase() : '';
-        const numCom = (c.numero) ? String(c.numero).toLowerCase() : '';
-        const nomCant = (c.nome_cantiere) ? String(c.nome_cantiere).toLowerCase() : '';
-        
-        const matchTesto = numCom.includes(q) || nomeCli.includes(q) || nomCant.includes(q);
-        if (!matchTesto) return false;
+        try {
+            const nomeCli = (c.clienti && c.clienti.nome_ragione_sociale) ? String(c.clienti.nome_ragione_sociale).toLowerCase() : '';
+            const numCom = (c.numero) ? String(c.numero).toLowerCase() : '';
+            const nomCant = (c.nome_cantiere) ? String(c.nome_cantiere).toLowerCase() : '';
+            
+            const matchTesto = numCom.includes(q) || nomeCli.includes(q) || nomCant.includes(q);
+            if (!matchTesto) return false;
 
-        if (filtroAttivoUrl === 'tutte') return true;
+            if (filtroAttivoUrl === 'tutte') return true;
 
-        let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
-        if (c.fasi_cantiere) {
-            let parsed = c.fasi_cantiere.split(',').map(Number);
-            for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
-        }
+            let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+            if (c.fasi_cantiere) {
+                let parsed = c.fasi_cantiere.split(',').map(Number);
+                for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
+            }
 
-        if (filtroAttivoUrl === 'preventivi_aperti') {
-            return arr[5] === 0;
-        } else if (filtroAttivoUrl === 'preventivi_confermati') {
-            return arr[5] === 1;
-        } else if (filtroAttivoUrl === 'contratti_firmati') {
-            return arr[9] === 1;
-        } else if (filtroAttivoUrl === 'fatture_inattesa') {
-            return arr[10] === 1 || arr[11] === 1;
-        } else if (filtroAttivoUrl === 'ordini_inattesa') {
-            return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
-                (o.stato === 'Ordine inviato' || o.stato === 'Inviato' || o.stato === 'Richiesta Inviata' || o.stato === 'In Modifica'));
-        } else if (filtroAttivoUrl === 'materiale_inarrivo') {
-            return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
-                (o.stato === 'Conferma' || o.stato === 'Da controllare ed inviare' || o.stato === 'Approvato ed Inviato' || o.stato === 'Ordine confermato ed inviato al Fornitore'));
+            if (filtroAttivoUrl === 'preventivi_aperti') {
+                return arr[5] === 0;
+            } else if (filtroAttivoUrl === 'preventivi_confermati') {
+                return arr[5] === 1;
+            } else if (filtroAttivoUrl === 'contratti_firmati') {
+                return arr[9] === 1;
+            } else if (filtroAttivoUrl === 'fatture_inattesa') {
+                return arr[10] === 1 || arr[11] === 1;
+            } else if (filtroAttivoUrl === 'ordini_inattesa') {
+                return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
+                    (o.stato === 'Ordine inviato' || o.stato === 'Inviato' || o.stato === 'Richiesta Inviata' || o.stato === 'In Modifica'));
+            } else if (filtroAttivoUrl === 'materiale_inarrivo') {
+                return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
+                    (o.stato === 'Conferma' || o.stato === 'Da controllare ed inviare' || o.stato === 'Approvato ed Inviato' || o.stato === 'Ordine confermato ed inviato al Fornitore'));
+            }
+        } catch (err) {
+            console.error("Errore nel filtro:", err);
+            return true;
         }
 
         return true;
@@ -278,7 +281,44 @@ function filtraCommesse() {
     disegnaListaCommesse(filtrate);
 }
 
+function disegnaListaCommesse(lista) {
+    const tbody = document.getElementById('tabella-commesse');
+    if(!tbody) return;
+    tbody.innerHTML = ''; 
+    
+    if (!lista || lista.length === 0) { 
+        tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-6 text-center text-gray-500">Nessuna commessa trovata con i filtri selezionati</td></tr>'; 
+        return; 
+    }
+
+    lista.forEach(com => {
+        const index = commesseCorrenti.findIndex(c => String(c.id) === String(com.id));
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+        tr.addEventListener('click', () => apriSchedaCommessa(index)); 
+        
+        const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+        const cantiere = com.nome_cantiere || '--';
+        const sedeTesto = com.sede_gestione ? '<div class="text-[9px] font-bold text-indigo-600 mt-1 uppercase">' + com.sede_gestione + '</div>' : '';
+
+        let bgStato = 'bg-gray-100 text-gray-700';
+        if (com.stato === 'Conclusa') bgStato = 'bg-emerald-100 text-emerald-800 font-bold';
+        if (com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800 font-bold';
+        if (com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800 font-bold';
+        
+        let numCommessa = com.numero || '[Da Definire]';
+        if (numCommessa === '[Pratica Rapida]') numCommessa = '<span class="text-orange-600">⚡ Rapida</span>';
+        
+        tr.innerHTML = '<td class="px-6 py-4 font-semibold text-gray-900">' + numCommessa + ' ' + sedeTesto + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600">' + nomeCliente + '</td>' +
+                       '<td class="px-6 py-4 text-gray-600 font-medium">' + cantiere + '</td>' +
+                       '<td class="px-6 py-4"><span class="px-3 py-1 ' + bgStato + ' rounded-full text-[10px] uppercase tracking-wider">' + (com.stato || 'Preventivo') + '</span></td>';
+        tbody.appendChild(tr);
+    });
+}
+
 function apriSchedaCommessa(index) {
+    if (index === -1) return;
     commessaAttivaIndex = index;
     const com = commesseCorrenti[index];
 
