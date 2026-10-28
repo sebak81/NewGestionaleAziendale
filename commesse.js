@@ -10,6 +10,7 @@ let commesseCorrenti = [];
 let ordiniCommessaCache = [];
 let ordiniGlobaliPerFiltro = [];
 let sediGlobali = []; 
+let totaleCommesse = 0; 
 let logsCorrenti = []; 
 let commessaAttivaIndex = null; 
 let filtroAttivoUrl = 'tutte';
@@ -761,7 +762,9 @@ function impostaStatoPendenteOrdine(nuovoStato) {
     const currentIdx = sequenzaStatiOrdine.indexOf(statoPendenteOrdine); const bgLine = document.createElement('div'); bgLine.className = 'absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full mx-4'; container.appendChild(bgLine);
     
     sequenzaStatiOrdine.forEach((stato, index) => {
-        const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10';
+        const punto = document.createElement('div'); punto.className = 'flex flex-col items-center gap-1 bg-gray-50 px-2 z-10 cursor-pointer';
+        punto.onclick = () => impostaStatoPendenteOrdine(stato);
+
         let iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">' + (index + 1) + '</div>';
         if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) { iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>'; } 
         else if (index === currentIdx) { let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100'; iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>'; }
@@ -772,19 +775,22 @@ function impostaStatoPendenteOrdine(nuovoStato) {
     
     document.getElementById('box-ord-data-conferma').classList.add('hidden'); document.getElementById('box-ord-costo').classList.add('hidden'); document.getElementById('box-ord-presunta').classList.add('hidden'); document.getElementById('box-ord-arrivo').classList.add('hidden');
     
-    if (statoPendenteOrdine === 'Ordine inviato') {
-        azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
-    } else if (statoPendenteOrdine === 'In Modifica') {
+    const oggi = new Date().toISOString().split('T')[0];
+
+    if (statoPendenteOrdine === 'In Modifica') {
+        document.getElementById('gest-ord-data-ordine').value = oggi;
         azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Ordine inviato\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
+    } else if (statoPendenteOrdine === 'Ordine inviato') {
+        azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'Conferma') {
         const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-presunta').classList.remove('hidden');
-        if(!document.getElementById('gest-ord-data-conferma').value) document.getElementById('gest-ord-data-conferma').value = new Date().toISOString().split('T')[0];
+        document.getElementById('gest-ord-data-conferma').value = oggi;
         azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Merce Arrivata\')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>';
     } else if (statoPendenteOrdine === 'Merce Arrivata') {
         const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-arrivo').classList.remove('hidden');
-        if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = new Date().toISOString().split('T')[0];
+        if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = oggi;
         azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>';
     }
 }
