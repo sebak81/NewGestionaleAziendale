@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         commesseCorrenti = [];
         disegnaListaCommesse([]);
         const lblCount = document.getElementById('conteggio-commesse');
-        if(lblCount) lblCount.innerText = '0 commesse (Errore connessione)';
+        if(lblCount) lblCount.innerText = '0 commesse (Errore di caricamento)';
     }
 
     if (idToOpen) {
@@ -141,10 +141,10 @@ async function salvaRiepilogoCommessa() {
 
 async function caricaOrdiniGlobaliPerFiltro() {
     try {
-        const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato, contratti(commessa_id)');
+        const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato');
         if (data) {
             ordiniGlobaliPerFiltro = data.map(o => ({
-                commessa_id: o.commessa_id || (o.contratti ? o.contratti.commessa_id : null),
+                commessa_id: o.commessa_id,
                 stato: o.stato
             }));
         }
@@ -196,18 +196,17 @@ async function caricaSediTendina() {
 async function caricaCommesse() {
     let commesse = [];
     try {
-        let { data, error } = await supabaseClient.from('commesse').select('*, clienti(id, nome_ragione_sociale)').order('updated_at', { ascending: false, nullsFirst: false }); 
-        if (error) { 
-            let { data: rawCommesse, error: err2 } = await supabaseClient.from('commesse').select('*').order('created_at', { ascending: false });
-            if (err2) throw err2;
-            const { data: allClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
-            commesse = (rawCommesse || []).map(com => {
-                if (allClienti) com.clienti = allClienti.find(c => String(c.id) === String(com.cliente_id));
-                return com;
-            });
-        } else {
-            commesse = data || [];
-        }
+        // Caricamento sicuro ordinato per ID discendente (evita errori su colonne di timestamp mancanti)
+        let { data: rawCommesse, error: err2 } = await supabaseClient.from('commesse').select('*').order('id', { ascending: false });
+        if (err2) throw err2;
+        
+        const { data: allClienti } = await supabaseClient.from('clienti').select('id, nome_ragione_sociale');
+        commesse = (rawCommesse || []).map(com => {
+            if (allClienti) {
+                com.clienti = allClienti.find(c => String(c.id) === String(com.cliente_id));
+            }
+            return com;
+        });
     } catch(e) {
         console.error("Errore query commesse:", e);
         commesse = [];
