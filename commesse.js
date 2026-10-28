@@ -31,11 +31,12 @@ const strutturaToDo = [
     { id: 'contr', label: '4. Contratto', sub: [
         { idx: 6, label: 'Ricontrollo da C.O.', triState: false },
         { idx: 7, label: 'Verifica', triState: false },
-        { idx: 8, label: 'Invio al cliente', triState: false }
+        { idx: 8, label: 'Invio al cliente', triState: false },
+        { idx: 9, label: 'Contratto Firmato', triState: false }
     ]},
     { id: 'pag', label: '5. Pagamenti', sub: [
-        { idx: 9, label: 'Acconto', triState: true },
-        { idx: 10, label: 'Saldo', triState: true }
+        { idx: 10, label: 'Acconto', triState: true },
+        { idx: 11, label: 'Saldo', triState: true }
     ]}
 ];
 
@@ -305,15 +306,16 @@ async function cambiaStatoManuale() {
     }
 }
 
+// ================= TO-DO E DIARIO =================
 function disegnaToDo() {
     const container = document.getElementById('todo-container');
     if(!container) return;
     container.innerHTML = '';
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<11; i++) arr[i] = parsed[i] || 0; 
+        for(let i=0; i<12; i++) arr[i] = parsed[i] || 0; 
     }
     
     strutturaToDo.forEach(sezione => {
@@ -338,6 +340,7 @@ function disegnaToDo() {
             }
             
             let disabledClass = '';
+            // Se siamo dopo l'esito preventivo (idx > 5), controlliamo se l'esito (idx 5) è stato impostato su ACCETTATO (valore 1)
             if (item.idx > 5 && arr[5] !== 1) { 
                 disabledClass = ' opacity-40 pointer-events-none grayscale';
             }
@@ -426,10 +429,10 @@ async function confermaToDoNota() {
     btn.innerText = "Salvataggio..."; btn.disabled = true;
 
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<11; i++) arr[i] = parsed[i] || 0;
+        for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
     }
 
     arr[todoPendente.idx] = todoPendente.nextState;
@@ -541,6 +544,7 @@ async function caricaCronologia(commessaId) {
     divLog.innerHTML = html;
 }
 
+// ================= GESTIONE ORDINI FORNITORI =================
 function cambiaSubTabOrdini(tab) { filtroOrdiniCommessa = tab; aggiornaStileTabsOrdini(); disegnaOrdiniCommessa(); }
 
 function aggiornaStileTabsOrdini() {
@@ -777,7 +781,7 @@ function inizializzaListeners() {
         let valNumero = document.getElementById('form-com-numero').value.trim();
         if (valNumero === '') valNumero = '[Da Definire]';
         
-        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0', descrizione_materiali: null };
+        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0,0', descrizione_materiali: null };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
         if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
