@@ -46,15 +46,15 @@
                 <button onclick="apriModaleNuovaCommessa()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"><span>+</span> Nuova commessa</button>
             </div>
 
-            <!-- BARRA DEI FILTRI RAPIDI (COLLEGATA ALLA DASHBOARD) -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-4">
-                <button onclick="impostaFiltroDashboard('tutti')" id="btn-filtro-tutti" class="px-4 py-2 text-xs font-bold bg-[#2e2a5b] text-white rounded-lg shadow-sm whitespace-nowrap transition-colors">Tutte le commesse</button>
-                <button onclick="impostaFiltroDashboard('preventivi_aperti')" id="btn-filtro-preventivi_aperti" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📝 Preventivi Aperti</button>
-                <button onclick="impostaFiltroDashboard('preventivi_confermati')" id="btn-filtro-preventivi_confermati" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">👍 Preventivi Confermati</button>
-                <button onclick="impostaFiltroDashboard('contratti_firmati')" id="btn-filtro-contratti_firmati" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📑 Contratti Firmati</button>
-                <button onclick="impostaFiltroDashboard('ordini_inattesa')" id="btn-filtro-ordini_inattesa" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📦 Ordini da Conf.</button>
-                <button onclick="impostaFiltroDashboard('materiale_inarrivo')" id="btn-filtro-materiale_inarrivo" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">🚚 Materiale in Arrivo</button>
-                <button onclick="impostaFiltroDashboard('fatture_inattesa')" id="btn-filtro-fatture_inattesa" class="px-4 py-2 text-xs font-medium bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">💶 Fatture da Saldare</button>
+            <!-- BARRA FILTRI RAPIDI (Pillole) -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2">
+                <button onclick="applicaFiltroRapido('tutte')" id="pill-tutte" class="px-4 py-2 text-xs font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm whitespace-nowrap transition-colors">Tutte le Commesse</button>
+                <button onclick="applicaFiltroRapido('preventivi_aperti')" id="pill-preventivi_aperti" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📝 Preventivi Aperti</button>
+                <button onclick="applicaFiltroRapido('preventivi_confermati')" id="pill-preventivi_confermati" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">👍 Preventivi Confermati</button>
+                <button onclick="applicaFiltroRapido('contratti_firmati')" id="pill-contratti_firmati" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📑 Contratti Firmati</button>
+                <button onclick="applicaFiltroRapido('ordini_inattesa')" id="pill-ordini_inattesa" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📦 Ordini in Attesa</button>
+                <button onclick="applicaFiltroRapido('materiale_inarrivo')" id="pill-materiale_inarrivo" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">🚚 Materiale in Arrivo</button>
+                <button onclick="applicaFiltroRapido('fatture_inattesa')" id="pill-fatture_inattesa" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">💶 Fatture da Saldare</button>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
