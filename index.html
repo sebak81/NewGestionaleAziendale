@@ -226,13 +226,23 @@
             document.getElementById('kpi-ordini-inattesa').innerText = countOrdiniInAttesa;
             document.getElementById('kpi-inarrivo').innerText = countMaterialeInArrivo;
 
+            // Conteggio sistemazioni aperte dagli interventi di posa
+            const { data: posaAll } = await supabaseClient.from('interventi_posa').select('commessa_id, sistemazione_richiesta');
+            let commesseConSistemazione = new Set();
+            if (posaAll) {
+                posaAll.forEach(p => {
+                    if (p.sistemazione_richiesta) commesseConSistemazione.add(p.commessa_id);
+                });
+            }
+            document.getElementById('kpi-sistemazioni').innerText = commesseConSistemazione.size;
+
+            // Cantieri Recenti
             const divCommesse = document.getElementById('lista-commesse-recenti');
             if (commesseAll && commesseAll.length > 0) {
                 const commesseRecenti = [...commesseAll].sort((a,b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)).slice(0, 6);
                 let htmlCommesse = '';
                 commesseRecenti.forEach(com => {
                     const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
-                    const cantiere = com.nome_cantiere || 'Cantiere non specificato';
                     let numDisplay = com.numero || '[Da Definire]';
                     if (numDisplay === '[Pratica Rapida]') numDisplay = '⚡ Rapida';
                     
@@ -241,11 +251,12 @@
                     if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800';
                     if(com.stato === 'Conclusa' || com.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800';
 
-                    htmlCommesse += '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href=\'commesse.html?id=' + com.id + '\'"><div><div class="flex items-center gap-2 mb-1"><span class="font-bold text-gray-900 text-sm">' + nomeCliente + ' - ' + numDisplay + '</span><span class="px-1.5 py-0.5 ' + bgStato + ' rounded text-[9px] font-bold uppercase tracking-wider">' + (com.stato || 'Preventivo') + '</span></div><p class="text-xs text-gray-500">' + cantiere + '</p></div><span class="text-gray-400 font-bold">&rarr;</span></div>';
+                    htmlCommesse += '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href=\'commesse.html?id=' + com.id + '\'"><div><div class="flex items-center gap-2 mb-1"><span class="font-bold text-gray-900 text-sm">' + nomeCliente + ' - ' + numDisplay + '</span><span class="px-1.5 py-0.5 ' + bgStato + ' rounded text-[9px] font-bold uppercase tracking-wider">' + (com.stato || 'Preventivo') + '</span></div><p class="text-xs text-gray-500">' + (com.nome_cantiere || 'Cantiere non specificato') + '</p></div><span class="text-gray-400 font-bold">&rarr;</span></div>';
                 });
                 divCommesse.innerHTML = htmlCommesse;
             } else { divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>'; }
 
+            // Radar Attività
             const divRadar = document.getElementById('lista-attivita-recenti');
             const { data: logs } = await supabaseClient.from('commesse_log').select('*, commesse(numero, clienti(nome_ragione_sociale))').order('created_at', { ascending: false }).limit(15); 
 
@@ -253,7 +264,7 @@
                 let htmlRadar = '<div class="space-y-4 pt-1">';
                 logs.forEach(log => {
                     const dateObj = new Date(log.created_at);
-                    const isToday = dateObj.toDateString() === new Date().toLocaleDateString();
+                    const isToday = dateObj.toDateString() === new Date().toDateString();
                     const orarioStr = dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
                     const dataStr = isToday ? 'Oggi alle ' + orarioStr : dateObj.toLocaleDateString('it-IT') + ' - ' + orarioStr;
                     
