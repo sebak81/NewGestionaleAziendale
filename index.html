@@ -47,67 +47,77 @@
 
         <div class="flex-1 overflow-y-auto px-8 pb-8 space-y-8 no-scrollbar">
             
-            <!-- KPI / CONTATORI AGGIORNATI CON FILTRI URL -->
-            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <!-- KPI / CONTATORI AGGIORNATI CON LA CASELLA SISTEMAZIONI -->
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3">
                 
                 <!-- 1. Preventivi Aperti -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_aperti'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-lg">📝</div>
-                        <span class="px-2 py-1 bg-gray-100 text-gray-500 rounded text-[9px] font-bold uppercase">In sospeso</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_aperti'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center text-sm">📝</div>
+                        <span class="px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded text-[8px] font-bold uppercase">In sospeso</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="kpi-preventivi-aperti">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Preventivi aperti</p>
+                    <p class="text-xl font-bold text-gray-900" id="kpi-preventivi-aperti">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Preventivi aperti</p>
                 </div>
 
                 <!-- 2. Preventivi Confermati -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_confermati'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">👍</div>
-                        <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-[9px] font-bold uppercase">Accettati</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-emerald-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=preventivi_confermati'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">👍</div>
+                        <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[8px] font-bold uppercase">Accettati</span>
                     </div>
-                    <p class="text-2xl font-bold text-emerald-700" id="kpi-preventivi-confermati">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Preventivi confermati</p>
+                    <p class="text-xl font-bold text-emerald-700" id="kpi-preventivi-confermati">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Preventivi confermati</p>
                 </div>
 
                 <!-- 3. Contratti Firmati -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-blue-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=contratti_firmati'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg">📑</div>
-                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[9px] font-bold uppercase">Firmati</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-blue-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=contratti_firmati'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm">📑</div>
+                        <span class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[8px] font-bold uppercase">Firmati</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="kpi-contratti-firmati">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Contratti firmati</p>
+                    <p class="text-xl font-bold text-gray-900" id="kpi-contratti-firmati">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Contratti firmati</p>
                 </div>
 
                 <!-- 4. Ordini da Confermare / Modificare -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-orange-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=ordini_inattesa'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-lg">📦</div>
-                        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded text-[9px] font-bold uppercase">Da Conf.</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-orange-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=ordini_inattesa'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-sm">📦</div>
+                        <span class="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-[8px] font-bold uppercase">Da Conf.</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="kpi-ordini-inattesa">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Ordini inviati / In modifica</p>
+                    <p class="text-xl font-bold text-gray-900" id="kpi-ordini-inattesa">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Ordini inviati</p>
                 </div>
 
                 <!-- 5. Materiale in Arrivo -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-teal-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=materiale_inarrivo'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center text-lg">🚚</div>
-                        <span class="px-2 py-1 bg-teal-100 text-teal-800 rounded text-[9px] font-bold uppercase">In Arrivo</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-teal-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=materiale_inarrivo'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center text-sm">🚚</div>
+                        <span class="px-1.5 py-0.5 bg-teal-100 text-teal-800 rounded text-[8px] font-bold uppercase">In Arrivo</span>
                     </div>
-                    <p class="text-2xl font-bold text-gray-900" id="kpi-inarrivo">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Materiale confermato</p>
+                    <p class="text-xl font-bold text-gray-900" id="kpi-inarrivo">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Materiale confermato</p>
                 </div>
 
                 <!-- 6. Fatture non ancora saldate -->
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-indigo-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=fatture_inattesa'">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">💶</div>
-                        <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-[9px] font-bold uppercase">Da Saldare</span>
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-indigo-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=fatture_inattesa'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">💶</div>
+                        <span class="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[8px] font-bold uppercase">Da Saldare</span>
                     </div>
-                    <p class="text-2xl font-bold text-indigo-900" id="kpi-fatture-inattesa">-</p>
-                    <p class="text-[11px] text-gray-500 mt-1">Fatture inviate non pagate</p>
+                    <p class="text-xl font-bold text-indigo-900" id="kpi-fatture-inattesa">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Fatture non pagate</p>
+                </div>
+
+                <!-- 7. Sistemazioni da fare (Nuova) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col hover:border-red-500 transition-colors cursor-pointer" onclick="window.location.href='commesse.html?filtro=sistemazioni_aperte'">
+                    <div class="flex justify-between items-start mb-2">
+                        <div class="w-7 h-7 rounded-full bg-red-50 text-red-600 flex items-center justify-center text-sm">🛠️</div>
+                        <span class="px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-[8px] font-bold uppercase">Da Sistemare</span>
+                    </div>
+                    <p class="text-xl font-bold text-red-700" id="kpi-sistemazioni">-</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Sistemazioni aperte</p>
                 </div>
             </div>
 
