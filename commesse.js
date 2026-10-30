@@ -40,6 +40,9 @@ const strutturaToDo = [
     { id: 'pag', label: '5. Pagamenti', sub: [
         { idx: 10, label: 'Acconto', triState: true },
         { idx: 11, label: 'Saldo', triState: true }
+    ]},
+    { id: 'chiusura', label: '6. Chiusura & Consegna', sub: [
+        { idx: 12, label: 'Commessa Conclusa / Chiusa', triState: false }
     ]}
 ];
 
