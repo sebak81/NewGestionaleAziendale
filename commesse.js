@@ -393,25 +393,7 @@ function aggiornaDatiSchedaUI() {
     document.getElementById('testo-riepilogo-commessa').classList.add('hidden');
     document.getElementById('btn-salva-riepilogo').classList.add('hidden');
 
-    const selStato = document.getElementById('scheda-select-stato');
-    if(selStato) selStato.value = com.stato || 'Preventivo';
-
     document.getElementById('data-nota-libera').value = new Date().toISOString().split('T')[0];
-}
-
-async function cambiaStatoManuale() {
-    const com = commesseCorrenti[commessaAttivaIndex];
-    const nuovoStato = document.getElementById('scheda-select-stato').value;
-    if(com.stato === nuovoStato) return;
-    
-    const { error } = await supabaseClient.from('commesse').update({ stato: nuovoStato }).eq('id', com.id);
-    if(!error) {
-        await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '🔄 Stato commessa modificato in: ' + nuovoStato, autore: UTENTE_CORRENTE }]);
-        com.stato = nuovoStato; caricaCronologia(com.id); caricaCommesse(); 
-    } else {
-        alert("Errore cambio stato: " + error.message);
-        document.getElementById('scheda-select-stato').value = com.stato || 'Preventivo';
-    }
 }
 
 // ================= TO-DO E DIARIO =================
@@ -826,7 +808,7 @@ async function caricaPosaInterventi() {
     const { data: interventi, error } = await supabaseClient.from('interventi_posa').select('*').eq('commessa_id', com.id).order('data_intervento', { ascending: false });
     if (error) { divLista.innerHTML = '<p class="text-sm text-red-500">Errore DB posa.</p>'; return; }
     
-    rilieviCommessaCache = interventi || []; // Usiamo una cache locale per le modifiche
+    rilieviCommessaCache = interventi || []; 
     if (!interventi || interventi.length === 0) { 
         divLista.innerHTML = '<div class="p-6 bg-gray-50 border border-dashed border-gray-300 rounded-xl text-center"><p class="text-sm text-gray-500">Nessun intervento registrato. Aggiungilo quando vai in cantiere!</p></div>'; 
         return; 
@@ -958,7 +940,7 @@ function inizializzaListeners() {
         if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: 'Dati anagrafici e operativi del cantiere aggiornati', autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
     });
 
-    // SUBMIT MODALE INTERVENTO POSA (GESTISCE INSERIMENTO E MODIFICA CON FLAG SISTEMAZIONE)
+    // SUBMIT MODALE INTERVENTO POSA
     legaSubmit('form-intervento-posa', async (e) => {
         e.preventDefault(); 
         const btn = document.getElementById('btn-salva-posa'); 
