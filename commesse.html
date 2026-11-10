@@ -1,195 +1,8 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3 ESSE - Commesse</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-</head>
-<body class="flex h-screen overflow-hidden text-gray-800 relative">
-
-    <aside class="w-52 bg-white border-r border-gray-200 hidden md:flex flex-col shrink-0">
-        <div class="p-5 flex items-center gap-3">
-            <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
-            <span class="font-bold text-base">3 ESSE</span>
-        </div>
-        <nav class="flex-1 overflow-y-auto px-3 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
-            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Dashboard</a>
-            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
-            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Commesse</a>
-            <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
-        </nav>
-        <div class="p-3 border-t border-gray-200 m-3 rounded-xl bg-gray-50">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xs">S</div>
-                <div class="overflow-hidden"><p class="font-bold text-xs truncate" id="nome-utente-sidebar">Sebastiano</p><p class="text-[10px] text-gray-500 uppercase">Owner</p></div>
-            </div>
-        </div>
-    </aside>
-
-    <main id="vista-elenco" class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="p-8 pb-4">
-            <h1 class="text-xl font-bold">Commesse Operative 🏗️</h1>
-            <p class="text-sm text-gray-500 mt-1">Gestione cantieri, To-Do List e documentazione</p>
-        </header>
-        <div class="flex-1 overflow-y-auto px-8 pb-8 no-scrollbar">
-            <div class="mb-6 flex justify-between items-end">
-                <div><h2 class="text-3xl font-bold tracking-tight">Commesse</h2><p class="text-sm text-gray-500 mt-1" id="conteggio-commesse">Caricamento in corso...</p></div>
-                <button onclick="apriModaleNuovaCommessa()" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"><span>+</span> Nuova commessa</button>
-            </div>
-
-            <!-- BARRA FILTRI RAPIDI (PILLOLE) -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-3 mb-2">
-                <button onclick="applicaFiltroRapido('tutte')" id="pill-tutte" class="px-4 py-2 text-xs font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm whitespace-nowrap transition-colors">Tutte le Commesse</button>
-                <button onclick="applicaFiltroRapido('preventivi_aperti')" id="pill-preventivi_aperti" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📝 Preventivi Aperti</button>
-                <button onclick="applicaFiltroRapido('preventivi_confermati')" id="pill-preventivi_confermati" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">👍 Preventivi Confermati</button>
-                <button onclick="applicaFiltroRapido('contratti_firmati')" id="pill-contratti_firmati" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📑 Contratti Firmati</button>
-                <button onclick="applicaFiltroRapido('ordini_inattesa')" id="pill-ordini_inattesa" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📦 Ordini in Attesa</button>
-                <button onclick="applicaFiltroRapido('materiale_inarrivo')" id="pill-materiale_inarrivo" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">🚚 Materiale in Arrivo</button>
-                <button onclick="applicaFiltroRapido('ordini_arrivati')" id="pill-ordini_arrivati" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">📥 Ordini Arrivati</button>
-                <button onclick="applicaFiltroRapido('fatture_inattesa')" id="pill-fatture_inattesa" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">💶 Fatture da Saldare</button>
-                <button onclick="applicaFiltroRapido('sistemazioni_aperte')" id="pill-sistemazioni_aperte" class="px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors">🛠️ Sistemazioni Aperte</button>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1 relative"><input type="text" id="input-ricerca-commesse" onkeyup="filtraCommesse()" placeholder="Cerca numero commessa o cliente..." class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]"><span class="absolute left-3 top-2 text-gray-400">🔍</span></div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm"><thead class="bg-gray-50/50 text-xs uppercase font-semibold text-gray-500 border-b border-gray-100"><tr><th class="px-6 py-4">Numero & Sede</th><th class="px-6 py-4">Cliente Principale</th><th class="px-6 py-4">Nome Cantiere / Lavoro</th><th class="px-6 py-4">Fase Corrente</th></tr></thead><tbody id="tabella-commesse" class="divide-y divide-gray-100"></tbody></table>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div id="vista-scheda" class="hidden absolute inset-0 bg-[#f8fafc] z-40 overflow-y-auto flex-col">
-        <div class="bg-white px-8 py-4 flex items-center justify-between border-b border-gray-200 shadow-sm sticky top-0 z-10">
-            <div class="flex items-center gap-4">
-                <button onclick="chiudiScheda()" class="text-gray-500 hover:text-gray-900 transition-colors flex items-center gap-2 text-sm font-medium"><span>&larr;</span> Torna a Commesse</button>
-                <div class="h-6 w-px bg-gray-300"></div>
-                <div class="flex items-center gap-3">
-                    <h2 class="text-2xl font-bold text-gray-900" id="scheda-titolo">COM-0000/000</h2>
-                    <span id="scheda-badge-sede" class="hidden px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded text-[10px] font-bold uppercase tracking-wider border border-indigo-200"></span>
-                </div>
-            </div>
-            <button onclick="apriModaleModifica()" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold border border-gray-200">✏️ Modifica Dati Base</button>
-        </div>
-
-        <div class="p-8 max-w-7xl mx-auto w-full space-y-6">
-            <div class="text-sm text-gray-600 flex flex-wrap items-center gap-2 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                <span class="font-bold text-[#2e2a5b]">Cliente:</span> <span id="scheda-sottotitolo-cliente" class="font-semibold text-gray-900">...</span> <span class="text-gray-400">&bull;</span> <span class="font-bold text-[#2e2a5b]">Cantiere:</span> <span id="scheda-sottotitolo-cantiere" class="text-gray-900">...</span>
-            </div>
-
-            <!-- RIEPILOGO MATERIALI & NOTE -->
-            <div class="bg-yellow-50/50 border border-yellow-200 rounded-xl p-4 relative shadow-sm">
-                <div class="flex justify-between items-center mb-1">
-                    <h3 class="text-sm font-bold text-yellow-800 flex items-center gap-2">📌 Riepilogo Materiali & Promemoria Cantiere</h3>
-                    <button onclick="salvaRiepilogoCommessa()" id="btn-salva-riepilogo" class="hidden text-xs font-bold bg-yellow-200 text-yellow-800 px-3 py-1 rounded-md hover:bg-yellow-300 transition-colors">Salva note</button>
-                </div>
-                <div id="preview-riepilogo-commessa" class="text-sm text-gray-800 cursor-pointer min-h-[30px] p-2 hover:bg-yellow-100/50 rounded transition-colors" onclick="attivaModificaRiepilogo()">
-                    <span class="text-gray-400 italic">Clicca qui per aggiungere materiali o promemoria...</span>
-                </div>
-                <textarea id="testo-riepilogo-commessa" rows="3" class="hidden w-full p-3 bg-white border border-yellow-300 rounded-lg outline-none text-sm text-gray-800 resize-y focus:ring-2 focus:ring-yellow-400" placeholder="Es. 5 Serramenti PVC, 2 Portoncini. (Usa **testo** per fare il grassetto)"></textarea>
-            </div>
-
-            <!-- TABS ORIZZONTALI SNELLITE -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar border-b border-gray-200 pb-px">
-                <button onclick="cambiaTab('todo')" id="tab-btn-todo" class="px-4 py-2 text-sm font-semibold text-[#2e2a5b] border-b-2 border-[#2e2a5b] transition-colors">To-Do & Diario</button>
-                <button onclick="cambiaTab('ordini')" id="tab-btn-ordini" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Ordini Fornitori</button>
-                <button onclick="cambiaTab('posa')" id="tab-btn-posa" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent transition-colors">Posa & Interventi</button>
-            </div>
-
-            <!-- TAB 1: TO-DO LIST E DIARIO -->
-            <div id="tab-content-todo" class="block">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                        <h3 class="text-lg font-bold text-gray-800 mb-6 flex justify-between items-center border-b border-gray-100 pb-3"><span>Checklist Operativa (To-Do)</span><span class="text-xs font-normal text-gray-400">Clicca per avanzare</span></h3>
-                        <div id="todo-container" class="space-y-6"></div>
-                    </div>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col">
-                        <h3 class="text-lg font-bold text-gray-800 mb-2 border-b border-gray-100 pb-3">Diario di Bordo & Note</h3>
-                        <p class="text-xs text-gray-500 mb-5"><strong class="text-[#2e2a5b]">Doppio clic su un'icona o data per modificare/eliminare.</strong></p>
-                        <div class="flex flex-col sm:flex-row items-center gap-3 mb-6 bg-gray-50 p-3 rounded-xl border border-gray-200">
-                            <input type="date" id="data-nota-libera" class="w-full sm:w-36 px-3 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                            <input type="text" id="input-nota-libera" placeholder="Scrivi una nota per il diario..." class="flex-1 w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#2e2a5b]">
-                            <button onclick="salvaNotaLibera()" class="w-full sm:w-auto bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm whitespace-nowrap">Aggiungi</button>
-                        </div>
-                        <div id="lista-cronologia" class="space-y-4 overflow-y-auto max-h-[600px] pr-2 no-scrollbar"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB ORDINI FORNITORI -->
-            <div id="tab-content-ordini" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2"><h3 class="text-lg font-bold text-gray-800">Ordini Fornitori</h3></div>
-                <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 mb-4"><button onclick="cambiaSubTabOrdini('Tutti')" id="subtab-ord-Tutti" class="px-4 py-2 text-sm font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm">Registro Ordini</button><button onclick="cambiaSubTabOrdini('Ordine inviato')" id="subtab-ord-Ordineinviato" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-200 rounded-lg">Inviati</button><button onclick="cambiaSubTabOrdini('In Modifica')" id="subtab-ord-InModifica" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg">In Modifica</button><button onclick="cambiaSubTabOrdini('Conferma')" id="subtab-ord-Conferma" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg">Confermati</button><button onclick="cambiaSubTabOrdini('Merce Arrivata')" id="subtab-ord-MerceArrivata" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-lg">Merce Arrivata</button></div>
-                <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200"><table class="w-full text-left text-sm"><thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b"><tr><th class="px-4 py-3">Fornitore</th><th class="px-4 py-3">Materiale</th><th class="px-4 py-3">Data</th><th class="px-4 py-3">Stato</th><th class="px-4 py-3 text-center">Azioni</th></tr></thead><tbody id="lista-ordini-commessa" class="divide-y divide-gray-100"></tbody></table></div>
-                <div class="text-right"><button onclick="apriModaleNuovoOrdineDaCommessa()" class="text-xs font-bold text-white bg-blue-600 px-4 py-2 rounded shadow-sm">+ Nuovo Ordine Fornitore</button></div>
-            </div>
-
-            <!-- TAB POSA IN OPERA -->
-            <div id="tab-content-posa" class="hidden space-y-4">
-                <div class="flex justify-between items-center mb-2"><h3 class="text-lg font-bold text-gray-800">Registro Uscite e Posa</h3><button onclick="apriModalePosa()" class="text-sm font-semibold text-white bg-[#2e2a5b] px-4 py-2 rounded-lg">+ Nuovo Intervento</button></div>
-                <div id="lista-interventi-posa" class="space-y-3"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALI DI BASE -->
-    <div id="modal-modifica-log" class="hidden fixed inset-0 bg-slate-900/60 z-[80] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg flex flex-col overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50"><div><h3 class="text-lg font-bold text-gray-900">Modifica Record Diario</h3></div><button type="button" onclick="chiudiModaleModificaLog()" class="text-gray-400 text-2xl leading-none">&times;</button></div><div class="p-6 space-y-4"><input type="hidden" id="mod-log-id"><div><label class="block text-sm font-medium mb-1">Azione Registrata</label><input type="text" id="mod-log-azione" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div><div><label class="block text-sm font-medium mb-1">Nota Libera</label><textarea id="mod-log-nota" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></textarea></div><div><label class="block text-sm font-medium mb-1">Data (Retroattiva)</label><input type="datetime-local" id="mod-log-data" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div></div><div class="p-5 border-t border-gray-100 flex justify-between gap-3 bg-gray-50"><button type="button" onclick="eliminaLog()" class="text-sm font-bold text-red-600 hover:text-red-800">🗑️ Elimina Record</button><div class="flex gap-2"><button type="button" onclick="chiudiModaleModificaLog()" class="px-4 py-2 rounded-lg text-sm font-semibold bg-white border border-gray-200">Annulla</button><button type="button" onclick="salvaModificaLog()" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold">Salva Modifiche</button></div></div></div></div>
-    
-    <div id="modal-gestisci-ordine" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div>
-                    <h3 class="text-lg font-bold text-[#2e2a5b]" id="titolo-gestione-ordine">Aggiorna Ordine Fornitore</h3>
-                    <p class="text-xs text-gray-500" id="sottotitolo-gestione-ordine">...</p>
-                </div>
-                <button type="button" onclick="chiudiModaleGestioneOrdine()" class="text-gray-400 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6 overflow-y-auto no-scrollbar">
-                <form id="form-gestisci-ordine" class="space-y-4">
-                    <input type="hidden" id="gest-ord-id">
-                    <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 mb-6">
-                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Stato Avanzamento</h4>
-                        <div class="relative flex justify-between items-center w-full mb-6 px-4" id="stepper-container-ordine"></div>
-                        <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200/60" id="stepper-azioni-ordine"></div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Inserimento Ordine</label><input type="date" id="gest-ord-data-ordine" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Numero Revisione</label><div class="flex items-center"><input type="number" min="0" id="gest-ord-revisione" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-l-lg outline-none text-center font-bold"><button type="button" onclick="document.getElementById('gest-ord-revisione').stepUp()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-r-lg font-bold border border-l-0">+1</button></div></div>
-                        <div id="box-ord-data-conferma" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Data Invio Conferma</label><input type="date" id="gest-ord-data-conferma" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div id="box-ord-costo" class="hidden col-span-1"><label class="block text-sm font-medium text-gray-700 mb-1">Costo Nostro (€)</label><input type="number" step="0.01" id="gest-ord-costo-conf" class="w-full px-4 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 font-bold rounded-lg outline-none"></div>
-                        <div id="box-ord-presunta" class="hidden col-span-2 sm:col-span-1"><label class="block text-sm font-bold text-blue-900 mb-1">Data Presunta Consegna</label><input type="date" id="gest-ord-data-presunta" class="w-full px-4 py-2 bg-white border border-blue-200 rounded-lg outline-none font-bold text-gray-700"></div>
-                        <div id="box-ord-arrivo" class="hidden col-span-2 sm:col-span-1 bg-teal-50 border border-teal-200 rounded-lg p-3"><label class="block text-sm font-bold text-teal-900 mb-1">Data Arrivo Merce</label><input type="date" id="gest-ord-data-arrivo" class="w-full px-4 py-2 bg-white border border-teal-200 rounded-lg outline-none font-bold text-teal-800"></div>
-                        <div class="col-span-2 mt-2"><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale / Note</label><textarea id="gest-ord-annotazioni" rows="2" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
-                    </div>
-                    <div class="p-4 border border-dashed border-gray-300 rounded-lg bg-gray-50 mt-4"><label class="block text-sm font-medium text-gray-700 mb-2">Allega Documento</label><input type="file" id="gest-ord-file" accept=".pdf,.doc,.docx,.jpg,.png" class="w-full text-sm text-gray-600 cursor-pointer"></div>
-                </form>
-            </div>
-            <div class="p-6 border-t border-gray-100 flex justify-between items-center bg-white rounded-b-2xl shrink-0">
-                <button type="button" onclick="eliminaOrdineDaCommessa()" class="text-xs font-bold text-red-600">🗑️ Elimina Ordine</button>
-                <div class="flex gap-3"><button type="button" onclick="chiudiModaleGestioneOrdine()" class="px-5 py-2.5 rounded-lg text-sm font-semibold bg-gray-100">Annulla</button><button type="submit" form="form-gestisci-ordine" id="btn-salva-gest-ordine" class="bg-[#2e2a5b] text-white px-8 py-2.5 rounded-lg text-sm font-bold">Salva Ordine</button></div>
-            </div>
-        </div>
-    </div>
-    
-    <div id="modal-nuovo-ordine-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0"><div><h3 class="text-lg font-bold">Nuova Richiesta Fornitore</h3></div><button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="text-gray-400 text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto no-scrollbar"><form id="form-nuovo-ordine-commessa" class="space-y-4"><div class="bg-orange-50 border border-orange-200 p-3 rounded-lg flex items-center gap-3"><input type="checkbox" id="form-ord-sostituzione" class="w-5 h-5 text-orange-600 border-gray-300 rounded cursor-pointer"><label for="form-ord-sostituzione" class="block text-sm font-bold text-orange-800 cursor-pointer">Segna come Sostituzione</label></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Ordine *</label><input type="date" id="form-ord-new-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm font-bold text-gray-800"></div>
-        <div><label class="block text-sm font-medium text-gray-700 mb-1">Fornitore *</label><select id="form-ord-new-fornitore" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none text-sm"></select></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Descrizione Materiale *</label><textarea id="form-ord-new-descrizione" rows="2" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div></form></div><div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="chiudiModaleNuovoOrdineDaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button><button type="submit" form="form-nuovo-ordine-commessa" id="btn-salva-nuovo-ordine-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea Ordine</button></div></div></div>
-    
-    <!-- MODALE POSA AGGIORNATO CON MENU A TENDINA E GESTIONE RISOLUZIONE -->
+<!-- MODALE POSA AGGIORNATO: SUPERVISORE SEMPRE OBBLIGATORIO -->
     <div id="modal-intervento-posa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col">
             <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0">
-                <div><h3 class="text-lg font-bold" id="modal-posa-titolo">Registra Intervento di Posa</h3></div>
+                <div><h3 class="text-lg font-bold" id="modal-posa-titolo">Registra Intervento</h3></div>
                 <button type="button" onclick="chiudiModalePosa()" class="text-gray-400 text-2xl leading-none">&times;</button>
             </div>
             <div class="p-6 overflow-y-auto no-scrollbar">
@@ -199,7 +12,7 @@
                     <!-- MENU A TENDINA CATEGORIA INTERVENTO -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo Intervento *</label>
-                        <select id="posa-tipo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-[#2e2a5b]">
+                        <select id="posa-tipo" onchange="gestisciCampiModalePosa()" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none font-bold text-[#2e2a5b]">
                             <option value="Posa Completata">Posa Completata</option>
                             <option value="Posa Parziale">Posa Parziale</option>
                             <option value="Sistemazioni da Fare">Sistemazioni da Fare</option>
@@ -207,21 +20,36 @@
                         </select>
                     </div>
 
-                    <!-- BLOCCO RISOLUZIONE (VISIBILE SOLO SE SISTEMAZIONE O NON CONFORMITA) -->
+                    <!-- BLOCCO SUPERVISORE (SEMPRE VISIBILE E OBBLIGATORIO) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Supervisore / Responsabile (Rilevatore o Supervisore Cantiere) *</label>
+                        <input type="text" id="posa-supervisore" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none">
+                    </div>
+
+                    <!-- BLOCCO RISOLUZIONE (SOLO PER SISTEMAZIONI / NON CONFORMITA) -->
                     <div id="box-risoluzione-posa" class="hidden bg-gray-50 border border-gray-200 p-3 rounded-lg space-y-3">
                         <div class="flex items-center gap-3">
                             <input type="checkbox" id="posa-risolto" onchange="toggleBoxRisolto()" class="w-5 h-5 text-emerald-600 border-gray-300 rounded cursor-pointer">
-                            <label for="posa-risolto" class="block text-sm font-bold text-gray-800 cursor-pointer">Segna come Risolto / Completato</label>
+                            <label for="posa-risolto" class="block text-sm font-bold text-gray-800 cursor-pointer">Segna come Sistemazione Risolta / Completata</label>
                         </div>
-                        <div id="subbox-data-risoluzione" class="hidden">
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Data Risoluzione</label>
-                            <input type="date" id="posa-data-risoluzione" class="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm">
+                        <div id="subbox-risoluzione" class="hidden space-y-3 pt-2 border-t border-gray-200">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Data Risoluzione *</label>
+                                <input type="date" id="posa-data-risoluzione" class="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Squadra che ha eseguito la sistemazione *</label>
+                                <input type="text" id="posa-squadra-risoluzione" class="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm" placeholder="Nome posatore / squadra">
+                            </div>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="block text-sm font-medium text-gray-700 mb-1">Data Intervento *</label><input type="date" id="posa-data" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
-                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Squadra / Posatore *</label><input type="text" id="posa-squadra" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none"></div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1" id="label-squadra">Squadra / Posatore *</label>
+                            <input type="text" id="posa-squadra" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none">
+                        </div>
                     </div>
                     <div><label class="block text-sm font-medium text-gray-700 mb-1">Lavori eseguiti / Note *</label><textarea id="posa-note" rows="3" required class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none text-sm"></textarea></div>
                 </form>
@@ -229,35 +57,3 @@
             <div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="chiudiModalePosa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700">Annulla</button><button type="submit" form="form-intervento-posa" id="btn-salva-posa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Intervento</button></div>
         </div>
     </div>
-    
-    <div id="modal-nuova-commessa" class="hidden fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0"><div><h3 class="text-lg font-bold">Nuova Commessa</h3></div><button type="button" onclick="chiudiModaleNuovaCommessa()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto no-scrollbar"><form id="form-nuova-commessa" class="space-y-5"><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Cliente Principale *</label><select id="form-com-cliente" required class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none"></select><div class="mt-2 flex items-center gap-2"><input type="checkbox" id="check-copia-dati" class="rounded border-gray-300 text-[#2e2a5b] w-4 h-4 cursor-pointer"><label for="check-copia-dati" class="text-xs text-gray-600 cursor-pointer">Usa i dati per cantiere</label></div></div><div><label class="block text-sm font-medium text-gray-700 mb-1">Numero / Riferimento</label><input type="text" id="form-com-numero" placeholder="Lascia vuoto se rapida" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg font-bold text-gray-600 outline-none focus:ring-2 focus:ring-[#2e2a5b]"></div></div><div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100"><label class="block text-sm font-bold text-[#2e2a5b] mb-1">Sede di Gestione *</label><select id="form-com-sede" required class="w-full px-4 py-2 bg-white border border-indigo-200 rounded-lg text-sm outline-none"><option value="">Caricamento sedi...</option></select></div><div class="p-4 bg-blue-50 border border-blue-100 rounded-lg"><div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 mb-1">Riferimento cantiere</label><input type="text" id="form-com-nome-cantiere" placeholder="Es. descrizione breve del cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div><div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-sm font-medium text-gray-700 mb-1">Indirizzo</label><input type="text" id="form-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Città</label><input type="text" id="form-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div><div class="grid grid-cols-12 gap-4 pt-3 border-t border-blue-200/50"><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Referente</label><input type="text" id="form-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Telefono</label><input type="text" id="form-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="form-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div></div></div></form></div><div class="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="chiudiModaleNuovaCommessa()" class="px-5 py-2.5 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-200">Annulla</button><button type="submit" form="form-nuova-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Crea</button></div></div></div>
-    
-    <div id="modal-modifica-commessa" class="hidden fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"><div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col"><div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-2xl shrink-0"><div><h3 class="text-lg font-bold">Modifica Dati Cantiere</h3></div><button type="button" onclick="chiudiModaleModifica()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button></div><div class="p-6 overflow-y-auto no-scrollbar"><form id="form-modifica-commessa" class="space-y-4"><input type="hidden" id="mod-com-id"> <div class="pt-2 space-y-4">
-        <div><label class="block text-xs font-medium text-gray-500 mb-1">Numero Commessa</label><input type="text" id="mod-com-numero" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-bold outline-none focus:ring-2 focus:ring-[#2e2a5b]"></div>
-        <div class="mb-4"><label class="block text-xs font-bold text-[#2e2a5b] mb-1">Sede di Gestione</label><select id="mod-com-sede" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none"></select></div><div><label class="block text-xs font-medium text-gray-500 mb-1">Riferimento cantiere</label><input type="text" id="mod-com-nome-cantiere" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm"></div><div class="grid grid-cols-12 gap-4"><div class="col-span-8"><label class="block text-xs font-medium text-gray-500 mb-1">Indirizzo</label><input type="text" id="mod-com-indirizzo" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Città</label><input type="text" id="mod-com-citta" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div><div class="grid grid-cols-12 gap-4 pt-2"><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Referente</label><input type="text" id="mod-com-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Telefono</label><input type="text" id="mod-com-tel-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div><div class="col-span-4"><label class="block text-xs font-medium text-gray-500 mb-1">Email</label><input type="email" id="mod-com-email-referente" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg"></div></div></div></form></div><div class="p-6 border-t border-gray-100 flex justify-between gap-3 bg-gray-50 rounded-b-2xl shrink-0"><button type="button" onclick="confermaEliminazioneCommessa()" class="text-sm font-bold text-red-600 hover:text-red-800 flex items-center gap-1">🗑️ Elimina Cantiere</button><div class="flex gap-3"><button type="button" onclick="chiudiModaleModifica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2.5 rounded-lg text-sm font-semibold">Annulla</button><button type="submit" form="form-modifica-commessa" class="bg-[#2e2a5b] text-white px-5 py-2.5 rounded-lg text-sm font-semibold">Salva Modifiche</button></div></div></div></div>
-
-    <!-- MODALE NOTE TO-DO -->
-    <div id="modal-todo-nota" class="hidden fixed inset-0 bg-slate-900/60 z-[70] flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm flex flex-col overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <div>
-                    <h3 class="text-lg font-bold text-gray-900" id="todo-nota-titolo">Conferma Azione</h3>
-                    <p class="text-xs text-gray-500" id="todo-nota-sub">...</p>
-                </div>
-                <button type="button" onclick="annullaToDoNota()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
-            </div>
-            <div class="p-6">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Aggiungi una nota (Opzionale)</label>
-                <textarea id="todo-nota-testo" rows="3" class="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2e2a5b]" placeholder="Es. Documentazione inviata via email..."></textarea>
-            </div>
-            <div class="p-5 border-t border-gray-100 flex justify-end gap-3 bg-gray-50">
-                <button type="button" onclick="annullaToDoNota()" class="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100">Annulla</button>
-                <button type="button" onclick="confermaToDoNota()" id="btn-conferma-todo" class="bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-sm font-bold shadow-sm">Conferma</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="config.js"></script>
-    <script src="commesse.js"></script>
-</body>
-</html>
