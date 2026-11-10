@@ -43,7 +43,7 @@ const strutturaToDo = [
         { idx: 11, label: 'Saldo', triState: true }
     ]},
     { id: 'chiusura', label: '6. Chiusura & Consegna', sub: [
-        { idx: 12, label: 'Commessa Conclusa / Chiusa', triState: false }
+        { idx: 12, label: 'Commessa Conclusa / Chiudi', triState: false }
     ]}
 ];
 
@@ -237,6 +237,43 @@ function applicaFiltroRapido(tipoFiltro) {
     filtraCommesse();
 }
 
+function aggiornaStileNotifichePillole() {
+    // Verifica se ci sono sistemazioni aperte globali
+    const haSistemazioni = commesseCorrenti.some(c => {
+        return posaGlobaliPerFiltro.some(p => String(p.commessa_id) === String(c.id) && (p.tipo_intervento === 'Sistemazioni da Fare' || p.tipo_intervento === 'Rapporto Non Conformita') && p.risolto !== true);
+    });
+
+    // Verifica se ci sono fatture in attesa globali
+    const haFatture = commesseCorrenti.some(c => {
+        let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+        if (c.fasi_cantiere) {
+            let parsed = c.fasi_cantiere.split(',').map(Number);
+            for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
+        }
+        return arr[10] === 1 || arr[11] === 1;
+    });
+
+    // Pillola Sistemazioni
+    const pillSistemazioni = document.getElementById('pill-sistemazioni_aperte');
+    if (pillSistemazioni && filtroAttivoUrl !== 'sistemazioni_aperte') {
+        if (haSistemazioni) {
+            pillSistemazioni.className = "px-4 py-2 text-xs font-bold text-red-800 bg-red-100 border border-red-300 rounded-lg whitespace-nowrap transition-colors animate-pulse";
+        } else {
+            pillSistemazioni.className = "px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
+        }
+    }
+
+    // Pillola Fatture
+    const pillFatture = document.getElementById('pill-fatture_inattesa');
+    if (pillFatture && filtroAttivoUrl !== 'fatture_inattesa') {
+        if (haFatture) {
+            pillFatture.className = "px-4 py-2 text-xs font-bold text-yellow-800 bg-yellow-100 border border-yellow-300 rounded-lg whitespace-nowrap transition-colors";
+        } else {
+            pillFatture.className = "px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
+        }
+    }
+}
+
 function filtraCommesse() {
     const searchInput = document.getElementById('input-ricerca-commesse');
     const q = searchInput ? searchInput.value.toLowerCase() : '';
@@ -248,6 +285,7 @@ function filtraCommesse() {
             if (id === filtroAttivoUrl) {
                 b.className = "px-4 py-2 text-xs font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm whitespace-nowrap transition-colors";
             } else {
+                // Se non è attivo ma ha notifiche, aggiorno dopo con aggiornaStileNotifichePillole
                 b.className = "px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
             }
         }
@@ -299,6 +337,7 @@ function filtraCommesse() {
     });
 
     disegnaListaCommesse(filtrate);
+    aggiornaStileNotifichePillole();
 }
 
 function disegnaListaCommesse(lista) {
@@ -342,7 +381,6 @@ async function apriSchedaCommessa(index) {
     commessaAttivaIndex = index;
     let com = commesseCorrenti[index];
 
-    // SINCRONIZZAZIONE AUTOMATICA DEI FLAG TO-DO IN BASE AI DATI REALI
     await verificaSincronizzazioneFasi(com);
 
     aggiornaDatiSchedaUI();
@@ -355,7 +393,6 @@ async function apriSchedaCommessa(index) {
     window.history.replaceState({}, document.title, window.location.pathname);
 }
 
-// Funzione che controlla gli ordini e le pose e spunta i flag automaticamente se ci sono dati
 async function verificaSincronizzazioneFasi(com) {
     let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
@@ -365,26 +402,22 @@ async function verificaSincronizzazioneFasi(com) {
 
     let modificato = false;
 
-    // Se lo stato è Conclusa, tutto è completato
     if (com.stato === 'Conclusa') {
         for(let i=0; i<13; i++) {
             if (arr[i] === 0) { arr[i] = 1; modificato = true; }
         }
     }
 
-    // Se ci sono ordini registrati per questa commessa, le fasi iniziali fino a contratto sono superate
     const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('commessa_id', com.id);
     if (ordini && ordini.length > 0) {
         for(let i=0; i<=9; i++) {
             if (arr[i] === 0) { arr[i] = 1; modificato = true; }
         }
-        // Se c'è almeno un ordine con merce arrivata, spuntiamo l'acconto (10)
         if (ordini.some(o => o.stato === 'Merce Arrivata' || o.stato === 'Merce Arrivata in Magazzino')) {
             if (arr[10] === 0) { arr[10] = 1; modificato = true; }
         }
     }
 
-    // Se ci sono interventi di posa registrati
     const { data: posa } = await supabaseClient.from('interventi_posa').select('id, tipo_intervento').eq('commessa_id', com.id);
     if (posa && posa.length > 0) {
         for(let i=0; i<=9; i++) {
