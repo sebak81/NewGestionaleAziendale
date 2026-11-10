@@ -792,19 +792,19 @@ function impostaStatoPendenteOrdine(nuovoStato) {
 
     if (statoPendenteOrdine === 'In Modifica') {
         document.getElementById('gest-ord-data-ordine').value = oggi;
-        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Ordine inviato\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine('Ordine inviato')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'Ordine inviato') {
-        azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
+        azioniBox.innerHTML = '<div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-bold text-red-600 bg-red-50 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-lg shadow-sm mr-2 flex items-center gap-1">⚠️ Da Modificare</button><button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg shadow-sm">Passa a Conferma &rarr;</button>';
     } else if (statoPendenteOrdine === 'Conferma') {
         const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-presunta').classList.remove('hidden');
         document.getElementById('gest-ord-data-conferma').value = oggi;
-        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'In Modifica\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine(\'Merce Arrivata\')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>';
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine('In Modifica')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button><div class="flex-1"></div><button type="button" onclick="impostaStatoPendenteOrdine('Merce Arrivata')" class="text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-lg shadow-sm">Passa a Merce Arrivata &rarr;</button>';
     } else if (statoPendenteOrdine === 'Merce Arrivata') {
         const lConferma = document.getElementById('box-ord-data-conferma'); lConferma.classList.remove('hidden'); lConferma.querySelector('label').innerText = "Data Invio Conferma";
         document.getElementById('box-ord-costo').classList.remove('hidden'); document.getElementById('box-ord-arrivo').classList.remove('hidden');
         if(!document.getElementById('gest-ord-data-arrivo').value) document.getElementById('gest-ord-data-arrivo').value = oggi;
-        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine(\'Conferma\')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>';
+        azioniBox.innerHTML = '<button type="button" onclick="impostaStatoPendenteOrdine('Conferma')" class="text-xs font-medium text-gray-600 bg-white border border-gray-300 px-3 py-2 rounded-lg">&larr; Indietro</button>';
     }
 }
 
@@ -812,7 +812,7 @@ async function eliminaOrdineDaCommessa() {
     const idOrdine = document.getElementById('gest-ord-id').value;
     if(!confirm("Sei sicuro di voler eliminare definitivamente questo ordine?")) return;
     const { error } = await supabaseClient.from('ordini_fornitori').delete().eq('id', idOrdine);
-    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: `Eliminato Ordine dal sistema`, autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
+    if(!error){ chiudiModaleGestioneOrdine(); caricaOrdiniDiQuestaCommessa(); await supabaseClient.from('commesse_log').insert([{ commessa_id: commesseCorrenti[commessaAttivaIndex].id, azione: \`Eliminato Ordine dal sistema\`, autore: UTENTE_CORRENTE }]); caricaCronologia(commesseCorrenti[commessaAttivaIndex].id); } else { alert("Errore durante l'eliminazione: " + error.message); }
 }
 
 // ================= GESTIONE POSA E INTERVENTI =================
@@ -831,26 +831,64 @@ async function caricaPosaInterventi() {
     }
     
     let html = '';
-    interventi.forEach((int, index) => {
+    interventi.forEach((int) => {
         const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; 
         const dataIta = int.data_intervento ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
         
         let badgeTipo = '<span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">' + (int.tipo_intervento || 'Posa Completata') + '</span>';
+        let infoSupervisore = int.supervisore ? '<span class="ml-2 text-xs text-gray-600">👔 Sup: ' + int.supervisore + '</span>' : '';
+        let infoSquadra = int.posatore ? '<span class="ml-2 text-xs text-gray-600">👤 Squadra: ' + int.posatore + '</span>' : '';
         
         let badgeStato = '';
         if (int.tipo_intervento === 'Sistemazioni da Fare' || int.tipo_intervento === 'Rapporto Non Conformita') {
             if (int.risolto) {
-                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">✓ Risolto (' + (int.data_risoluzione || '') + ')</span>';
+                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">✓ Risolto il ' + (int.data_risoluzione || '') + (int.posatore ? ' (' + int.posatore + ')' : '') + '</span>';
             } else {
-                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-bold">⚠️ Aperto</span>';
+                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-bold">⚠️ Da Sistemare</span>';
             }
         }
 
         const note = int.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + int.note + '</p>' : ''; 
         
-        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 text-xs font-semibold text-gray-600">👤 ' + int.posatore + '</span>' + badgeTipo + badgeStato + '</div><div class="flex items-center gap-2"><button onclick="apriModalePosa(' + int.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div></div>' + note + '</div>';
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span>' + badgeTipo + infoSupervisore + infoSquadra + badgeStato + '</div><div class="flex items-center gap-2"><button onclick="apriModalePosa(' + int.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div></div>' + note + '</div>';
     }); 
     divLista.innerHTML = html;
+}
+
+function gestisciCampiModalePosa() {
+    const tipo = document.getElementById('posa-tipo').value;
+    const boxRisoluzione = document.getElementById('box-risoluzione-posa');
+    const inputSquadra = document.getElementById('posa-squadra');
+    const labelSquadra = document.getElementById('label-squadra');
+
+    if (tipo === 'Posa Completata' || tipo === 'Posa Parziale') {
+        boxRisoluzione.classList.add('hidden');
+        document.getElementById('posa-risolto').checked = false;
+        labelSquadra.innerText = 'Squadra / Posatore *';
+        inputSquadra.required = true;
+    } else {
+        boxRisoluzione.classList.remove('hidden');
+        labelSquadra.innerText = 'Squadra / Posatore (Se nota iniziale)';
+        inputSquadra.required = false;
+    }
+}
+
+function toggleBoxRisolto() {
+    const chk = document.getElementById('posa-risolto').checked;
+    const subbox = document.getElementById('subbox-risoluzione');
+    const inputSquadraRes = document.getElementById('posa-squadra-risoluzione');
+    const inputDataRes = document.getElementById('posa-data-risoluzione');
+
+    if (chk) {
+        subbox.classList.remove('hidden');
+        inputSquadraRes.required = true;
+        inputDataRes.required = true;
+        inputDataRes.value = new Date().toISOString().split('T')[0];
+    } else {
+        subbox.classList.add('hidden');
+        inputSquadraRes.required = false;
+        inputDataRes.required = false;
+    }
 }
 
 function apriModalePosa(idStr = null) { 
@@ -862,19 +900,9 @@ function apriModalePosa(idStr = null) {
     document.getElementById('posa-tipo').value = 'Posa Completata';
     document.getElementById('box-risoluzione-posa').classList.add('hidden');
     document.getElementById('posa-risolto').checked = false;
-    document.getElementById('subbox-data-risoluzione').classList.add('hidden');
-
-    // Gestione cambio tipo
-    const selectTipo = document.getElementById('posa-tipo');
-    selectTipo.onchange = function() {
-        if (this.value === 'Sistemazioni da Fare' || this.value === 'Rapporto Non Conformita') {
-            document.getElementById('box-risoluzione-posa').classList.remove('hidden');
-        } else {
-            document.getElementById('box-risoluzione-posa').classList.add('hidden');
-            document.getElementById('posa-risolto').checked = false;
-            document.getElementById('subbox-data-risoluzione').classList.add('hidden');
-        }
-    };
+    document.getElementById('subbox-risoluzione').classList.add('hidden');
+    
+    gestisciCampiModalePosa();
 
     if (idStr) {
         document.getElementById('modal-posa-titolo').innerText = 'Modifica Intervento';
@@ -883,35 +911,28 @@ function apriModalePosa(idStr = null) {
             document.getElementById('posa-id').value = intObj.id;
             document.getElementById('posa-data').value = intObj.data_intervento || '';
             document.getElementById('posa-squadra').value = intObj.posatore || '';
+            document.getElementById('posa-supervisore').value = intObj.supervisore || '';
             document.getElementById('posa-note').value = intObj.note || '';
             document.getElementById('posa-tipo').value = intObj.tipo_intervento || 'Posa Completata';
             
+            gestisciCampiModalePosa();
+
             if (intObj.tipo_intervento === 'Sistemazioni da Fare' || intObj.tipo_intervento === 'Rapporto Non Conformita') {
-                document.getElementById('box-risoluzione-posa').classList.remove('hidden');
                 document.getElementById('posa-risolto').checked = !!intObj.risolto;
+                toggleBoxRisolto();
                 if (intObj.risolto) {
-                    document.getElementById('subbox-data-risoluzione').classList.remove('hidden');
                     document.getElementById('posa-data-risoluzione').value = intObj.data_risoluzione || new Date().toISOString().split('T')[0];
+                    document.getElementById('posa-squadra-risoluzione').value = intObj.posatore || '';
                 }
             }
         }
     } else {
         document.getElementById('posa-data').value = new Date().toISOString().split('T')[0];
-        document.getElementById('posa-squadra').value = UTENTE_CORRENTE;
+        document.getElementById('posa-squadra').value = '';
+        document.getElementById('posa-supervisore').value = UTENTE_CORRENTE;
     }
 
     document.getElementById('modal-intervento-posa').classList.remove('hidden'); 
-}
-
-function toggleBoxRisolto() {
-    const chk = document.getElementById('posa-risolto').checked;
-    const subbox = document.getElementById('subbox-data-risoluzione');
-    if (chk) {
-        subbox.classList.remove('hidden');
-        document.getElementById('posa-data-risoluzione').value = new Date().toISOString().split('T')[0];
-    } else {
-        subbox.classList.add('hidden');
-    }
 }
 
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
@@ -1000,7 +1021,7 @@ function inizializzaListeners() {
         if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: 'Dati anagrafici e operativi del cantiere aggiornati', autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
     });
 
-    // SUBMIT MODALE INTERVENTO POSA (CON GESTIONE TIPO E RISOLUZIONE)
+    // SUBMIT MODALE INTERVENTO POSA
     legaSubmit('form-intervento-posa', async (e) => {
         e.preventDefault(); 
         const btn = document.getElementById('btn-salva-posa'); 
@@ -1011,20 +1032,30 @@ function inizializzaListeners() {
         const idModifica = document.getElementById('posa-id').value;
         const tipoIntervento = document.getElementById('posa-tipo').value;
         const dataIntervento = document.getElementById('posa-data').value;
-        const posatore = document.getElementById('posa-squadra').value.trim();
         const note = document.getElementById('posa-note').value.trim();
+        const supervisore = document.getElementById('posa-supervisore').value.trim();
         
-        const isRisolto = document.getElementById('posa-risolto').checked;
-        const dataRisoluzione = document.getElementById('posa-data-risoluzione').value || null;
+        let posatore = document.getElementById('posa-squadra').value.trim();
+        let isRisolto = false;
+        let dataRisoluzione = null;
+
+        if (tipoIntervento === 'Sistemazioni da Fare' || tipoIntervento === 'Rapporto Non Conformita') {
+            isRisolto = document.getElementById('posa-risolto').checked;
+            if (isRisolto) {
+                dataRisoluzione = document.getElementById('posa-data-risoluzione').value;
+                posatore = document.getElementById('posa-squadra-risoluzione').value.trim(); 
+            }
+        }
 
         const payload = { 
             commessa_id: com.id, 
             tipo_intervento: tipoIntervento,
             data_intervento: dataIntervento, 
-            posatore: posatore, 
+            posatore: posatore || null,
+            supervisore: supervisore || null,
             note: note || null, 
             risolto: isRisolto,
-            data_risoluzione: isRisolto ? dataRisoluzione : null
+            data_risoluzione: dataRisoluzione
         };
 
         let erroreDB = null;
@@ -1032,13 +1063,15 @@ function inizializzaListeners() {
             const { error } = await supabaseClient.from('interventi_posa').update(payload).eq('id', idModifica); 
             erroreDB = error;
             if (!error) { 
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '✏️ Aggiornato intervento: ' + tipoIntervento + ' (' + posatore + ')', nota: note || null, autore: UTENTE_CORRENTE }]); 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '✏️ Aggiornato intervento: ' + tipoIntervento, nota: note || null, autore: UTENTE_CORRENTE }]); 
             }
         } else {
             const { error } = await supabaseClient.from('interventi_posa').insert([payload]); 
             erroreDB = error;
             if (!error) { 
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '🛠️ Registrato: ' + tipoIntervento + ' da ' + posatore, nota: note || null, autore: UTENTE_CORRENTE }]); 
+                let logText = '🛠️ Registrato: ' + tipoIntervento;
+                if (isRisolto) logText += ' (Risolto)';
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: logText, nota: note || null, autore: UTENTE_CORRENTE }]); 
             }
         }
 
