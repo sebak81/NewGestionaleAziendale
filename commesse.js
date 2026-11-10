@@ -10,6 +10,7 @@ let commesseCorrenti = [];
 let ordiniCommessaCache = [];
 let ordiniGlobaliPerFiltro = [];
 let posaGlobaliPerFiltro = [];
+let rilieviCommessaCache = [];
 let sediGlobali = []; 
 let totaleCommesse = 0; 
 let logsCorrenti = []; 
@@ -146,12 +147,9 @@ async function salvaRiepilogoCommessa() {
 
 async function caricaOrdiniGlobaliPerFiltro() {
     try {
-        const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, contratto_id, stato');
+        const { data } = await supabaseClient.from('ordini_fornitori').select('commessa_id, stato');
         if (data) {
-            ordiniGlobaliPerFiltro = data.map(o => ({
-                commessa_id: o.commessa_id,
-                stato: o.stato
-            }));
+            ordiniGlobaliPerFiltro = data;
         }
     } catch(e) {
         ordiniGlobaliPerFiltro = [];
@@ -160,7 +158,7 @@ async function caricaOrdiniGlobaliPerFiltro() {
 
 async function caricaPosaGlobaliPerFiltro() {
     try {
-        const { data } = await supabaseClient.from('interventi_posa').select('commessa_id, sistemazione_richiesta');
+        const { data } = await supabaseClient.from('interventi_posa').select('commessa_id, tipo_intervento, risolto');
         if (data) {
             posaGlobaliPerFiltro = data;
         }
@@ -243,7 +241,7 @@ function filtraCommesse() {
     const searchInput = document.getElementById('input-ricerca-commesse');
     const q = searchInput ? searchInput.value.toLowerCase() : '';
     
-    const idsPillole = ['tutte', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'fatture_inattesa', 'sistemazioni_aperte'];
+    const idsPillole = ['tutte', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'ordini_arrivati', 'fatture_inattesa', 'sistemazioni_aperte'];
     idsPillole.forEach(id => {
         const b = document.getElementById('pill-' + id);
         if(b) {
@@ -266,10 +264,10 @@ function filtraCommesse() {
 
             if (filtroAttivoUrl === 'tutte') return true;
 
-            let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+            let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
             if (c.fasi_cantiere) {
                 let parsed = c.fasi_cantiere.split(',').map(Number);
-                for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
+                for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
             }
 
             if (filtroAttivoUrl === 'preventivi_aperti') {
@@ -286,8 +284,11 @@ function filtraCommesse() {
             } else if (filtroAttivoUrl === 'materiale_inarrivo') {
                 return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
                     (o.stato === 'Conferma' || o.stato === 'Da controllare ed inviare' || o.stato === 'Approvato ed Inviato' || o.stato === 'Ordine confermato ed inviato al Fornitore'));
+            } else if (filtroAttivoUrl === 'ordini_arrivati') {
+                return ordiniGlobaliPerFiltro.some(o => String(o.commessa_id) === String(c.id) && 
+                    (o.stato === 'Merce Arrivata' || o.stato === 'Merce Arrivata in Magazzino'));
             } else if (filtroAttivoUrl === 'sistemazioni_aperte') {
-                return posaGlobaliPerFiltro.some(p => String(p.commessa_id) === String(c.id) && p.sistemazione_richiesta === true);
+                return posaGlobaliPerFiltro.some(p => String(p.commessa_id) === String(c.id) && (p.tipo_intervento === 'Sistemazioni da Fare' || p.tipo_intervento === 'Rapporto Non Conformita') && p.risolto !== true);
             }
         } catch (err) {
             console.error("Errore nel filtro:", err);
@@ -405,10 +406,10 @@ function disegnaToDo() {
     if(!container) return;
     container.innerHTML = '';
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<12; i++) arr[i] = parsed[i] || 0; 
+        for(let i=0; i<13; i++) arr[i] = parsed[i] || 0; 
     }
     
     strutturaToDo.forEach(sezione => {
@@ -521,17 +522,29 @@ async function confermaToDoNota() {
     btn.innerText = "Salvataggio..."; btn.disabled = true;
 
     const com = commesseCorrenti[commessaAttivaIndex];
-    let arr = [0,0,0,0,0,0,0,0,0,0,0,0];
+    let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
     if (com.fasi_cantiere) {
         let parsed = com.fasi_cantiere.split(',').map(Number);
-        for(let i=0; i<12; i++) arr[i] = parsed[i] || 0;
+        for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
     }
 
     arr[todoPendente.idx] = todoPendente.nextState;
     const nuovaStringa = arr.join(',');
     const notaTesto = document.getElementById('todo-nota-testo').value.trim();
 
-    const { error } = await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa }).eq('id', com.id);
+    let datiAggiornamento = { fasi_cantiere: nuovaStringa };
+
+    if (todoPendente.idx === 12) {
+        if (todoPendente.nextState === 1) {
+            datiAggiornamento.stato = 'Conclusa';
+            com.stato = 'Conclusa';
+        } else {
+            datiAggiornamento.stato = 'Posa';
+            com.stato = 'Posa';
+        }
+    }
+
+    const { error } = await supabaseClient.from('commesse').update(datiAggiornamento).eq('id', com.id);
     if (!error) {
         let logMsg = '';
         if (todoPendente.isTriState) {
@@ -822,11 +835,20 @@ async function caricaPosaInterventi() {
         const dataSplit = int.data_intervento ? int.data_intervento.split('-') : ['','','']; 
         const dataIta = int.data_intervento ? (dataSplit[2] + '/' + dataSplit[1] + '/' + dataSplit[0]) : '--';
         
-        let badgeSistemazione = int.sistemazione_richiesta ? '<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-bold">⚠️ Sistemazione da fare</span>' : '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">✓ OK</span>';
-        const note = int.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + int.note + '</p>' : ''; 
-        const btnFile = int.file_url ? '<a href="' + int.file_url + '" target="_blank" class="mt-2 inline-block px-3 py-1 bg-emerald-50 text-emerald-700 rounded text-xs font-bold border border-emerald-100">📷 Apri Foto / PDF</a>' : '';
+        let badgeTipo = '<span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">' + (int.tipo_intervento || 'Posa Completata') + '</span>';
         
-        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-bold">' + int.posatore + '</span>' + badgeSistemazione + '</div><div class="flex items-center gap-2"><button onclick="apriModalePosa(' + int.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div></div>' + note + ' ' + btnFile + '</div>';
+        let badgeStato = '';
+        if (int.tipo_intervento === 'Sistemazioni da Fare' || int.tipo_intervento === 'Rapporto Non Conformita') {
+            if (int.risolto) {
+                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-xs font-bold">✓ Risolto (' + (int.data_risoluzione || '') + ')</span>';
+            } else {
+                badgeStato = '<span class="ml-2 px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-bold">⚠️ Aperto</span>';
+            }
+        }
+
+        const note = int.note ? '<p class="text-sm text-gray-700 mt-2 bg-gray-50 p-2 rounded">' + int.note + '</p>' : ''; 
+        
+        html += '<div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm mb-3"><div class="flex justify-between items-start"><div><span class="font-bold text-gray-900 text-lg">📅 ' + dataIta + '</span><span class="ml-2 text-xs font-semibold text-gray-600">👤 ' + int.posatore + '</span>' + badgeTipo + badgeStato + '</div><div class="flex items-center gap-2"><button onclick="apriModalePosa(' + int.id + ')" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-[#2e2a5b] rounded text-xs font-bold transition-colors border border-gray-200 shadow-sm">✏️ Modifica</button><button onclick="eliminaPosa(' + int.id + ')" class="text-red-400 hover:text-red-600 font-bold">&times;</button></div></div>' + note + '</div>';
     }); 
     divLista.innerHTML = html;
 }
@@ -836,18 +858,42 @@ function apriModalePosa(idStr = null) {
     if (form) form.reset(); 
     
     document.getElementById('posa-id').value = '';
-    document.getElementById('modal-posa-titolo').innerText = 'Registra Intervento di Posa';
-    document.getElementById('posa-sistemazione').checked = false;
+    document.getElementById('modal-posa-titolo').innerText = 'Registra Intervento';
+    document.getElementById('posa-tipo').value = 'Posa Completata';
+    document.getElementById('box-risoluzione-posa').classList.add('hidden');
+    document.getElementById('posa-risolto').checked = false;
+    document.getElementById('subbox-data-risoluzione').classList.add('hidden');
+
+    // Gestione cambio tipo
+    const selectTipo = document.getElementById('posa-tipo');
+    selectTipo.onchange = function() {
+        if (this.value === 'Sistemazioni da Fare' || this.value === 'Rapporto Non Conformita') {
+            document.getElementById('box-risoluzione-posa').classList.remove('hidden');
+        } else {
+            document.getElementById('box-risoluzione-posa').classList.add('hidden');
+            document.getElementById('posa-risolto').checked = false;
+            document.getElementById('subbox-data-risoluzione').classList.add('hidden');
+        }
+    };
 
     if (idStr) {
-        document.getElementById('modal-posa-titolo').innerText = 'Modifica Intervento di Posa';
+        document.getElementById('modal-posa-titolo').innerText = 'Modifica Intervento';
         const intObj = rilieviCommessaCache.find(x => x.id == idStr);
         if (intObj) {
             document.getElementById('posa-id').value = intObj.id;
             document.getElementById('posa-data').value = intObj.data_intervento || '';
             document.getElementById('posa-squadra').value = intObj.posatore || '';
             document.getElementById('posa-note').value = intObj.note || '';
-            document.getElementById('posa-sistemazione').checked = !!intObj.sistemazione_richiesta;
+            document.getElementById('posa-tipo').value = intObj.tipo_intervento || 'Posa Completata';
+            
+            if (intObj.tipo_intervento === 'Sistemazioni da Fare' || intObj.tipo_intervento === 'Rapporto Non Conformita') {
+                document.getElementById('box-risoluzione-posa').classList.remove('hidden');
+                document.getElementById('posa-risolto').checked = !!intObj.risolto;
+                if (intObj.risolto) {
+                    document.getElementById('subbox-data-risoluzione').classList.remove('hidden');
+                    document.getElementById('posa-data-risoluzione').value = intObj.data_risoluzione || new Date().toISOString().split('T')[0];
+                }
+            }
         }
     } else {
         document.getElementById('posa-data').value = new Date().toISOString().split('T')[0];
@@ -857,10 +903,21 @@ function apriModalePosa(idStr = null) {
     document.getElementById('modal-intervento-posa').classList.remove('hidden'); 
 }
 
+function toggleBoxRisolto() {
+    const chk = document.getElementById('posa-risolto').checked;
+    const subbox = document.getElementById('subbox-data-risoluzione');
+    if (chk) {
+        subbox.classList.remove('hidden');
+        document.getElementById('posa-data-risoluzione').value = new Date().toISOString().split('T')[0];
+    } else {
+        subbox.classList.add('hidden');
+    }
+}
+
 function chiudiModalePosa() { document.getElementById('modal-intervento-posa').classList.add('hidden'); }
 
 async function eliminaPosa(id) { 
-    if(!confirm("Vuoi eliminare questa registrazione di posa?")) return; 
+    if(!confirm("Vuoi eliminare questa registrazione?")) return; 
     await supabaseClient.from('interventi_posa').delete().eq('id', id); 
     caricaPosaInterventi(); 
     caricaPosaGlobaliPerFiltro();
@@ -926,7 +983,7 @@ function inizializzaListeners() {
         let valNumero = document.getElementById('form-com-numero').value.trim();
         if (valNumero === '') valNumero = '[Da Definire]';
         
-        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0,0', descrizione_materiali: null };
+        const nuovaCommessa = { cliente_id: document.getElementById('form-com-cliente').value, sede_gestione: document.getElementById('form-com-sede').value || null, numero: valNumero, nome_cantiere: document.getElementById('form-com-nome-cantiere').value, indirizzo_cantiere: document.getElementById('form-com-indirizzo').value, citta_cantiere: document.getElementById('form-com-citta').value, referente: document.getElementById('form-com-referente').value, telefono_referente: document.getElementById('form-com-tel-referente').value, email_referente: document.getElementById('form-com-email-referente').value, stato: 'Preventivo', valore: null, fasi_cantiere: '0,0,0,0,0,0,0,0,0,0,0,0,0', descrizione_materiali: null };
         const { data, error } = await supabaseClient.from('commesse').insert([nuovaCommessa]).select();
         if (!error && data) { await supabaseClient.from('commesse_log').insert([{ commessa_id: data[0].id, azione: 'Apertura nuovo cantiere', autore: UTENTE_CORRENTE }]); chiudiModaleNuovaCommessa(); caricaCommesse(); } else { alert("Errore salvataggio: " + error.message); }
     });
@@ -943,7 +1000,7 @@ function inizializzaListeners() {
         if (!error) { await supabaseClient.from('commesse_log').insert([{ commessa_id: id, azione: 'Dati anagrafici e operativi del cantiere aggiornati', autore: UTENTE_CORRENTE }]); chiudiModaleModifica(); Object.assign(commesseCorrenti[commessaAttivaIndex], datiAggiornati); aggiornaDatiSchedaUI(); caricaCronologia(id); caricaCommesse(); } else { alert("Errore modifica commessa: " + error.message); }
     });
 
-    // SUBMIT MODALE INTERVENTO POSA
+    // SUBMIT MODALE INTERVENTO POSA (CON GESTIONE TIPO E RISOLUZIONE)
     legaSubmit('form-intervento-posa', async (e) => {
         e.preventDefault(); 
         const btn = document.getElementById('btn-salva-posa'); 
@@ -952,43 +1009,36 @@ function inizializzaListeners() {
         btn.disabled = true;
 
         const idModifica = document.getElementById('posa-id').value;
+        const tipoIntervento = document.getElementById('posa-tipo').value;
         const dataIntervento = document.getElementById('posa-data').value;
         const posatore = document.getElementById('posa-squadra').value.trim();
         const note = document.getElementById('posa-note').value.trim();
-        const sistemazione = document.getElementById('posa-sistemazione').checked;
-        const fileInput = document.getElementById('posa-file');
-
-        let fileUrl = null; 
-        if (fileInput.files.length > 0) { 
-            btn.innerText = "Caricamento file..."; 
-            fileUrl = await caricaFileSuStorage(fileInput.files[0], 'POSA'); 
-        }
+        
+        const isRisolto = document.getElementById('posa-risolto').checked;
+        const dataRisoluzione = document.getElementById('posa-data-risoluzione').value || null;
 
         const payload = { 
             commessa_id: com.id, 
+            tipo_intervento: tipoIntervento,
             data_intervento: dataIntervento, 
             posatore: posatore, 
             note: note || null, 
-            sistemazione_richiesta: sistemazione 
+            risolto: isRisolto,
+            data_risoluzione: isRisolto ? dataRisoluzione : null
         };
-        if (fileUrl) payload.file_url = fileUrl;
 
         let erroreDB = null;
         if (idModifica) {
             const { error } = await supabaseClient.from('interventi_posa').update(payload).eq('id', idModifica); 
             erroreDB = error;
             if (!error) { 
-                let msgLog = '✏️ Modificato intervento di posa (' + posatore + ')';
-                if (sistemazione) msgLog += ' [⚠️ Sistemazione richiesta]';
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: msgLog, nota: note || null, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '✏️ Aggiornato intervento: ' + tipoIntervento + ' (' + posatore + ')', nota: note || null, autore: UTENTE_CORRENTE }]); 
             }
         } else {
             const { error } = await supabaseClient.from('interventi_posa').insert([payload]); 
             erroreDB = error;
             if (!error) { 
-                let msgLog = '🛠️ Registrato intervento di posa da: ' + posatore;
-                if (sistemazione) msgLog += ' [⚠️ Sistemazione richiesta]';
-                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: msgLog, nota: note || null, file_url: fileUrl, autore: UTENTE_CORRENTE }]); 
+                await supabaseClient.from('commesse_log').insert([{ commessa_id: com.id, azione: '🛠️ Registrato: ' + tipoIntervento + ' da ' + posatore, nota: note || null, autore: UTENTE_CORRENTE }]); 
             }
         }
 
@@ -998,7 +1048,7 @@ function inizializzaListeners() {
             await caricaPosaGlobaliPerFiltro();
             await caricaCronologia(com.id); 
         } else { 
-            alert("Errore salvataggio posa: " + erroreDB.message); 
+            alert("Errore salvataggio intervento: " + erroreDB.message); 
         }
 
         btn.innerText = "Salva Intervento"; 
