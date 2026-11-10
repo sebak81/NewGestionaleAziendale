@@ -337,10 +337,13 @@ function disegnaListaCommesse(lista) {
     });
 }
 
-function apriSchedaCommessa(index) {
+async function apriSchedaCommessa(index) {
     if (index === -1) return;
     commessaAttivaIndex = index;
-    const com = commesseCorrenti[index];
+    let com = commesseCorrenti[index];
+
+    // SINCRONIZZAZIONE AUTOMATICA DEI FLAG TO-DO IN BASE AI DATI REALI
+    await verificaSincronizzazioneFasi(com);
 
     aggiornaDatiSchedaUI();
     disegnaToDo();
@@ -350,6 +353,50 @@ function apriSchedaCommessa(index) {
     document.getElementById('vista-elenco').classList.replace('flex', 'hidden');
     document.getElementById('vista-scheda').classList.replace('hidden', 'flex');
     window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+// Funzione che controlla gli ordini e le pose e spunta i flag automaticamente se ci sono dati
+async function verificaSincronizzazioneFasi(com) {
+    let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+    if (com.fasi_cantiere) {
+        let parsed = com.fasi_cantiere.split(',').map(Number);
+        for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
+    }
+
+    let modificato = false;
+
+    // Se lo stato è Conclusa, tutto è completato
+    if (com.stato === 'Conclusa') {
+        for(let i=0; i<13; i++) {
+            if (arr[i] === 0) { arr[i] = 1; modificato = true; }
+        }
+    }
+
+    // Se ci sono ordini registrati per questa commessa, le fasi iniziali fino a contratto sono superate
+    const { data: ordini } = await supabaseClient.from('ordini_fornitori').select('stato').eq('commessa_id', com.id);
+    if (ordini && ordini.length > 0) {
+        for(let i=0; i<=9; i++) {
+            if (arr[i] === 0) { arr[i] = 1; modificato = true; }
+        }
+        // Se c'è almeno un ordine con merce arrivata, spuntiamo l'acconto (10)
+        if (ordini.some(o => o.stato === 'Merce Arrivata' || o.stato === 'Merce Arrivata in Magazzino')) {
+            if (arr[10] === 0) { arr[10] = 1; modificato = true; }
+        }
+    }
+
+    // Se ci sono interventi di posa registrati
+    const { data: posa } = await supabaseClient.from('interventi_posa').select('id, tipo_intervento').eq('commessa_id', com.id);
+    if (posa && posa.length > 0) {
+        for(let i=0; i<=9; i++) {
+            if (arr[i] === 0) { arr[i] = 1; modificato = true; }
+        }
+    }
+
+    if (modificato) {
+        const nuovaStringa = arr.join(',');
+        await supabaseClient.from('commesse').update({ fasi_cantiere: nuovaStringa }).eq('id', com.id);
+        com.fasi_cantiere = nuovaStringa;
+    }
 }
 
 function chiudiScheda() {
