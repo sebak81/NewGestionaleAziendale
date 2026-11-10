@@ -1,4 +1,56 @@
-<!-- KPI / CONTATORI AGGIORNATI (8 Riquadri) -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3 ESSE - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-gray-800 relative">
+
+    <!-- Sidebar laterale w-52 -->
+    <aside class="w-52 bg-white border-r border-gray-200 hidden md:flex flex-col shrink-0">
+        <div class="p-5 flex items-center gap-3">
+            <div class="w-6 h-6 bg-[#2e2a5b] rounded flex items-center justify-center text-white font-bold text-xs">3S</div>
+            <span class="font-bold text-base">3 ESSE</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto px-3 space-y-1 text-sm font-medium text-gray-600 no-scrollbar">
+            <a href="index.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-[#2e2a5b] text-white shadow-md">Dashboard</a>
+            <a href="clienti.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Clienti</a>
+            <a href="commesse.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Commesse</a>
+            <a href="impostazioni.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-100 transition-colors">Impostazioni</a>
+        </nav>
+        <div class="p-3 border-t border-gray-200 m-3 rounded-xl bg-gray-50">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-xs">S</div>
+                <div class="overflow-hidden"><p class="font-bold text-xs truncate" id="nome-utente-sidebar">Sebastiano</p><p class="text-[10px] text-gray-500 uppercase">Owner</p></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Contenuto principale della Dashboard -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="p-8 pb-4 flex justify-between items-center bg-white border-b border-gray-100 shrink-0">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Dashboard Aziendale 📊</h1>
+                <p class="text-sm text-gray-500 mt-0.5">Panoramica generale di cantieri, ordini e attività</p>
+            </div>
+            <div class="flex gap-3">
+                <a href="clienti.html?action=new" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-2"><span>+</span> Nuovo Cliente</a>
+                <a href="commesse.html?action=new" class="bg-[#2e2a5b] hover:bg-[#3f3a7a] text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors flex items-center gap-2"><span>+</span> Nuova Commessa</a>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-6 no-scrollbar">
+            
+            <!-- KPI / CONTATORI A 8 RIQUADRI IN LINEA -->
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
                 
                 <!-- 1. Preventivi Aperti -->
@@ -81,3 +133,167 @@
                     <p class="text-[10px] text-gray-500 mt-1 truncate">Sistemazioni aperte</p>
                 </div>
             </div>
+
+            <!-- SEZIONE INFERIORE: CANTIERI RECENTI & RADAR ATTIVITÀ -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>Cantieri Recenti 🏗️</span>
+                        <a href="commesse.html" class="text-xs text-[#2e2a5b] font-semibold hover:underline">Vedi tutti &rarr;</a>
+                    </h3>
+                    <div id="lista-commesse-recenti" class="space-y-3">
+                        <p class="text-sm text-gray-500 italic">Caricamento cantieri...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4">Radar Attività Recenti 📡</h3>
+                    <div id="lista-attivita-recenti" class="space-y-3 overflow-y-auto max-h-[350px] no-scrollbar">
+                        <p class="text-sm text-gray-500 italic">Caricamento attività...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await caricaDashboard();
+        });
+
+        async function caricaDashboard() {
+            try {
+                const { data: commesseAll } = await supabaseClient.from('commesse').select('*, clienti(nome_ragione_sociale)');
+                
+                let countPrevAperti = 0;
+                let countPrevConfermati = 0;
+                let countContrattiFirmati = 0;
+                let countFattureInAttesa = 0;
+
+                if (commesseAll) {
+                    commesseAll.forEach(com => {
+                        let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+                        if (com.fasi_cantiere) {
+                            let parsed = com.fasi_cantiere.split(',').map(Number);
+                            for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
+                        }
+
+                        if (arr[5] === 1) {
+                            countPrevConfermati++;
+                        } else if (arr[5] === 0) {
+                            countPrevAperti++;
+                        }
+
+                        if (arr[9] === 1) {
+                            countContrattiFirmati++;
+                        }
+
+                        if (arr[10] === 1) countFattureInAttesa++;
+                        if (arr[11] === 1) countFattureInAttesa++;
+                    });
+                }
+
+                document.getElementById('kpi-preventivi-aperti').innerText = countPrevAperti;
+                document.getElementById('kpi-preventivi-confermati').innerText = countPrevConfermati;
+                document.getElementById('kpi-contratti-firmati').innerText = countContrattiFirmati;
+                document.getElementById('kpi-fatture-inattesa').innerText = countFattureInAttesa;
+
+                const { data: ordiniAll } = await supabaseClient.from('ordini_fornitori').select('stato');
+                let countOrdiniInAttesa = 0;
+                let countMaterialeInArrivo = 0;
+                let countMerceArrivata = 0;
+
+                if (ordiniAll) {
+                    ordiniAll.forEach(ord => {
+                        let s = ord.stato || 'Ordine inviato';
+                        if (s === 'Inviato' || s === 'Richiesta Inviata' || s === 'Ordine inviato' || s === 'In Modifica') {
+                            countOrdiniInAttesa++;
+                        } else if (s === 'Conferma' || s === 'Da controllare ed inviare' || s === 'Approvato ed Inviato' || s === 'Ordine confermato ed inviato al Fornitore') {
+                            countMaterialeInArrivo++;
+                        } else if (s === 'Merce Arrivata' || s === 'Merce Arrivata in Magazzino') {
+                            countMerceArrivata++;
+                        }
+                    });
+                }
+
+                document.getElementById('kpi-ordini-inattesa').innerText = countOrdiniInAttesa;
+                document.getElementById('kpi-inarrivo').innerText = countMaterialeInArrivo;
+                document.getElementById('kpi-ordini-arrivati').innerText = countMerceArrivata;
+
+                const { data: posaAll } = await supabaseClient.from('interventi_posa').select('commessa_id, tipo_intervento, risolto');
+                let commesseConSistemazione = new Set();
+                if (posaAll) {
+                    posaAll.forEach(p => {
+                        if ((p.tipo_intervento === 'Sistemazioni da Fare' || p.tipo_intervento === 'Rapporto Non Conformita') && p.risolto !== true) {
+                            commesseConSistemazione.add(p.commessa_id);
+                        }
+                    });
+                }
+                document.getElementById('kpi-sistemazioni').innerText = commesseConSistemazione.size;
+
+                // Cantieri Recenti
+                const divCommesse = document.getElementById('lista-commesse-recenti');
+                if (commesseAll && commesseAll.length > 0) {
+                    const commesseRecenti = [...commesseAll].sort((a,b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)).slice(0, 6);
+                    let htmlCommesse = '';
+                    commesseRecenti.forEach(com => {
+                        const nomeCliente = com.clienti ? com.clienti.nome_ragione_sociale : 'Sconosciuto';
+                        let numDisplay = com.numero || '[Da Definire]';
+                        if (numDisplay === '[Pratica Rapida]') numDisplay = '⚡ Rapida';
+                        
+                        let bgStato = 'bg-yellow-100 text-yellow-800';
+                        if(com.stato === 'In Assistenza / Ripristino') bgStato = 'bg-orange-100 text-orange-800';
+                        if(com.stato === 'Contestazione') bgStato = 'bg-red-100 text-red-800';
+                        if(com.stato === 'Conclusa' || com.stato === 'Saldo') bgStato = 'bg-emerald-100 text-emerald-800';
+
+                        htmlCommesse += '<div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-100 hover:border-[#2e2a5b] transition-colors cursor-pointer" onclick="window.location.href=\'commesse.html?id=' + com.id + '\'"><div><div class="flex items-center gap-2 mb-1"><span class="font-bold text-gray-900 text-sm">' + nomeCliente + ' - ' + numDisplay + '</span><span class="px-1.5 py-0.5 ' + bgStato + ' rounded text-[9px] font-bold uppercase tracking-wider">' + (com.stato || 'Preventivo') + '</span></div><p class="text-xs text-gray-500">' + (com.nome_cantiere || 'Cantiere non specificato') + '</p></div><span class="text-gray-400 font-bold">&rarr;</span></div>';
+                    });
+                    divCommesse.innerHTML = htmlCommesse;
+                } else { 
+                    divCommesse.innerHTML = '<p class="text-sm text-gray-500">Nessuna commessa presente.</p>'; 
+                }
+
+                // Radar Attività
+                const divRadar = document.getElementById('lista-attivita-recenti');
+                const { data: logs } = await supabaseClient.from('commesse_log').select('*, commesse(numero, clienti(nome_ragione_sociale))').order('created_at', { ascending: false }).limit(15); 
+
+                if (logs && logs.length > 0) {
+                    let htmlRadar = '<div class="space-y-4 pt-1">';
+                    logs.forEach(log => {
+                        const dateObj = new Date(log.created_at);
+                        const isToday = dateObj.toDateString() === new Date().toDateString();
+                        const orarioStr = dateObj.toLocaleTimeString('it-IT', { hour: '2-digit', minute:'2-digit' });
+                        const dataStr = isToday ? 'Oggi alle ' + orarioStr : dateObj.toLocaleDateString('it-IT') + ' - ' + orarioStr;
+                        
+                        let commessaRif = 'Sistema';
+                        if (log.commesse) {
+                            let numCommessa = log.commesse.numero || '[Da Definire]';
+                            if (numCommessa === '[Pratica Rapida]') numCommessa = '⚡ Rapida';
+                            const nomeCliente = (log.commesse.clienti && log.commesse.clienti.nome_ragione_sociale) ? log.commesse.clienti.nome_ragione_sociale : '';
+                            commessaRif = nomeCliente ? '<span class="text-[#2e2a5b] font-bold">' + numCommessa + '</span> <span class="text-gray-500">(' + nomeCliente + ')</span>' : '<span class="text-[#2e2a5b] font-bold">' + numCommessa + '</span>';
+                        }
+                        const autoreText = log.autore ? '&bull; 👤 ' + log.autore : '';
+
+                        let icona = '<div class="w-2.5 h-2.5 rounded-full bg-[#2e2a5b] mt-1 ring-4 ring-indigo-50 shrink-0"></div>';
+                        if (log.azione.includes("Appunto Manuale") || log.azione.includes("Comunicazione")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-emerald-100 text-emerald-600 text-[10px] ring-2 ring-emerald-50 shrink-0">💬</div>';
+                        if (log.file_url) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-blue-100 text-blue-600 text-[10px] ring-2 ring-blue-50 shrink-0">📎</div>';
+                        if (log.azione.includes("Merce Arrivata")) icona = '<div class="w-4 h-4 rounded flex items-center justify-center bg-teal-100 text-teal-600 text-[10px] ring-2 ring-teal-50 shrink-0">📦</div>';
+
+                        htmlRadar += '<div class="flex gap-3 items-start pb-3 border-b border-gray-100 last:border-0 last:pb-0">' + icona + '<div class="flex-1"><p class="text-xs font-semibold text-gray-800 leading-tight">' + log.azione + '</p><p class="text-[10px] text-gray-500 mt-1 uppercase tracking-wider">' + commessaRif + ' &bull; ' + dataStr + ' ' + autoreText + '</p></div></div>';
+                    });
+                    htmlRadar += '</div>';
+                    divRadar.innerHTML = htmlRadar;
+                } else { 
+                    divRadar.innerHTML = '<p class="text-sm text-gray-500">Nessuna attività registrata di recente.</p>'; 
+                }
+            } catch (err) {
+                console.error("Errore caricamento dashboard:", err);
+            }
+        }
+    </script>
+</body>
+</html>
