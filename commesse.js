@@ -238,12 +238,10 @@ function applicaFiltroRapido(tipoFiltro) {
 }
 
 function aggiornaStileNotifichePillole() {
-    // Verifica se ci sono sistemazioni aperte globali
     const haSistemazioni = commesseCorrenti.some(c => {
         return posaGlobaliPerFiltro.some(p => String(p.commessa_id) === String(c.id) && (p.tipo_intervento === 'Sistemazioni da Fare' || p.tipo_intervento === 'Rapporto Non Conformita') && p.risolto !== true);
     });
 
-    // Verifica se ci sono fatture in attesa globali
     const haFatture = commesseCorrenti.some(c => {
         let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
         if (c.fasi_cantiere) {
@@ -253,7 +251,6 @@ function aggiornaStileNotifichePillole() {
         return arr[10] === 1 || arr[11] === 1;
     });
 
-    // Pillola Sistemazioni
     const pillSistemazioni = document.getElementById('pill-sistemazioni_aperte');
     if (pillSistemazioni && filtroAttivoUrl !== 'sistemazioni_aperte') {
         if (haSistemazioni) {
@@ -263,7 +260,6 @@ function aggiornaStileNotifichePillole() {
         }
     }
 
-    // Pillola Fatture
     const pillFatture = document.getElementById('pill-fatture_inattesa');
     if (pillFatture && filtroAttivoUrl !== 'fatture_inattesa') {
         if (haFatture) {
@@ -284,11 +280,7 @@ function filtraCommesse() {
         if(b) {
             if (id === filtroAttivoUrl) {
                 b.className = "px-4 py-2 text-xs font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm whitespace-nowrap transition-colors";
-            } else if (filtroAttivoUrl === 'preventivi_confermati') {
-                return arr[5] === 1 && arr[9] !== 1;
-            
             } else {
-                // Se non è attivo ma ha notifiche, aggiorno dopo con aggiornaStileNotifichePillole
                 b.className = "px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
             }
         }
@@ -314,7 +306,7 @@ function filtraCommesse() {
             if (filtroAttivoUrl === 'preventivi_aperti') {
                 return arr[5] === 0;
             } else if (filtroAttivoUrl === 'preventivi_confermati') {
-                return arr[5] === 1;
+                return arr[5] === 1 && arr[9] !== 1;
             } else if (filtroAttivoUrl === 'contratti_firmati') {
                 return arr[9] === 1;
             } else if (filtroAttivoUrl === 'fatture_inattesa') {
