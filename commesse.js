@@ -284,6 +284,9 @@ function filtraCommesse() {
         if(b) {
             if (id === filtroAttivoUrl) {
                 b.className = "px-4 py-2 text-xs font-bold text-white bg-[#2e2a5b] rounded-lg shadow-sm whitespace-nowrap transition-colors";
+            } else if (filtroAttivoUrl === 'preventivi_confermati') {
+                return arr[5] === 1 && arr[9] !== 1;
+            
             } else {
                 // Se non è attivo ma ha notifiche, aggiorno dopo con aggiornaStileNotifichePillole
                 b.className = "px-4 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 rounded-lg whitespace-nowrap transition-colors";
