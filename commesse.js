@@ -43,7 +43,7 @@ const strutturaToDo = [
         { idx: 11, label: 'Saldo', triState: true }
     ]},
     { id: 'chiusura', label: '6. Chiusura & Consegna', sub: [
-        { idx: 12, label: 'Commessa Conclusa / Chiudi', triState: false }
+        { idx: 12, label: 'Commessa Conclusa / Chiusa', triState: false }
     ]}
 ];
 
@@ -560,15 +560,32 @@ function richiediConfermaToDo(idx, labelTesto, currentState, isTriState, isSiNo)
     avviaLogicaModalToDo(idx, labelTesto, currentState, isTriState, isSiNo);
 }
 
-function avviaLogicaModalToDo(idx, labelTesto, currentState, isTriState, isSiNo) {
+async function avviaLogicaModalToDo(idx, labelTesto, currentState, isTriState, isSiNo) {
     let nextState = 0;
     if (isTriState || isSiNo) { nextState = (currentState + 1) % 3; } 
     else { nextState = currentState === 0 ? 1 : 0; }
     
     todoPendente = { idx: idx, label: labelTesto, nextState: nextState, isTriState: isTriState, isSiNo: isSiNo };
 
-    document.getElementById('todo-nota-testo').value = '';
+    const com = commesseCorrenti[commessaAttivaIndex];
+    const textareaNota = document.getElementById('todo-nota-testo');
+    const titoloEl = document.getElementById('todo-nota-titolo');
+    const subEl = document.getElementById('todo-nota-sub');
+    const btnAnnulla = document.querySelector('#modal-todo-nota button[onclick="annullaToDoNota()"]');
+    const btnConferma = document.getElementById('btn-conferma-todo');
+
+    if (btnAnnulla) {
+        btnAnnulla.innerText = 'Annulla';
+        btnAnnulla.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-100';
+    }
+    if (btnConferma) {
+        btnConferma.innerText = 'Conferma';
+        btnConferma.className = 'bg-[#2e2a5b] text-white px-5 py-2 rounded-lg text-xs sm:text-sm font-bold shadow-sm';
+    }
+
+    textareaNota.value = '';
     let modalTitolo = '';
+    let subTesto = labelTesto;
     
     if (isTriState) {
         if (nextState === 1) modalTitolo = 'Fattura Inviata / Attesa Pagamento';
@@ -581,9 +598,65 @@ function avviaLogicaModalToDo(idx, labelTesto, currentState, isTriState, isSiNo)
     } else {
         modalTitolo = nextState === 1 ? 'Conferma Completamento' : 'Annulla Completamento';
     }
+
+    if (idx === 12 && nextState === 1 && com) {
+        let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
+        if (com.fasi_cantiere) {
+            let parsed = com.fasi_cantiere.split(',').map(Number);
+            for (let i = 0; i < 13; i++) arr[i] = parsed[i] || 0;
+        }
+
+        let flagMancanti = [];
+        strutturaToDo.forEach(sezione => {
+            sezione.sub.forEach(item => {
+                if (item.idx === 12) return;
+                const val = arr[item.idx] || 0;
+                const completato = item.triState ? (val === 2) : (val === 1);
+                if (!completato) {
+                    flagMancanti.push(item.label);
+                }
+            });
+        });
+
+        let ordiniApertiCount = 0;
+        try {
+            const { data: ordini } = await supabaseClient
+                .from('ordini_fornitori')
+                .select('stato')
+                .eq('commessa_id', com.id);
+            if (ordini && ordini.length > 0) {
+                ordiniApertiCount = ordini.filter(o =>
+                    o.stato !== 'Merce Arrivata' && o.stato !== 'Merce Arrivata in Magazzino'
+                ).length;
+            }
+        } catch (e) {
+            console.error("Errore controllo ordini aperti:", e);
+        }
+
+        if (flagMancanti.length > 0 || ordiniApertiCount > 0) {
+            modalTitolo = '⚠️ Pratica ancora con elementi non completati';
+            let avvisi = [];
+            if (flagMancanti.length > 0) {
+                avvisi.push('Flag non completati (' + flagMancanti.length + '): ' + flagMancanti.join(', '));
+            }
+            if (ordiniApertiCount > 0) {
+                avvisi.push('Ordini non ancora segnati come "Merce Arrivata": ' + ordiniApertiCount);
+            }
+            subTesto = avvisi.join(' • ') + ' — Vuoi ricontrollare?';
+
+            if (btnAnnulla) {
+                btnAnnulla.innerText = 'Modifica';
+                btnAnnulla.className = 'px-4 py-2 rounded-lg text-xs sm:text-sm font-bold text-gray-700 bg-amber-100 border border-amber-300 hover:bg-amber-200';
+            }
+            if (btnConferma) {
+                btnConferma.innerText = 'Conferma commessa conclusa';
+                btnConferma.className = 'bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-bold shadow-sm';
+            }
+        }
+    }
     
-    document.getElementById('todo-nota-titolo').innerText = modalTitolo;
-    document.getElementById('todo-nota-sub').innerText = labelTesto;
+    titoloEl.innerText = modalTitolo;
+    subEl.innerText = subTesto;
     document.getElementById('modal-todo-nota').classList.remove('hidden');
 }
 
