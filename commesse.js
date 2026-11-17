@@ -248,6 +248,8 @@ function aggiornaStileNotifichePillole() {
             let parsed = c.fasi_cantiere.split(',').map(Number);
             for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
         }
+        const isConclusa = (arr[12] === 1) || (c.stato === 'Conclusa');
+        if (isConclusa) return false;
         return arr[10] === 1 || arr[11] === 1;
     });
 
@@ -274,7 +276,7 @@ function filtraCommesse() {
     const searchInput = document.getElementById('input-ricerca-commesse');
     const q = searchInput ? searchInput.value.toLowerCase() : '';
     
-    const idsPillole = ['tutte', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'ordini_arrivati', 'fatture_inattesa', 'sistemazioni_aperte'];
+    const idsPillole = ['tutte', 'preventivi_aperti', 'preventivi_confermati', 'contratti_firmati', 'ordini_inattesa', 'materiale_inarrivo', 'ordini_arrivati', 'fatture_inattesa', 'sistemazioni_aperte', 'concluse'];
     idsPillole.forEach(id => {
         const b = document.getElementById('pill-' + id);
         if(b) {
@@ -295,13 +297,23 @@ function filtraCommesse() {
             const matchTesto = numCom.includes(q) || nomeCli.includes(q) || nomCant.includes(q);
             if (!matchTesto) return false;
 
-            if (filtroAttivoUrl === 'tutte') return true;
-
             let arr = [0,0,0,0,0,0,0,0,0,0,0,0,0];
             if (c.fasi_cantiere) {
                 let parsed = c.fasi_cantiere.split(',').map(Number);
                 for(let i=0; i<13; i++) arr[i] = parsed[i] || 0;
             }
+
+            const isConclusa = (arr[12] === 1) || (c.stato === 'Conclusa');
+
+            if (filtroAttivoUrl === 'concluse') {
+                return isConclusa;
+            }
+
+            if (isConclusa && filtroAttivoUrl !== 'sistemazioni_aperte') {
+                return false;
+            }
+
+            if (filtroAttivoUrl === 'tutte') return true;
 
             if (filtroAttivoUrl === 'preventivi_aperti') {
                 return arr[5] === 0;
@@ -928,7 +940,7 @@ function impostaStatoPendenteOrdine(nuovoStato) {
 
         let iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] bg-gray-200 text-gray-500 border-2 border-white">' + (index + 1) + '</div>';
         if (index < currentIdx || (currentIdx === sequenzaStatiOrdine.length -1 && index === currentIdx)) { iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-sm font-bold text-[10px]">✓</div>'; } 
-        else if (index === currentIdx) { let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-blue-100'; iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>'; }
+        else if (index === currentIdx) { let col = stato === 'In Modifica' ? 'bg-red-500 ring-red-100' : 'bg-blue-500 ring-red-100'; iconaHTML = '<div class="w-6 h-6 rounded-full flex items-center justify-center ' + col + ' text-white font-bold text-[10px] shadow-md ring-2">' + (index + 1) + '</div>'; }
         let textColor = (index <= currentIdx) ? 'text-gray-900 font-bold' : 'text-gray-400'; if(index === currentIdx && stato === 'In Modifica') textColor = 'text-red-600 font-bold';
         punto.innerHTML = iconaHTML + '<span class="text-[9px] mt-1 uppercase tracking-wider text-center w-16 leading-tight ' + textColor + '">' + stato + '</span>'; 
         container.appendChild(punto);
